@@ -110,9 +110,10 @@ def replay(did: str) -> dict:
     withplan = run(sc_plan)
     p = float((plan["p_works"] * plan["cost_inr"]).sum() / plan["cost_inr"].sum()) if len(plan) and plan["cost_inr"].sum() else 0.9
     cost = float(plan["cost_inr"].sum()) if len(plan) else 0.0
-    rev_prot_full = unmit.totals["revenue_lost_inr"] - withplan.totals["revenue_lost_inr"]
-    marg_prot = (unmit.totals["margin_at_risk_inr"] - withplan.totals["margin_at_risk_inr"]) * p + extra
-    pen_prot = (unmit.totals["penalty_inr"] - withplan.totals["penalty_inr"]) * p
+    # Credit only what the co-pilot adds over what the team actually did (team run = baseline).
+    rev_prot_full = team.totals["revenue_lost_inr"] - withplan.totals["revenue_lost_inr"]
+    marg_prot = (team.totals["margin_at_risk_inr"] - withplan.totals["margin_at_risk_inr"]) * p + extra
+    pen_prot = (team.totals["penalty_inr"] - withplan.totals["penalty_inr"]) * p
 
     actual_lost = float(d["revenue_lost_inr_cr"]) * 1e7
     # Structural counterfactual: had each short part's unqualified alternate been qualified BEFORE the event
