@@ -14,12 +14,12 @@
   "test": {
    "signals": 1218,
    "relevant": 43,
-   "flagged": 41,
-   "tp": 41,
+   "flagged": 43,
+   "tp": 43,
    "fp": 0,
-   "fn": 2,
+   "fn": 0,
    "precision": 1.0,
-   "recall": 0.953
+   "recall": 1.0
   }
  },
  "alerts": {
@@ -33,7 +33,7 @@
    "alerts": 5,
    "relevant_alerts": 5,
    "precision": 1.0,
-   "signals_per_alert": 7.4
+   "signals_per_alert": 7.8
   }
  },
  "lead": {
@@ -47,7 +47,7 @@
    "disruptions_with_warning": 4,
    "detected": 4,
    "median_lead_days": 13.75,
-   "min_lead_days": 10.3
+   "min_lead_days": 11.7
   },
   "all": {
    "disruptions_with_warning": 11,
@@ -344,16 +344,16 @@
    "had_warning": true,
    "start_date": "2026-05-18T00:00:00.000",
    "first_public_signal": "2026-05-06T06:21:14.539",
-   "first_alert": "2026-05-07T15:52:03.661",
-   "lead_days": 10.3,
+   "first_alert": "2026-05-06T06:21:14.539",
+   "lead_days": 11.7,
    "team_lead_days": 0,
-   "days_gained_vs_team": 10.3,
+   "days_gained_vs_team": 11.7,
    "alerts": [
     "EV-016",
     "EV-017"
    ],
    "relevant_signals": 6,
-   "signals_caught": 4
+   "signals_caught": 6
   },
   {
    "disruption_id": "D17",
@@ -406,7 +406,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.04
+   "secs": 0.05
   },
   {
    "alert_id": "AL-002",
@@ -457,7 +457,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b915.95 cr",
    "owner": "Magnets",
-   "secs": 0.22
+   "secs": 0.28
   },
   {
    "alert_id": "AL-005",
@@ -474,7 +474,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b955.45 cr",
    "owner": "Semiconductors",
-   "secs": 0.29
+   "secs": 0.32
   },
   {
    "alert_id": "AL-006",
@@ -491,7 +491,7 @@
    "confidence": 0.84,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.04
+   "secs": 0.05
   },
   {
    "alert_id": "AL-007",
@@ -508,7 +508,7 @@
    "confidence": 0.84,
    "at_risk": "\u20b90",
    "owner": "Passives",
-   "secs": 0.05
+   "secs": 0.06
   },
   {
    "alert_id": "AL-008",
@@ -525,7 +525,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-009",
@@ -559,7 +559,7 @@
    "confidence": 0.63,
    "at_risk": "\u20b90",
    "owner": "Li-ion cells",
-   "secs": 0.13
+   "secs": 0.15
   },
   {
    "alert_id": "AL-011",
@@ -576,7 +576,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b93.45 cr",
    "owner": "PCBs",
-   "secs": 0.37
+   "secs": 0.32
   },
   {
    "alert_id": "AL-012",
@@ -593,7 +593,7 @@
    "confidence": 0.72,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.06
+   "secs": 0.05
   },
   {
    "alert_id": "AL-013",
@@ -644,24 +644,24 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Connectors",
-   "secs": 0.04
+   "secs": 0.05
   },
   {
    "alert_id": "AL-016",
-   "first_seen": "2026-05-07T15:52:03.661",
-   "title": "Container shortage hits Asia\u2013India trade lane",
+   "first_seen": "2026-05-06T06:21:14.539",
+   "title": "Spot freight rates Asia\u2013India more than double in a month",
    "disruption": "D16",
-   "n_signals": 2,
-   "n_sources": 2,
+   "n_signals": 4,
+   "n_sources": 4,
    "event_type": "congestion",
    "L": 4,
    "I": 1,
    "P": 4,
    "route": "Watch log",
-   "confidence": 0.66,
+   "confidence": 0.78,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.08
   },
   {
    "alert_id": "AL-017",
@@ -678,7 +678,7 @@
    "confidence": 0.6,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.04
+   "secs": 0.06
   },
   {
    "alert_id": "AL-018",
@@ -695,7 +695,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Connectors",
-   "secs": 0.03
+   "secs": 0.05
   },
   {
    "alert_id": "AL-019",
@@ -712,7 +712,7 @@
    "confidence": 0.75,
    "at_risk": "\u20b93.87 cr",
    "owner": "Passives",
-   "secs": 0.27
+   "secs": 0.38
   }
  ]
 }

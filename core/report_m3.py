@@ -74,6 +74,14 @@ def build() -> str:
                       f"stories</b> sit in the borderline band (one call each to <code>{E(js.get('model', ''))}</code>). "
                       "Run <code>python -m core.llm_judge --run</code> once a key is set; verdicts are cached and this "
                       "report picks them up.</p>")
+    if len(r["misses"]):
+        misses_html = (_t(r["misses"], {"signal_id": "Signal", "linked_disruption_id": "Disruption", "days_before_impact": "Days before",
+                                        "score": "Score", "text": "Text"}, num=("days_before_impact", "score"))
+                       + "<p class='note'>Rules alone miss the D16 freight story (\"rates more than double\"): it scores just under "
+                       "the threshold. D16 itself was still caught 10 days ahead through other stories.</p>")
+    else:
+        misses_html = ("<p>None. With rules alone the two D16 freight signals (\"spot freight rates Asia–India more than double\") "
+                       "scored just under the threshold; the Claude review promoted them (see §5). Rules-only recall is 95.3%.</p>")
     L = r["lead_table"].copy()
     L["first_alert"] = pd.to_datetime(L["first_alert"])
     tiles = f"""<div class="tiles">
@@ -133,10 +141,7 @@ D05, D08 and D18 are sudden (fire, earthquake, ransomware). There the co-pilot a
 <div class="card">{judge_html}</div>
 
 <h2>6 · Test-period misses</h2>
-<div class="card">{_t(r['misses'], {"signal_id": "Signal", "linked_disruption_id": "Disruption", "days_before_impact": "Days before",
-                                   "score": "Score", "text": "Text"}, num=("days_before_impact", "score"))}
-<p class="note">Both are the same D16 freight story ("rates more than double"). It scores just under the threshold, a typical
-borderline case for the Claude pass. D16 itself was still caught 10 days ahead through other stories.</p></div>
+<div class="card">{misses_html}</div>
 </main><div id="tip" role="tooltip"></div><script>{JS}</script></body></html>"""
     OUT.mkdir(exist_ok=True)
     (OUT / "m3.html").write_text(page, encoding="utf-8")
