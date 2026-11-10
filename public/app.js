@@ -341,6 +341,40 @@ async function viewReplay(did = "D05") {
   document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => (location.hash = `#/replay/${b.dataset.d}`)));
 }
 
+/* ---------------- business case (M6) ---------------- */
+async function viewBusiness() {
+  const m = await get("/api/business-case");
+  const b = m.base, ss = m.structural_summary, base = m.scenarios[0];
+  const x = (v) => v == null ? "—" : `${v.toFixed(1)}×`;
+  const pc = (v) => v == null ? "—" : `${Math.round(v * 100)}%`;
+  const moves = m.structural.filter((r) => r.net_annual_value_inr > 0);
+  $("#app").innerHTML = `<h1>Business case</h1>
+    <p class="sub">All 18 disruptions replayed as if the co-pilot had been live. Only what it adds over the team's own actions is credited, in margin,
+    weighted by the chance each action works, net of what the actions cost; annualised over 2 years.</p>
+    <div class="tiles"><div class="tile"><b>${inr(b.net)}</b><span>net benefit per year</span></div>
+      <div class="tile"><b>${inr(m.annual_cost_inr)}</b><span>co-pilot running cost per year, including people</span></div>
+      <div class="tile"><b>${x(base.roi)}</b><span>ROI; ${x(Math.min(...m.scenarios.map((r) => r.roi)))} in the harshest sensitivity</span></div>
+      <div class="tile"><b>₹${ss.net_annual_value_cr.toFixed(1)} cr/yr</b><span>extra from ${ss.parts_with_positive_move} structural moves (not in the ROI)</span></div></div>
+    <div class="row"><div class="card"><h3>Benefit per year</h3><table><tbody>
+      <tr><td>Margin protected</td><td class="num">${inr(b.margin_protected)}</td></tr>
+      <tr><td>Penalties avoided</td><td class="num">${inr(b.penalties_avoided)}</td></tr>
+      <tr><td>Spend avoided where cover was enough</td><td class="num">${inr(b.waste_avoided)}</td></tr>
+      <tr><td>Less: cost of recommended actions</td><td class="num">−${inr(b.mitigation_cost)}</td></tr>
+      <tr><td><b>Net</b></td><td class="num"><b>${inr(b.net)}</b></td></tr></tbody></table></div>
+    <div class="card"><h3>Cost per year</h3><table><tbody>${m.cost_rows.map((r) => `<tr><td>${esc(r.item[0].toUpperCase() + r.item.slice(1))}</td><td class="num">${inr(r.annual_inr)}</td></tr>`).join("")}
+      <tr><td><b>Total</b></td><td class="num"><b>${inr(m.annual_cost_inr)}</b></td></tr></tbody></table></div></div>
+    <div class="card"><h3>Sensitivity</h3><table><thead><tr><th>Scenario</th><th class="num">Net benefit / yr</th><th class="num">Cost / yr</th><th class="num">ROI</th><th class="num">Payback (months)</th></tr></thead>
+      <tbody>${m.scenarios.map((r) => `<tr><td>${esc(r.scenario)}</td><td class="num">${inr(r.net_benefit_inr)}</td><td class="num">${inr(r.copilot_cost_inr)}</td><td class="num">${x(r.roi)}</td><td class="num">${r.payback_months ? r.payback_months.toFixed(1) : "—"}</td></tr>`).join("")}</tbody></table></div>
+    <div class="card"><h3>Structural moves for single-source parts (${moves.length} pay back)</h3><table><thead><tr><th>Part</th><th>Description</th><th class="num">Cover (d)</th><th>Move</th><th class="num">Net value / yr</th></tr></thead>
+      <tbody>${moves.map((r) => `<tr><td>${esc(r.part_id)}</td><td>${esc(r.description)}</td><td class="num">${r.cover_days}</td><td>${esc(r.recommendation)}</td><td class="num">${inr(r.net_annual_value_inr)}</td></tr>`).join("")}</tbody></table>
+      <p class="muted">One-off qualification ₹${ss.one_off_qualification_cost_cr.toFixed(1)} cr; extra buffer ${inr(ss.annual_buffer_cost_cr * 1e7)}/yr. An input to next year's sourcing budget, approved by Head of Supply Chain + Quality.</p></div>
+    <div class="card"><h3>False alarms: each guard switched off</h3><table><thead><tr><th>Guard removed</th><th class="num">False signals (test)</th><th class="num">False alerts (test)</th><th class="num">Precision (test)</th></tr></thead>
+      <tbody>${m.ablations.map((r) => `<tr><td>${esc(r["guard removed"])}</td><td class="num">${r.false_alarm_signals_test}</td><td class="num">${r.false_alerts_test}</td><td class="num">${pc(r.precision_test)}</td></tr>`).join("")}</tbody></table>
+      <p class="muted">Load as built: ${m.load.alerts_per_week} alerts a week and ${m.load.inbox_per_month} inbox alerts a month, from ${m.load.signals_per_week} signals a week read.</p></div>
+    <p class="muted">Full exhibits: <a href="reports/m6.html" target="_blank" rel="noopener">M6 report</a> ·
+      <a href="reports/coo_onepager.html" target="_blank" rel="noopener">COO one-pager</a> (prints on one A4 page)</p>`;
+}
+
 /* ---------------- router ---------------- */
 async function route() {
   const [, r, id] = (location.hash || "#/inbox").split("/");
@@ -353,6 +387,7 @@ async function route() {
     else if (r === "ask") await viewAsk();
     else if (r === "replay") await viewReplay(id ? decodeURIComponent(id) : "D05");
     else if (r === "backtest") await viewBacktest();
+    else if (r === "business") await viewBusiness();
     else await viewInbox();
     window.scrollTo(0, 0);
   } catch (e) { $("#app").innerHTML = `<div class="result needs_review">Could not load: ${esc(e.message.slice(0, 300))}</div>`; }

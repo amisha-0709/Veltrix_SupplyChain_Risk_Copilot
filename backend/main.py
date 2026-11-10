@@ -134,6 +134,14 @@ def backtest():
     return {**s["backtest"], "m2": s.get("m2"), "m3": s.get("m3"), "timeline": s["timeline"]}
 
 
+@app.get("/api/business-case")
+def business_case():
+    m6 = snap().get("m6")
+    if not m6:
+        raise HTTPException(404, "business case not built (run python -m core.report_m6, then core.snapshot)")
+    return m6
+
+
 @app.get("/api/needs-review")
 def needs_review():
     return snap()["needs_review"]

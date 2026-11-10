@@ -11,7 +11,7 @@ orders, books freight or contacts suppliers. All data is synthetic (Veltrix Comp
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements-dev.txt
 .venv/Scripts/python -m uvicorn app:app --port 8000      # UI + API at http://localhost:8000
-.venv/Scripts/python -m pytest -q                         # 47 tests: M1–M5 incl. acceptance scenarios T1–T10
+.venv/Scripts/python -m pytest -q                         # 52 tests: M1–M6 incl. acceptance scenarios T1–T10
 ```
 
 ## Rebuild data and reports (after changing rules or the engine)
@@ -21,7 +21,8 @@ python -m venv .venv
 .venv/Scripts/python -m core.report       # reports/stage1.html  (exposure, timeline, first business case)
 .venv/Scripts/python -m core.report_m2    # reports/m2.html      (impact engine validation, T1/T4–T8)
 .venv/Scripts/python -m core.report_m3    # reports/m3.html      (T9 back-test)
-.venv/Scripts/python -m core.snapshot     # data/snapshot.json   (what the UI serves, incl. 18 replays)
+.venv/Scripts/python -m core.report_m6   # reports/m6.html + coo_onepager.html (business case, structural, false alarms)
+.venv/Scripts/python -m core.snapshot     # data/snapshot.json   (what the UI serves, incl. 18 replays and M6 data)
 .venv/Scripts/python -m core.acceptance   # reports/acceptance.html (T1–T10 end to end through the API)
 ```
 
@@ -53,6 +54,9 @@ for a real pilot.
 | `core/ask.py` | conversational layer: what-ifs, exposure, inbox, options; answered by the engine with working |
 | `core/replay.py` | T10 replay of any disruption as if live + structural counterfactual; business case |
 | `core/acceptance.py` | brief §6 T1–T10 checks with evidence, end to end through the API |
+| `core/roi.py`, `core/structural.py`, `core/false_alarms.py` | M6: co-pilot ROI with running costs, dual-sourcing / buffer moves, false-alarm ablations |
+| `core/report_m6.py` | M6 report and the printable COO one-pager |
+| `docs/persona_feedback_kit.md` | scripts and scoring sheet for the 3 persona sessions (results still to be collected) |
 | `core/llm_judge.py` | optional Claude review of borderline signals (off by default) |
 | `backend/main.py` | FastAPI: alerts, briefings, register, exposure, back-test, simulate, decisions |
 | `public/` | web UI (no build step) |

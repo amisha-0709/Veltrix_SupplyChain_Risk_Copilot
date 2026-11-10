@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>COO One-Pager</title><style>
+@page{size:A4;margin:12mm}
+:root{--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--s1:#2a78d6;--page:#fff;--surface:#f9f9f7}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--ink:#f0efec;--ink2:#c3c2b7;--muted:#9a9890;
+--grid:#2c2c2a;--s1:#3987e5;--page:#0d0d0d;--surface:#1a1a19}}
+:root[data-theme="dark"]{--ink:#f0efec;--ink2:#c3c2b7;--muted:#9a9890;--grid:#2c2c2a;--s1:#3987e5;--page:#0d0d0d;--surface:#1a1a19}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font:12.5px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:186mm;margin:0 auto;padding:16px}
+h1{font-size:20px;line-height:1.25;margin:2px 0 6px}h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--s1);
+margin:12px 0 4px}p{margin:4px 0}.k{color:var(--muted);font-size:11px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0}
+.tile{background:var(--surface);border-radius:8px;padding:8px 10px}.tile b{display:block;font-size:18px}.tile span{color:var(--ink2);font-size:11px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+ul{margin:2px 0;padding-left:18px}li{margin:2px 0}
+table{border-collapse:collapse;width:100%;font-size:11.5px}td,th{border-bottom:1px solid var(--grid);padding:3px 4px;text-align:left;
+vertical-align:top}th{color:var(--ink2);font-weight:600}.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ask{border:2px solid var(--s1);border-radius:8px;padding:8px 12px;margin-top:10px}
+@media (max-width:640px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.cols{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000}}
+</style></head><body><main>
+<p class="k">For: COO, Veltrix Components · From: Supply Chain Resilience Co-Pilot team · Decision requested: approve a 3-month pilot ·
+synthetic data</p>
+<h1>We lost ₹170.26 cr of revenue to disruptions we mostly saw coming. A ₹43.8 lakh pilot tests whether we
+can stop that.</h1>
+
+<h2>The problem</h2>
+<p>In 24 months, 18 disruptions cost ₹170.26 cr of revenue. Most had public warnings one to three weeks ahead, but nobody owns
+monitoring: the team noticed a median of a day <i>after</i> impact and decided days later. Meanwhile about ₹4.57 cr
+went on expediting parts whose stock would have lasted anyway. 26 parts have a single supplier, and on most of them stock cover is
+shorter than the lead time.</p>
+
+<h2>What the co-pilot does</h2>
+<p>Reads news, weather, port and trade notices; links each to our supplier → part → product network; quantifies revenue, margin and
+OTIF at risk using today's stock and in-transit; ranks options (pre-buy, air freight, switch supplier, re-allocate) by net value with
+the approver named; and writes a one-page briefing. <b>It recommends; people decide.</b> It never orders, books freight or contacts a
+supplier.</p>
+
+<div class="tiles">
+<div class="tile"><b>14 days</b><span>median warning before impact (target ≥ 7)</span></div>
+<div class="tile"><b>95% / 100%</b><span>recall / alert precision on unseen months (targets 80% / 60%)</span></div>
+<div class="tile"><b>₹11.03 cr/yr</b><span>net benefit in replay vs ₹46.9 lakh/yr running cost</span></div>
+<div class="tile"><b>23×</b><span>ROI; 4.3× with the largest events removed</span></div>
+</div>
+
+<div class="cols"><div>
+<h2>Evidence</h2>
+<ul>
+<li><b>Back-test</b> on Feb–Sep 2026, data the rules were not tuned on: every warned disruption caught, a median
+14 days ahead, with about 9 alerts a year in total, not a flood.</li>
+<li><b>Impact engine</b> reproduces past losses with a 2.8% median error (7 of 9 loss events within ±25%; every no-loss event right).</li>
+<li><b>Replay of the Penang MOSFET fire (D05, ₹61 cr lost)</b>: same-day briefing and re-allocation would have protected
+₹3.68 cr of margin. Qualifying the known alternate beforehand (about ₹15 lakh) would have protected about
+₹50 cr of revenue.</li>
+<li>All 10 acceptance scenarios from the brief pass end to end.</li>
+</ul>
+<h2>Biggest structural moves (separate budget)</h2>
+<table><tr><th>Part</th><th>Move</th><th class="num">Net / yr</th></tr><tr><td>PRT-004 Si MOSFET 100V</td><td>Qualify SUP-011</td><td class='num'>₹5.99 cr</td></tr><tr><td>PRT-030 4-layer PCB (BMS)</td><td>Qualify SUP-035</td><td class='num'>₹5.27 cr</td></tr><tr><td>PRT-043 NdFeB rotor magnet set</td><td>Qualify a new second source</td><td class='num'>₹2.26 cr</td></tr></table>
+<p class="k">15 moves pay back, ₹15.9 cr/yr net for about
+₹1.3 cr one-off.</p>
+</div><div>
+<h2>Pilot: 3 months, live feeds, real stock</h2>
+<ul>
+<li><b>Scope:</b> all suppliers; inbox owned by a named risk analyst (0.5 FTE); weekly 30-minute review with category managers.</li>
+<li><b>Cost:</b> ₹35.0 lakh one-off (ERP stock and in-transit feed, set-up) + about ₹8.8 lakh running for the 3 months.</li>
+<li><b>Success KPIs:</b> ≥ 80% of relevant signals caught; ≥ 60% of alerts worth acting on; median warning ≥ 7 days; signal to
+quantified impact in under 5 minutes; impact within ±25% on any real event; a logged decision on every inbox alert within its
+response time; briefing rated useful (≥ 4/5) by category managers; no expediting where cover was enough.</li>
+<li><b>Stop rule:</b> if alert precision is under 60% after week 6, or nobody acts on the briefings, we stop.</li>
+</ul>
+<h2>Risks</h2>
+<ul><li>Results so far are on synthetic data; real feeds are messier. The pilot exists to measure that.</li>
+<li>Needs an ERP stock feed; without current cover the impact numbers are guesses.</li>
+<li>Benefit is concentrated in a few large events; the case holds without them, but thinner.</li></ul>
+</div></div>
+
+<div class="ask"><b>Decision requested.</b> (1) Approve the 3-month pilot (₹43.8 lakh). (2) Name the risk owner.
+(3) Give IT the go-ahead for a read-only ERP stock and in-transit feed. The dual-sourcing programme is a separate decision for
+Head of Supply Chain + Quality, using the structural table.</div>
+</main></body></html>

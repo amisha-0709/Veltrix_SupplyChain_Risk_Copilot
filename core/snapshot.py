@@ -91,7 +91,7 @@ def build_snapshot() -> dict:
     snap["replays"] = reps
     snap["replay_summary"] = summarise(flat) | {
         "structural_protected_cr": round(float(flat["structural_protected_inr"].clip(lower=0).sum()) / 1e7, 1)}
-    for k in ("m2_data.json", "m3_data.json"):
+    for k in ("m2_data.json", "m3_data.json", "m6_data.json"):
         p = ROOT / "reports" / k
         if p.exists():
             snap[k.replace("_data.json", "")] = json.loads(p.read_text(encoding="utf-8"))

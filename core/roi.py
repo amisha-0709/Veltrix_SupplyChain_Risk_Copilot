@@ -23,7 +23,7 @@ COSTS = {  # ₹ per year unless noted; deliberately on the generous side
     "build_and_pilot_one_off": (35e5, "ERP stock/in-transit feed, 3-month pilot, set-up (one-off, amortised over 3 years)"),
     "news_and_data_feeds": (12e5, "Licensed news API; GDELT, PortWatch and Global Trade Alert are free"),
     "hosting": (3e5, "Serverless app + managed database + monitoring"),
-    "model_calls": (None, "Claude: triage review of all signals on Haiku 5.5 + briefings on Opus 5.5 (computed below)"),
+    "model_calls": (None, "Claude: triage review of all signals on Haiku 5.5 + briefings on Opus 5.5"),
     "risk_owner": (12e5, "0.5 FTE risk analyst owns the inbox and weekly review (nobody owns monitoring today)"),
     "maintenance": (8e5, "0.25 FTE engineer: rules, data feeds, model updates"),
 }
