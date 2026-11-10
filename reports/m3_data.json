@@ -1,0 +1,718 @@
+{
+ "threshold": 3.5,
+ "signals": {
+  "train": {
+   "signals": 2391,
+   "relevant": 136,
+   "flagged": 136,
+   "tp": 136,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  "test": {
+   "signals": 1218,
+   "relevant": 43,
+   "flagged": 41,
+   "tp": 41,
+   "fp": 0,
+   "fn": 2,
+   "precision": 1.0,
+   "recall": 0.953
+  }
+ },
+ "alerts": {
+  "train": {
+   "alerts": 14,
+   "relevant_alerts": 14,
+   "precision": 1.0,
+   "signals_per_alert": 10.0
+  },
+  "test": {
+   "alerts": 5,
+   "relevant_alerts": 5,
+   "precision": 1.0,
+   "signals_per_alert": 7.4
+  }
+ },
+ "lead": {
+  "train": {
+   "disruptions_with_warning": 11,
+   "detected": 11,
+   "median_lead_days": 19.1,
+   "min_lead_days": 10.8
+  },
+  "test": {
+   "disruptions_with_warning": 4,
+   "detected": 4,
+   "median_lead_days": 13.75,
+   "min_lead_days": 10.3
+  },
+  "all": {
+   "disruptions_with_warning": 11,
+   "detected": 11,
+   "median_lead_days": 19.1,
+   "min_lead_days": 10.8
+  }
+ },
+ "ablation": {
+  "removed": "load-shedding|container shortage",
+  "signals": {
+   "signals": 1218,
+   "relevant": 43,
+   "flagged": 39,
+   "tp": 39,
+   "fp": 0,
+   "fn": 4,
+   "precision": 1.0,
+   "recall": 0.907
+  },
+  "alerts": {
+   "alerts": 4,
+   "relevant_alerts": 4,
+   "precision": 1.0,
+   "signals_per_alert": 8.8
+  },
+  "lead": {
+   "disruptions_with_warning": 4,
+   "detected": 4,
+   "median_lead_days": 13.75,
+   "min_lead_days": 3.3
+  }
+ },
+ "lead_table": [
+  {
+   "disruption_id": "D01",
+   "title": "Typhoon Kaelin closes Kaohsiung port",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2024-11-18T00:00:00.000",
+   "first_public_signal": "2024-10-31T07:09:45.972",
+   "first_alert": "2024-10-31T07:09:45.972",
+   "lead_days": 17.7,
+   "team_lead_days": -1,
+   "days_gained_vs_team": 18.7,
+   "alerts": [
+    "EV-001"
+   ],
+   "relevant_signals": 15,
+   "signals_caught": 15
+  },
+  {
+   "disruption_id": "D02",
+   "title": "Cyclone and flooding in Chennai",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2024-12-03T00:00:00.000",
+   "first_public_signal": "2024-11-18T10:41:13.576",
+   "first_alert": "2024-11-18T10:41:13.576",
+   "lead_days": 14.6,
+   "team_lead_days": -3,
+   "days_gained_vs_team": 17.6,
+   "alerts": [
+    "EV-002"
+   ],
+   "relevant_signals": 15,
+   "signals_caught": 15
+  },
+  {
+   "disruption_id": "D03",
+   "title": "Red Sea attacks force Europe\u2013India reroute via Cape",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-01-06T00:00:00.000",
+   "first_public_signal": "2024-12-17T22:26:28.657",
+   "first_alert": "2024-12-17T22:26:28.657",
+   "lead_days": 19.1,
+   "team_lead_days": -1,
+   "days_gained_vs_team": 20.1,
+   "alerts": [
+    "EV-003"
+   ],
+   "relevant_signals": 11,
+   "signals_caught": 11
+  },
+  {
+   "disruption_id": "D04",
+   "title": "Export licensing on rare-earth magnets",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-02-17T00:00:00.000",
+   "first_public_signal": "2025-01-28T21:07:53.421",
+   "first_alert": "2025-01-28T21:07:53.421",
+   "lead_days": 19.1,
+   "team_lead_days": 0,
+   "days_gained_vs_team": 19.1,
+   "alerts": [
+    "EV-004"
+   ],
+   "relevant_signals": 15,
+   "signals_caught": 15
+  },
+  {
+   "disruption_id": "D05",
+   "title": "Fire at a Penang MOSFET plant",
+   "split": "train",
+   "had_warning": false,
+   "start_date": "2025-03-24T00:00:00.000",
+   "first_public_signal": "2025-03-24T05:19:17.883",
+   "first_alert": "2025-03-24T05:19:17.883",
+   "lead_days": -0.2,
+   "team_lead_days": -3,
+   "days_gained_vs_team": 2.8,
+   "alerts": [
+    "EV-005"
+   ],
+   "relevant_signals": 8,
+   "signals_caught": 8
+  },
+  {
+   "disruption_id": "D06",
+   "title": "Shanghai port congestion after systems outage",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-04-21T00:00:00.000",
+   "first_public_signal": "2025-04-06T18:10:28.294",
+   "first_alert": "2025-04-06T18:10:28.294",
+   "lead_days": 14.2,
+   "team_lead_days": -1,
+   "days_gained_vs_team": 15.2,
+   "alerts": [
+    "EV-006"
+   ],
+   "relevant_signals": 8,
+   "signals_caught": 8
+  },
+  {
+   "disruption_id": "D07",
+   "title": "All-India transporters' strike",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-05-26T00:00:00.000",
+   "first_public_signal": "2025-05-13T06:13:28.020",
+   "first_alert": "2025-05-13T06:13:28.020",
+   "lead_days": 12.7,
+   "team_lead_days": -2,
+   "days_gained_vs_team": 14.7,
+   "alerts": [
+    "EV-007"
+   ],
+   "relevant_signals": 9,
+   "signals_caught": 9
+  },
+  {
+   "disruption_id": "D08",
+   "title": "Earthquake halts fab output for inspection",
+   "split": "train",
+   "had_warning": false,
+   "start_date": "2025-06-16T00:00:00.000",
+   "first_public_signal": "2025-06-16T00:00:00.000",
+   "first_alert": "2025-06-16T00:00:00.000",
+   "lead_days": 0.0,
+   "team_lead_days": -2,
+   "days_gained_vs_team": 2.0,
+   "alerts": [
+    "EV-008"
+   ],
+   "relevant_signals": 12,
+   "signals_caught": 12
+  },
+  {
+   "disruption_id": "D09",
+   "title": "Monsoon flooding slows Nhava Sheva",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-07-14T00:00:00.000",
+   "first_public_signal": "2025-06-24T15:23:08.146",
+   "first_alert": "2025-06-24T15:23:08.146",
+   "lead_days": 19.4,
+   "team_lead_days": -1,
+   "days_gained_vs_team": 20.4,
+   "alerts": [
+    "EV-009"
+   ],
+   "relevant_signals": 10,
+   "signals_caught": 10
+  },
+  {
+   "disruption_id": "D10",
+   "title": "Strike at Korean cell maker",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-08-11T00:00:00.000",
+   "first_public_signal": "2025-07-22T05:32:02.996",
+   "first_alert": "2025-07-22T05:32:02.996",
+   "lead_days": 19.8,
+   "team_lead_days": 0,
+   "days_gained_vs_team": 19.8,
+   "alerts": [
+    "EV-010"
+   ],
+   "relevant_signals": 4,
+   "signals_caught": 4
+  },
+  {
+   "disruption_id": "D11",
+   "title": "Customs IT outage at Indian ports",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-09-22T00:00:00.000",
+   "first_public_signal": "2025-09-11T05:22:42.211",
+   "first_alert": "2025-09-11T05:22:42.211",
+   "lead_days": 10.8,
+   "team_lead_days": -2,
+   "days_gained_vs_team": 12.8,
+   "alerts": [
+    "EV-012"
+   ],
+   "relevant_signals": 4,
+   "signals_caught": 4
+  },
+  {
+   "disruption_id": "D12",
+   "title": "PCB supplier enters insolvency",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2025-11-10T00:00:00.000",
+   "first_public_signal": "2025-09-10T05:30:18.126",
+   "first_alert": "2025-09-10T05:30:18.126",
+   "lead_days": 60.8,
+   "team_lead_days": 0,
+   "days_gained_vs_team": 60.8,
+   "alerts": [
+    "EV-011"
+   ],
+   "relevant_signals": 15,
+   "signals_caught": 15
+  },
+  {
+   "disruption_id": "D13",
+   "title": "Port Klang congestion and Malacca delays",
+   "split": "train",
+   "had_warning": true,
+   "start_date": "2026-01-12T00:00:00.000",
+   "first_public_signal": "2025-12-23T18:24:49.680",
+   "first_alert": "2025-12-23T18:24:49.680",
+   "lead_days": 19.2,
+   "team_lead_days": -3,
+   "days_gained_vs_team": 22.2,
+   "alerts": [
+    "EV-013"
+   ],
+   "relevant_signals": 8,
+   "signals_caught": 8
+  },
+  {
+   "disruption_id": "D14",
+   "title": "Anti-dumping duty on Chinese aluminium castings (+18% landed cost)",
+   "split": "test",
+   "had_warning": true,
+   "start_date": "2026-02-09T00:00:00.000",
+   "first_public_signal": "2025-12-31T00:00:00.000",
+   "first_alert": "2025-12-31T00:00:00.000",
+   "lead_days": 40.0,
+   "team_lead_days": -3,
+   "days_gained_vs_team": 43.0,
+   "alerts": [
+    "EV-014"
+   ],
+   "relevant_signals": 6,
+   "signals_caught": 6
+  },
+  {
+   "disruption_id": "D15",
+   "title": "Heatwave and power cuts at Pune suppliers",
+   "split": "test",
+   "had_warning": true,
+   "start_date": "2026-04-20T00:00:00.000",
+   "first_public_signal": "2026-04-04T18:24:10.450",
+   "first_alert": "2026-04-04T18:24:10.450",
+   "lead_days": 15.2,
+   "team_lead_days": 0,
+   "days_gained_vs_team": 15.2,
+   "alerts": [
+    "EV-015"
+   ],
+   "relevant_signals": 13,
+   "signals_caught": 13
+  },
+  {
+   "disruption_id": "D16",
+   "title": "Container shortage; freight rates +120%",
+   "split": "test",
+   "had_warning": true,
+   "start_date": "2026-05-18T00:00:00.000",
+   "first_public_signal": "2026-05-06T06:21:14.539",
+   "first_alert": "2026-05-07T15:52:03.661",
+   "lead_days": 10.3,
+   "team_lead_days": 0,
+   "days_gained_vs_team": 10.3,
+   "alerts": [
+    "EV-016",
+    "EV-017"
+   ],
+   "relevant_signals": 6,
+   "signals_caught": 4
+  },
+  {
+   "disruption_id": "D17",
+   "title": "Flooding in northern Vietnam",
+   "split": "test",
+   "had_warning": true,
+   "start_date": "2026-07-06T00:00:00.000",
+   "first_public_signal": "2026-06-23T16:14:06.492",
+   "first_alert": "2026-06-23T16:14:06.492",
+   "lead_days": 12.3,
+   "team_lead_days": -1,
+   "days_gained_vs_team": 13.3,
+   "alerts": [
+    "EV-018"
+   ],
+   "relevant_signals": 9,
+   "signals_caught": 9
+  },
+  {
+   "disruption_id": "D18",
+   "title": "Ransomware attack halts a Japanese passives supplier",
+   "split": "test",
+   "had_warning": false,
+   "start_date": "2026-08-17T00:00:00.000",
+   "first_public_signal": "2026-08-17T12:39:35.955",
+   "first_alert": "2026-08-17T12:39:35.955",
+   "lead_days": -0.5,
+   "team_lead_days": -2,
+   "days_gained_vs_team": 1.5,
+   "alerts": [
+    "EV-019"
+   ],
+   "relevant_signals": 11,
+   "signals_caught": 11
+  }
+ ],
+ "alert_rows": [
+  {
+   "alert_id": "AL-001",
+   "first_seen": "2024-10-31T07:09:45.972",
+   "title": "Taiwan issues sea warning as Kaelin strengthens",
+   "disruption": "D01",
+   "n_signals": 15,
+   "n_sources": 9,
+   "event_type": "port_closure",
+   "L": 5,
+   "I": 1,
+   "P": 5,
+   "route": "Watch log",
+   "confidence": 0.95,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.04
+  },
+  {
+   "alert_id": "AL-002",
+   "first_seen": "2024-11-18T10:41:13.576",
+   "title": "Deep depression over Bay of Bengal likely to become cyclone",
+   "disruption": "D02",
+   "n_signals": 15,
+   "n_sources": 7,
+   "event_type": "port_closure",
+   "L": 5,
+   "I": 1,
+   "P": 5,
+   "route": "Watch log",
+   "confidence": 0.95,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.05
+  },
+  {
+   "alert_id": "AL-003",
+   "first_seen": "2024-12-17T22:26:28.657",
+   "title": "Attacks on merchant vessels in the Red Sea escalate",
+   "disruption": "D03",
+   "n_signals": 11,
+   "n_sources": 7,
+   "event_type": "route",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.9,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.04
+  },
+  {
+   "alert_id": "AL-004",
+   "first_seen": "2025-01-28T21:07:53.421",
+   "title": "China signals tighter controls on rare-earth exports",
+   "disruption": "D04",
+   "n_signals": 15,
+   "n_sources": 7,
+   "event_type": "trade_licensing",
+   "L": 4,
+   "I": 4,
+   "P": 16,
+   "route": "Inbox",
+   "confidence": 0.95,
+   "at_risk": "\u20b915.95 cr",
+   "owner": "Magnets",
+   "secs": 0.22
+  },
+  {
+   "alert_id": "AL-005",
+   "first_seen": "2025-03-24T05:19:17.883",
+   "title": "Fire reported at semiconductor assembly plant in Penang",
+   "disruption": "D05",
+   "n_signals": 8,
+   "n_sources": 6,
+   "event_type": "supplier_outage",
+   "L": 4,
+   "I": 5,
+   "P": 20,
+   "route": "Inbox",
+   "confidence": 0.9,
+   "at_risk": "\u20b955.45 cr",
+   "owner": "Semiconductors",
+   "secs": 0.26
+  },
+  {
+   "alert_id": "AL-006",
+   "first_seen": "2025-04-06T18:10:28.294",
+   "title": "Shanghai port hit by terminal systems outage",
+   "disruption": "D06",
+   "n_signals": 8,
+   "n_sources": 5,
+   "event_type": "congestion",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.84,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.04
+  },
+  {
+   "alert_id": "AL-007",
+   "first_seen": "2025-05-13T06:13:28.020",
+   "title": "Transporters' federation calls nationwide strike over toll and fuel issues",
+   "disruption": "D07",
+   "n_signals": 9,
+   "n_sources": 5,
+   "event_type": "congestion",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.84,
+   "at_risk": "\u20b90",
+   "owner": "Passives",
+   "secs": 0.05
+  },
+  {
+   "alert_id": "AL-008",
+   "first_seen": "2025-06-16T00:00:00.000",
+   "title": "Earthquake M6.4 (seismic bulletin) for Hsinchu (severity 4/5, ~4 days)",
+   "disruption": "D08",
+   "n_signals": 12,
+   "n_sources": 6,
+   "event_type": "supplier_outage",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.95,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.05
+  },
+  {
+   "alert_id": "AL-009",
+   "first_seen": "2025-06-24T15:23:08.146",
+   "title": "IMD issues extremely heavy rain warning for Mumbai and Raigad",
+   "disruption": "D09",
+   "n_signals": 10,
+   "n_sources": 6,
+   "event_type": "port_closure",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.95,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.05
+  },
+  {
+   "alert_id": "AL-010",
+   "first_seen": "2025-07-22T05:32:02.996",
+   "title": "Union at Korean battery maker votes to strike",
+   "disruption": "D10",
+   "n_signals": 4,
+   "n_sources": 4,
+   "event_type": "supplier_outage",
+   "L": 3,
+   "I": 3,
+   "P": 9,
+   "route": "Inbox",
+   "confidence": 0.63,
+   "at_risk": "\u20b90",
+   "owner": "Li-ion cells",
+   "secs": 0.13
+  },
+  {
+   "alert_id": "AL-011",
+   "first_seen": "2025-09-10T05:30:18.126",
+   "title": "Credit insurer cuts cover for Guangdong PCB manufacturer",
+   "disruption": "D12",
+   "n_signals": 15,
+   "n_sources": 9,
+   "event_type": "supplier_outage",
+   "L": 4,
+   "I": 5,
+   "P": 20,
+   "route": "Inbox",
+   "confidence": 0.9,
+   "at_risk": "\u20b93.45 cr",
+   "owner": "PCBs",
+   "secs": 0.36
+  },
+  {
+   "alert_id": "AL-012",
+   "first_seen": "2025-09-11T05:22:42.211",
+   "title": "Customs portal reports intermittent outages",
+   "disruption": "D11",
+   "n_signals": 4,
+   "n_sources": 3,
+   "event_type": "congestion",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.72,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.05
+  },
+  {
+   "alert_id": "AL-013",
+   "first_seen": "2025-12-23T18:24:49.680",
+   "title": "Port Klang congestion builds as transshipment volumes surge",
+   "disruption": "D13",
+   "n_signals": 8,
+   "n_sources": 6,
+   "event_type": "congestion",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.9,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.06
+  },
+  {
+   "alert_id": "AL-014",
+   "first_seen": "2025-12-31T00:00:00.000",
+   "title": "India: Anti-dumping duty recommendation (DGTR) on Aluminium die-castings from Ch",
+   "disruption": "D14",
+   "n_signals": 6,
+   "n_sources": 5,
+   "event_type": "cost_only",
+   "L": 3,
+   "I": 1,
+   "P": 3,
+   "route": "Watch log",
+   "confidence": 0.79,
+   "at_risk": "\u20b90",
+   "owner": "Castings",
+   "secs": 0.02
+  },
+  {
+   "alert_id": "AL-015",
+   "first_seen": "2026-04-04T18:24:10.450",
+   "title": "Severe heatwave warning for Pune and central Maharashtra",
+   "disruption": "D15",
+   "n_signals": 13,
+   "n_sources": 9,
+   "event_type": "supplier_outage",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.95,
+   "at_risk": "\u20b90",
+   "owner": "Connectors",
+   "secs": 0.04
+  },
+  {
+   "alert_id": "AL-016",
+   "first_seen": "2026-05-07T15:52:03.661",
+   "title": "Container shortage hits Asia\u2013India trade lane",
+   "disruption": "D16",
+   "n_signals": 2,
+   "n_sources": 2,
+   "event_type": "congestion",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.66,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.06
+  },
+  {
+   "alert_id": "AL-017",
+   "first_seen": "2026-05-14T16:18:32.734",
+   "title": "Importers report rolled bookings and blank sailings",
+   "disruption": "D16",
+   "n_signals": 2,
+   "n_sources": 1,
+   "event_type": "congestion",
+   "L": 3,
+   "I": 1,
+   "P": 3,
+   "route": "Watch log",
+   "confidence": 0.6,
+   "at_risk": "\u20b90",
+   "owner": "Semiconductors",
+   "secs": 0.04
+  },
+  {
+   "alert_id": "AL-018",
+   "first_seen": "2026-06-23T16:14:06.492",
+   "title": "Tropical storm brings flooding to northern Vietnam",
+   "disruption": "D17",
+   "n_signals": 9,
+   "n_sources": 6,
+   "event_type": "port_closure",
+   "L": 4,
+   "I": 1,
+   "P": 4,
+   "route": "Watch log",
+   "confidence": 0.95,
+   "at_risk": "\u20b90",
+   "owner": "Connectors",
+   "secs": 0.03
+  },
+  {
+   "alert_id": "AL-019",
+   "first_seen": "2026-08-17T12:39:35.955",
+   "title": "Japanese electronic components maker hit by ransomware",
+   "disruption": "D18",
+   "n_signals": 11,
+   "n_sources": 7,
+   "event_type": "supplier_outage",
+   "L": 3,
+   "I": 5,
+   "P": 15,
+   "route": "Inbox",
+   "confidence": 0.75,
+   "at_risk": "\u20b93.87 cr",
+   "owner": "Passives",
+   "secs": 0.26
+  }
+ ]
+}

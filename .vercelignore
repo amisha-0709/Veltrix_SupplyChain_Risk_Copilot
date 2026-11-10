@@ -1,0 +1,9 @@
+.venv
+/tests
+/reports
+/data/raw
+data/decisions.json
+data/llm_cache.json
+.claude
+**/__pycache__
+.pytest_cache

@@ -1,0 +1,46 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Briefing AL-004</title><style>
+:root{--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--line:#e1e0d9;--surface:#fff;--page:#f4f4f1;
+--crit:#d03b3b;--serious:#ec835a;--warn:#fab219;--good:#0ca30c;--accent:#2a78d6}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);
+font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.sheet{max-width:820px;margin:24px auto;background:var(--surface);padding:28px 32px;border:1px solid var(--line);border-radius:8px}
+@media print{body{background:#fff}.sheet{margin:0;border:0;padding:0;max-width:none}.noprint{display:none}}
+@page{size:A4;margin:14mm}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.kicker{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+h1{font-size:19px;margin:2px 0 4px;line-height:1.25}h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;
+color:var(--ink2);margin:16px 0 6px;border-bottom:1px solid var(--line);padding-bottom:3px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:700;border-radius:6px;padding:6px 10px;color:#fff;white-space:nowrap}
+.p-crit{background:var(--crit)}.p-high{background:var(--serious);color:#0b0b0b}.p-med{background:var(--warn);color:#0b0b0b}.p-low{background:#c3c2b7;color:#0b0b0b}
+.lead{font-size:14px;margin:10px 0 0}.ask{background:#f0f6fd;border-left:3px solid var(--accent);padding:8px 12px;margin:10px 0;font-weight:600}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0}.kv div{border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.kv b{display:block;font-size:15px}.kv span{color:var(--ink2);font-size:11px}
+table{border-collapse:collapse;width:100%;font-size:12px}th{text-align:left;color:var(--ink2);font-weight:600;border-bottom:1px solid #c3c2b7;padding:3px 6px}
+td{border-bottom:1px solid var(--line);padding:3px 6px;vertical-align:top}.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.short{color:var(--crit);font-weight:600}.note{color:var(--muted);font-size:11px}ul{margin:4px 0;padding-left:18px}
+.meta{color:var(--ink2);font-size:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:700px){.kv{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}.sheet{padding:16px}}
+</style></head><body><p class='noprint' style='text-align:center;margin:12px'><button onclick='print()'>Print / save as PDF</button></p><div class="sheet">
+<div class="top"><div><div class="kicker">Veltrix supply risk briefing · AL-004 · Shipping route blocked · first seen 17 Dec 2024</div>
+<h1>Attacks on merchant vessels in the Red Sea escalate</h1><div class="meta">Owner: Category manager: Semiconductors · Response: Log and watch; weekly review</div></div>
+<div class="badge p-low">Priority 4 <span style="font-weight:400">(L4 × I1)</span></div></div>
+<p class="lead">Cover holds: no shortage expected. ₹4.47 cr/day of revenue depends on the 4 linked part(s).</p>
+<div class="ask">No action: cover exceeds expected delay. Monitor.</div>
+<div class="kv"><div><b>₹0</b><span>revenue at risk</span></div>
+<div><b>₹0</b><span>margin at risk</span></div>
+<div><b>0</b><span>units short · 0 SKU(s)</span></div>
+<div><b>12.7 d</b><span>lowest cover vs 1 d max shortage</span></div></div>
+<h2>What is happening</h2><p>Europe–India freight rates jump as ships avoid the Red Sea. Shippers report longer lead times and surcharges on Hamburg and Rotterdam loops.</p>
+<p class="meta">Linked to: Red Sea / Suez Canal (chokepoint), India (country), Hamburg (port of loading), Rotterdam (port of loading). Likelihood 4/5: confirmed / under way at a node we use.
+Impact 1/5: ₹0 at risk; cover holds. Confidence 90%: 7 independent sources, named node in our network.</p>
+<h2>Exposure</h2><table><thead><tr><th>Part</th><th>Primary supplier</th><th class=num>Cover (d)</th><th class=num>Delay (d)</th>
+<th class=num>Short (d)</th><th>Fallback</th></tr></thead><tbody><tr><td>PRT-006 · CAN transceiver <span class=note>single source</span></td><td>Rheinwerk Semiconductor GmbH</td><td class=num>12.7</td><td class=num>14.0</td><td class='num short'>1.3</td><td>none</td></tr></tbody></table>
+<div class="two"><div><h2>Products</h2><ul><li>No product stops.</li></ul></div><div><h2>Customers</h2><ul><li>No customer falls below 95% OTIF.</li></ul></div></div>
+<h2>Recommended action</h2><table><thead><tr><th>Option</th><th class=num>Cost</th><th class=num>Effect</th><th class=num>Net value</th>
+<th class=num>ROI</th><th>Approver</th></tr></thead><tbody><tr><td><b>No action: cover exceeds expected delay. Monitor.</b><div class=note>Min cover 12.7 d vs delay 14.0 d; finished-goods stock absorbs the small part shortage.</div></td><td class=num>₹0</td><td class=num>0 d</td><td class=num>₹0</td><td class=num>—</td><td>Category manager (log only)</td></tr></tbody></table>
+<p class="note"> Ranked by playbook §5 net value; on-time options first. Shown for approval, not approved.</p>
+
+<h2>Sources (11 signals, 7 sources)</h2><ul><li>17 Dec 2024 · Global Trade Wire: Attacks on merchant vessels in the Red Sea escalate</li><li>21 Dec 2024 · Semicon Insider: Major carriers pause Suez transits, divert via Cape of Good Hope</li><li>22 Dec 2024 · Monsoon Desk: Major carriers pause Suez transits, divert via Cape of Good Hope</li><li>22 Dec 2024 · Container Pulse: Major carriers pause Suez transits, divert via Cape of Good Hope</li><li>30 Dec 2024 · Auto Components Today: Attacks on merchant vessels in the Red Sea escalate</li><li>02 Jan 2025 · Asia Freight Daily: Major carriers pause Suez transits, divert via Cape of Good Hope</li><li>02 Jan 2025 · Metals &amp; Minerals Brief: Europe–India freight rates jump as ships avoid the Red Sea</li><li>02 Jan 2025 · Container Pulse: Europe–india freight rates jump as ships avoid the red sea</li><li>… and 1 more</li></ul>
+<h2>Assumptions</h2><ul><li>Stock position as of 30 Sep 2026 (on hand + in transit).</li><li>Effective delay: lane reroute penalty 14 d = 14.0 d.</li><li>Recommendation only: nothing has been ordered, booked or communicated to suppliers.</li></ul>
+<p class="note">Generated by the Veltrix supply-chain co-pilot in 0.1 s. Method: playbook v2.0 §2–§7.</p>
+</div></body></html>
