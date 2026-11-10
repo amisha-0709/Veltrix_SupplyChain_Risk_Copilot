@@ -11,7 +11,7 @@ orders, books freight or contacts suppliers. All data is synthetic (Veltrix Comp
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements-dev.txt
 .venv/Scripts/python -m uvicorn app:app --port 8000      # UI + API at http://localhost:8000
-.venv/Scripts/python -m pytest -q                         # 33 tests: M1–M4 + acceptance scenarios
+.venv/Scripts/python -m pytest -q                         # 47 tests: M1–M5 incl. acceptance scenarios T1–T10
 ```
 
 ## Rebuild data and reports (after changing rules or the engine)
@@ -21,7 +21,8 @@ python -m venv .venv
 .venv/Scripts/python -m core.report       # reports/stage1.html  (exposure, timeline, first business case)
 .venv/Scripts/python -m core.report_m2    # reports/m2.html      (impact engine validation, T1/T4–T8)
 .venv/Scripts/python -m core.report_m3    # reports/m3.html      (T9 back-test)
-.venv/Scripts/python -m core.snapshot     # data/snapshot.json   (what the UI serves)
+.venv/Scripts/python -m core.snapshot     # data/snapshot.json   (what the UI serves, incl. 18 replays)
+.venv/Scripts/python -m core.acceptance   # reports/acceptance.html (T1–T10 end to end through the API)
 ```
 
 Copy `reports/*.html` into `public/reports/` after rebuilding them.
@@ -49,6 +50,9 @@ for a real pilot.
 | `core/triage.py`, `core/events.py`, `core/alerts.py` | signal triage, dedup into events, L×I scoring |
 | `core/briefing.py` | one-page briefing (HTML + text), numbers straight from the engine |
 | `core/backtest.py`, `core/validate_impact.py` | T9 back-test, D01–D18 impact validation |
+| `core/ask.py` | conversational layer: what-ifs, exposure, inbox, options; answered by the engine with working |
+| `core/replay.py` | T10 replay of any disruption as if live + structural counterfactual; business case |
+| `core/acceptance.py` | brief §6 T1–T10 checks with evidence, end to end through the API |
 | `core/llm_judge.py` | optional Claude review of borderline signals (off by default) |
 | `backend/main.py` | FastAPI: alerts, briefings, register, exposure, back-test, simulate, decisions |
 | `public/` | web UI (no build step) |

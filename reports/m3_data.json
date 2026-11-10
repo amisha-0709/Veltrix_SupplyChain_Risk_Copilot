@@ -474,7 +474,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b955.45 cr",
    "owner": "Semiconductors",
-   "secs": 0.26
+   "secs": 0.29
   },
   {
    "alert_id": "AL-006",
@@ -576,7 +576,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b93.45 cr",
    "owner": "PCBs",
-   "secs": 0.36
+   "secs": 0.37
   },
   {
    "alert_id": "AL-012",
@@ -593,7 +593,7 @@
    "confidence": 0.72,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.06
   },
   {
    "alert_id": "AL-013",
@@ -661,7 +661,7 @@
    "confidence": 0.66,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.06
+   "secs": 0.05
   },
   {
    "alert_id": "AL-017",
@@ -712,7 +712,7 @@
    "confidence": 0.75,
    "at_risk": "\u20b93.87 cr",
    "owner": "Passives",
-   "secs": 0.26
+   "secs": 0.27
   }
  ]
 }

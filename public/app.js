@@ -253,7 +253,92 @@ async function viewBacktest() {
       <table><tbody>${b.misses.map((m) => `<tr><td>miss</td><td>${esc(m.linked_disruption_id)}</td><td>${esc(m.text)}</td><td class="num">score ${m.score}</td></tr>`).join("")}
       ${b.false_alarms.map((m) => `<tr><td>false alarm</td><td></td><td>${esc(m.text)}</td><td class="num">score ${m.score}</td></tr>`).join("")}</tbody></table>
       <p class="muted">Full exhibits: <a href="reports/stage1.html" target="_blank" rel="noopener">Stage 1</a> ·
-      <a href="reports/m2.html" target="_blank" rel="noopener">Impact engine</a> · <a href="reports/m3.html" target="_blank" rel="noopener">Signal back-test</a></p></div>`;
+      <a href="reports/m2.html" target="_blank" rel="noopener">Impact engine</a> · <a href="reports/m3.html" target="_blank" rel="noopener">Signal back-test</a> ·
+      <a href="reports/acceptance.html" target="_blank" rel="noopener">Acceptance tests T1–T10</a> · <a href="#/replay/D05">D05 replay (T10)</a></p></div>`;
+}
+
+/* ---------------- ask (chat) ---------------- */
+const ASK_EXAMPLES = [
+  "Which customers miss their 95% OTIF target if Penang semiconductor output stops for six weeks?",
+  "Which products stop first if Kaohsiung closes for ten days?",
+  "Which products stop first if Kaohsiung closes for forty days?",
+  "How exposed are we to Shanghai?",
+  "What if the Red Sea closes?",
+  "What's in the inbox right now?",
+];
+const chat = [];
+const tableHtml = (t) => `<h3 style="margin-top:12px">${esc(t.title)}</h3><div style="overflow-x:auto"><table><thead><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+  <tbody>${t.rows.map((r) => `<tr>${r.map((v) => `<td>${esc(v === true ? "yes" : v === false ? "no" : v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+function renderChat() {
+  $("#log").innerHTML = chat.map((m) => m.role === "user"
+    ? `<div class="result" style="border-color:var(--axis)"><b>You</b><p>${esc(m.text)}</p></div>`
+    : `<div class="card"><p style="white-space:pre-line;margin-top:0">${esc(m.r.answer)}</p>
+        ${(m.r.tables || []).map(tableHtml).join("")}
+        ${m.r.working?.length ? `<details><summary class="muted">Working (playbook §3)</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
+        ${m.r.assumptions?.length ? `<details><summary class="muted">Assumptions</summary><ul>${m.r.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></details>` : ""}</div>`).join("");
+}
+async function viewAsk() {
+  $("#app").innerHTML = `<h1>Ask the co-pilot</h1>
+    <p class="sub">Questions are answered by the same impact engine that quantifies alerts: places and commodities are matched to Veltrix's network, and every
+    answer shows its working. If a question can't be linked to the network, it asks rather than guesses.</p>
+    <div class="examples">${ASK_EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e)}</button>`).join("")}</div>
+    <div id="log"></div>
+    <form class="card stack" id="askf"><label>Your question<input name="q" required maxlength="400" placeholder="e.g. Which products stop first if Ningbo closes for three weeks?"></label>
+      <div class="btns"><button class="btn" type="submit">Ask</button></div></form>`;
+  renderChat();
+  const send = async (q) => {
+    chat.push({ role: "user", text: q }); renderChat();
+    try { const r = await api("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q }) });
+      chat.push({ role: "bot", r }); } catch (e) { chat.push({ role: "bot", r: { answer: "Error: " + e.message.slice(0, 200) } }); }
+    renderChat(); $("#askf").scrollIntoView({ behavior: "smooth", block: "end" });
+  };
+  document.querySelectorAll(".examples button").forEach((b) => (b.onclick = () => send(ASK_EXAMPLES[+b.dataset.i])));
+  $("#askf").onsubmit = (ev) => { ev.preventDefault(); const q = ev.target.q.value.trim(); if (q) { ev.target.q.value = ""; send(q); } };
+}
+
+/* ---------------- replay (T10) ---------------- */
+async function viewReplay(did = "D05") {
+  const [list, r] = await Promise.all([get("/api/replays"), api(`/api/replays/${encodeURIComponent(did)}`)]);
+  const s = list.summary;
+  const opts = (r.top_options || []).map((o) => `<tr><td>${esc(o.option)}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td>
+    <td>${o.on_time ? "in time" : "late"}</td><td>${esc(o.approver)}</td></tr>`).join("");
+  const rec = r.recommended.length ? r.recommended.map((x) => `<li><b>${esc(x.option)}</b> (${esc(x.part_id)}): ${inr(x.cost_inr)}, ${x.time_to_effect_days} d to effect; ${esc(x.approver)}</li>`).join("")
+    : "<li>No option clears the playbook's net-value bar (margin protected must exceed cost).</li>";
+  const st = r.structural;
+  $("#app").innerHTML = `<h1>Replay: what if the co-pilot had been live?</h1>
+    <p class="sub">The co-pilot sees only what it would have known that day: its own alert date from the signal back-test, stock cover at the time, and its
+    <i>own</i> delay estimate. Its plan is then applied to what actually happened.</p>
+    <div class="tiles"><div class="tile"><b>₹${s.revenue_protected_expected_cr} cr</b><span>expected revenue protected across all 18 disruptions (of ₹${s.actual_revenue_lost_cr} cr lost)</span></div>
+      <div class="tile"><b>₹${s.plan_cost_cr} cr</b><span>cost of the recommended plans; ROI on plans ${s.roi_on_plans ?? "—"}×</span></div>
+      <div class="tile"><b>₹${s.avoided_waste_cr} cr</b><span>of ₹${s.team_wasted_cr} cr wasted spend avoided (cover was enough)</span></div>
+      <div class="tile"><b>₹${s.structural_protected_cr} cr</b><span>more if unqualified alternates had been qualified in advance (structural; overlaps with plans)</span></div></div>
+    <div class="tabs">${list.rows.map((x) => `<button data-d="${esc(x.disruption_id)}" class="${x.disruption_id === r.disruption_id ? "on" : ""}">${esc(x.disruption_id)}</button>`).join("")}</div>
+    <div class="row"><div class="card">
+      <h2 style="margin-top:0">${esc(r.disruption_id)} · ${esc(r.title)}</h2>
+      <table><tbody>
+        <tr><td>Impact started</td><td>${date(r.start_date)}</td></tr>
+        <tr><td><b>Co-pilot first alert</b></td><td><b>${r.detected ? date(r.copilot_alert_date) + ` (${r.copilot_lead_days} d before impact)` : "not detected"}</b></td></tr>
+        <tr><td>Team first alert</td><td>${date(r.team_alert_date)}</td></tr>
+        <tr><td>Team first decision</td><td>day +${r.team_decision_day} after impact</td></tr>
+        <tr><td>Co-pilot's delay estimate vs actual</td><td>${r.seen.delay_estimate_days ?? "—"} d vs ${r.actual_delay_days} d</td></tr>
+        <tr><td>Revenue at risk it would have shown</td><td>${inr(r.seen.revenue_at_risk_inr)} (${r.seen.skus_stopped} SKUs)</td></tr>
+      </tbody></table>
+      <h3 style="margin-top:14px">It would have recommended</h3><ul>${rec}</ul>
+      <h3>Outcome</h3><table><tbody>
+        <tr><td>Actually lost</td><td class="num">${inr(r.actual_revenue_lost_inr)}</td></tr>
+        <tr><td>Lost with the co-pilot's plan (if it works)</td><td class="num">${inr(r.with_plan_lost_inr)}</td></tr>
+        <tr><td><b>Expected revenue protected</b> (× P works ${r.plan_p_works})</td><td class="num"><b>${inr(r.vs_actual_protected_expected_inr)}</b></td></tr>
+        <tr><td>Plan cost</td><td class="num">${inr(r.plan_cost_inr)}</td></tr>
+        <tr><td>Margin protected / penalties avoided</td><td class="num">${inr(r.margin_protected_inr)} / ${inr(r.penalties_avoided_inr)}</td></tr>
+        <tr><td>Wasted spend it would have skipped</td><td class="num">${inr(r.avoided_waste_inr)} of ${inr(r.team_wasted_inr)}</td></tr>
+      </tbody></table>
+      ${st ? `<div class="result" style="margin-top:12px"><b>Structural fix the exposure map flags</b><p>${st.parts.map(esc).join("; ")}: about ${inr(st.cost_inr)}.
+        Had this been done before the event, a switch would land ~19 days after impact: <b>${inr(st.revenue_protected_inr)}</b> of revenue protected.</p></div>` : ""}
+    </div><div class="card"><h3>Options it ranked (on the day)</h3><table><thead><tr><th>Option</th><th class="num">Cost</th><th class="num">Net value</th><th>Timing</th><th>Approver</th></tr></thead>
+      <tbody>${opts || '<tr><td colspan="5" class="muted">Cover was enough: no options needed.</td></tr>'}</tbody></table>
+      <details><summary class="muted">Working on the day</summary><ol class="steps">${(r.seen.working || []).map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>
+      <p class="muted">Switches are assumed to take hold in 19 days (observed in history), not the playbook's 5–10. Team actions the co-pilot didn't cover still count.</p></div></div>`;
+  document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => (location.hash = `#/replay/${b.dataset.d}`)));
 }
 
 /* ---------------- router ---------------- */
@@ -265,6 +350,8 @@ async function route() {
     else if (r === "register") await viewRegister();
     else if (r === "exposure") await viewExposure();
     else if (r === "simulate") await viewSimulate();
+    else if (r === "ask") await viewAsk();
+    else if (r === "replay") await viewReplay(id ? decodeURIComponent(id) : "D05");
     else if (r === "backtest") await viewBacktest();
     else await viewInbox();
     window.scrollTo(0, 0);

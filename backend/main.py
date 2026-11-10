@@ -139,6 +139,41 @@ def needs_review():
     return snap()["needs_review"]
 
 
+@app.get("/api/replays")
+def replays():
+    s = snap()
+    keep = ("disruption_id", "title", "type", "start_date", "detected", "copilot_alert_date", "copilot_lead_days",
+            "team_alert_date", "team_decision_day", "actual_revenue_lost_inr", "with_plan_lost_inr", "plan_cost_inr",
+            "vs_actual_protected_expected_inr", "avoided_waste_inr", "team_wasted_inr", "structural")
+    return {"summary": s["replay_summary"], "rows": [{k: r.get(k) for k in keep} for r in s["replays"]]}
+
+
+@app.get("/api/replays/{did}")
+def replay_one(did: str):
+    for r in snap()["replays"]:
+        if r["disruption_id"] == did.upper():
+            return r
+    raise HTTPException(404, f"No disruption {did}")
+
+
+class AskIn(BaseModel):
+    question: str = Field(min_length=1, max_length=400)
+
+
+@app.post("/api/ask")
+def ask_endpoint(q: AskIn):
+    """Conversational layer: questions answered by the impact engine, with the working shown."""
+    from core.ask import ask
+    from core.snapshot import clean
+
+    def get(aid):
+        try:
+            return _alert(aid)
+        except HTTPException:
+            return None
+    return clean(ask(q.question, alerts=alerts(), get_alert=get))
+
+
 class SignalIn(BaseModel):
     headline: str = Field(min_length=5, max_length=300)
     snippet: str = Field(default="", max_length=600)

@@ -35,6 +35,7 @@ DEFAULT_ALT_PREMIUM = 0.085  # playbook 3–14% when the part has no figure
 QUAL_FIXED_INR = 15e5        # playbook ₹8–25 lakh qualification cost (midpoint-ish)
 BROKER_PREMIUM = 1.0         # playbook +40–160%
 DEMAND_SHAPING_DISCOUNT = 0.05
+HEDGE_MAX_INR = 50e5         # structural hedges up to ₹50 lakh even when the expected case doesn't pay them back
 
 APPROVAL = {  # decision type -> (≤ ₹50 lakh, ₹50 lakh–2 cr, > ₹2 cr)
     "expedite": ("Category manager", "Head of Supply Chain", "COO"),
@@ -282,17 +283,33 @@ def rank_options(sc: Scenario, base: ImpactResult, lead_days: float = 0.0) -> pd
     return O.reset_index(drop=True)
 
 
-def best_plan(options: pd.DataFrame) -> pd.DataFrame:
-    """Top on-time option with positive net value per short part (else its top option)."""
+def best_plan(options: pd.DataFrame, structural_hedge: bool = False) -> pd.DataFrame:
+    """Top on-time option with positive net value per short part (else its top option).
+
+    structural_hedge (supplier outages): if the top pick is only a bridge (pre-buy, expedite, broker) and a
+    supplier switch or qualification also lands in time with positive net value, recommend both. Playbook §4:
+    "start early for structural risks". Outages often run far longer than expected (D12: 123 days).
+    """
     if options.empty or options["part_id"].isna().all():
         return options
+    single = load()["parts"].set_index("part_id")["single_source"]
     picks = []
-    for _, g in options.groupby("part_id", sort=False):
+    for part, g in options.groupby("part_id", sort=False):
         good = g[g["on_time"] & (g["net_value_inr"] > 0)]
         if not len(good):
             good = g[g["net_value_inr"] > 0]       # late but still worth it
         if len(good):
             picks.append(good.iloc[0])
+        if structural_hedge and not (len(good) and good.iloc[0]["kind"] == "switch"):
+            # Worth it on its own, or a cheap insurance policy for a single-source part (outages run long).
+            hedge = g[(g["kind"] == "switch") & g["on_time"] & g["fixes_shortage"]
+                      & ((g["net_value_inr"] > 0) | (bool(single.get(part, False)) & (g["cost_inr"] <= HEDGE_MAX_INR)))]
+            if len(hedge):
+                h = hedge.iloc[0].copy()
+                h["note"] = ("Structural hedge alongside the bridge" if h["net_value_inr"] > 0 else
+                             "Structural hedge: not paid back in the expected case, but cheap insurance for a "
+                             "single-source part if the outage runs long") + ". " + str(h["note"])
+                picks.append(h)
     if not picks:
         return options.iloc[0:0]
     return pd.DataFrame(picks).sort_values("rank").reset_index(drop=True)
@@ -306,12 +323,15 @@ def evaluate_plan(sc: Scenario, base: ImpactResult, plan: pd.DataFrame) -> dict:
     cover = dict(sc.cover_override or {})
     P = base.parts.set_index("part_id")
     extra = 0.0
+    best_after: dict[str, float] = {}
     for r in plan.itertuples():
-        d = float(P.loc[r.part_id, "effective_delay_days"])
         if r.kind == "realloc":
             extra += r.margin_avoided_inr * r.p_works
         new = float(r.shortage_days_after)
-        cover[r.part_id] = d - new if new > 0 else d + 1
+        best_after[r.part_id] = min(best_after.get(r.part_id, new), new)   # bridge + hedge: the better one counts
+    for part, new in best_after.items():
+        d = float(P.loc[part, "effective_delay_days"])
+        cover[part] = d - new if new > 0 else d + 1
     after = run(replace(sc, cover_override=cover, mitigation_effect_day=None)).totals
     p = float((plan["p_works"] * plan["cost_inr"]).sum() / plan["cost_inr"].sum()) if plan["cost_inr"].sum() else 0.9
     margin = (base.totals["margin_at_risk_inr"] - after["margin_at_risk_inr"]) * p + extra
@@ -341,7 +361,8 @@ def recommend(sc: Scenario, lead_days: float = 0.0) -> dict:
     opts = rank_options(basis_sc, basis, lead_days)
     if mode == "precautionary" and len(opts):
         opts["status"] = "Precautionary (if the outage runs long): requires approval"
-    plan = best_plan(opts) if not basis.totals["no_action_needed"] else opts.iloc[0:0]
+    plan = (best_plan(opts, structural_hedge=sc.event_type == "supplier_outage")
+            if not basis.totals["no_action_needed"] else opts.iloc[0:0])
     ev = evaluate_plan(basis_sc, basis, plan) if len(plan) else None
     return {"mode": mode, "expected": expected, "stress": stress, "options": opts, "plan": plan,
             "plan_value": ev, "lead_days": lead_days}

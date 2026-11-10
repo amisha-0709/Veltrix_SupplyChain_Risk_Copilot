@@ -79,6 +79,18 @@ def build_snapshot() -> dict:
                      "misses": bt["misses"][["signal_id", "linked_disruption_id", "days_before_impact", "score", "text"]],
                      "false_alarms": bt["false_alarms"][["signal_id", "score", "text"]]},
     }
+    from core.replay import replay, summarise
+    reps = []
+    for did in snap["timeline"]["disruption_id"]:
+        r = replay(did)
+        reps.append(r)
+    import pandas as _pd
+    flat = _pd.DataFrame([{k: v for k, v in r.items() if k not in ("seen", "recommended", "top_options", "structural")}
+                          | {"structural_protected_inr": (r["structural"] or {}).get("revenue_protected_inr", 0.0)}
+                          for r in reps])
+    snap["replays"] = reps
+    snap["replay_summary"] = summarise(flat) | {
+        "structural_protected_cr": round(float(flat["structural_protected_inr"].clip(lower=0).sum()) / 1e7, 1)}
     for k in ("m2_data.json", "m3_data.json"):
         p = ROOT / "reports" / k
         if p.exists():
