@@ -261,7 +261,7 @@ class SignalIn(BaseModel):
 
 
 @app.post("/api/simulate")
-def simulate(sig: SignalIn, x_copilot_session: str | None = Header(default=None)):
+def simulate(sig: SignalIn, request: Request, x_copilot_session: str | None = Header(default=None)):
     """Run the whole co-pilot on one signal. Returns what it would do: ignore, review, watch or alert."""
     import pandas as pd
 
@@ -274,8 +274,28 @@ def simulate(sig: SignalIn, x_copilot_session: str | None = Header(default=None)
     t = triage_text(sig.headline, sig.snippet, sig.source, pd.Timestamp.now(), signal_id=f"SIM-{secrets.token_hex(4)}")
     if sig.duration_days is not None:
         t["duration_days"] = sig.duration_days
+    # Claude reads the signal too (must-have 1: classify and extract). Our gazetteer links what it extracts; the rule
+    # that combines Claude and the word list was chosen on train data only (snapshot meta 'triage_rule').
+    ext, rule = None, snap()["meta"].get("triage_rule", "rules")
+    from core import llm_chat
+    if llm_chat.enabled():
+        who = (request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+               or (request.client.host if request.client else "")) + "|" + (session or "")
+        if _llm_allowed(who)[0]:
+            from core.triage_llm import live_extraction
+            ext = live_extraction(f"{sig.headline}. {sig.snippet}".strip(". "))
+    promoted = False
+    if ext and rule == "either" and ext["relevant"] and t["score"] < th:
+        t["links"] = list(dict.fromkeys(list(t["links"]) + ext["geo_links"] + ext["cat_links"]))
+        t["link_strength"] = max(float(t["link_strength"] or 0), 1.0)
+        t["score"], t["event_type"] = th, t["event_type"] or ext["event_type"]
+        t["reason"] = f"Claude: {ext['reason']}"
+        promoted = True
+    if ext and rule != "rules" and t.get("duration_days") is None and ext["duration_days"]:
+        t["duration_days"] = ext["duration_days"]
     base = {"triage": clean({k: t[k] for k in ("text", "links", "link_strength", "cues", "cue_score", "score",
-                                                "event_type", "reason")}), "threshold": th}
+                                                "event_type", "reason")}), "threshold": th,
+            "extraction": clean(ext) if ext else None, "triage_rule": rule, "claude_promoted": promoted}
     from core.triage import off_network_places
     if t["link_strength"] == 0 and t["cue_score"] >= th:
         elsewhere = off_network_places(f"{sig.headline} {sig.snippet}")

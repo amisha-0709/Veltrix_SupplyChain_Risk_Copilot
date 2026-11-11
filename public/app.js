@@ -240,6 +240,16 @@ async function viewSimulate() {
       let html = `<div class="result ${esc(r.decision)}"><b>${esc(head)}</b>${r.message ? `<p>${esc(r.message)}</p>` : ""}
         <p class="muted">Score ${t.score} (threshold ${r.threshold}) · ${esc(t.reason)}${t.event_type ? ` · class ${esc(t.event_type)}` : ""}</p>
         ${t.links.length ? `<div>${t.links.map(node).join("")}</div>` : ""}</div>`;
+      const x = r.extraction;
+      if (x) {
+        const e = x.entities, list = (k, lab) => e[k]?.length ? `<li><b>${lab}:</b> ${e[k].map(esc).join(", ")}</li>` : "";
+        html += `<div class="card"><h3 style="margin-top:0">What Claude extracted</h3>
+          <p class="muted" style="margin-top:0">Status <b>${esc(x.status.replace(/_/g, " "))}</b> · ${esc(x.event_type.replace(/_/g, " "))} · severity ${x.severity}/5${x.duration_days ? ` · ${x.duration_days} days` : ""}
+          · ${x.relevant ? "supply risk that touches our network" : "not a live risk to our network"} (confidence ${Math.round(x.confidence * 100)}%)</p>
+          <ul>${list("locations", "Locations")}${list("ports", "Ports")}${list("routes", "Routes")}${list("companies", "Companies")}${list("commodities", "Commodities")}</ul>
+          ${(x.geo_links.length || x.cat_links.length) ? `<div>Linked by the network gazetteer: ${[...x.geo_links, ...x.cat_links].map(node).join("")}</div>` : `<p class="muted">None of these names is in Veltrix's network.</p>`}
+          <p class="muted">${esc(x.reason)} · Decision rule chosen on train data: <b>${esc(r.triage_rule)}</b>${r.claude_promoted ? " · Claude flagged a signal the word list missed" : ""}.</p></div>`;
+      }
       if (r.alert) {
         const a = r.alert;
         html += `<div class="btns" style="margin:8px 0"><a class="btn" href="#/alert/${encodeURIComponent(a.alert_id)}">Open full alert</a></div>

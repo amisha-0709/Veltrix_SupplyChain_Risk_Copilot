@@ -66,7 +66,8 @@ def build_snapshot() -> dict:
     pe = part_exposure()
     snap = {
         "meta": {"snapshot_date": SNAPSHOT_DATE.date().isoformat(), "generated": pd.Timestamp.now().isoformat(),
-                 "threshold": bt["threshold"], "llm_judge": bt["llm_judge"],
+                 "threshold": bt["threshold"], "llm_judge": bt["llm_judge"], "triage_rule": bt["triage_rule"],
+                 "extraction_coverage": bt["extraction_coverage"], "triage_variants": bt["triage_variants"],
                  "company": "Veltrix Components (fictional)", "synthetic": True},
         "headline": headline_checks(), "timeline_summary": timeline_summary(),
         "alerts": alerts,
