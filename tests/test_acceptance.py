@@ -40,3 +40,15 @@ def test_replay_d05_structural_fix_dominates():
     r = replay("D05")
     assert r["copilot_lead_days"] == 0 and r["team_decision_day"] == 11
     assert r["structural"]["revenue_protected_inr"] > 0.5 * r["actual_revenue_lost_inr"]
+
+
+def test_t7_lists_inbound_shipments_with_verdicts():
+    from fastapi.testclient import TestClient
+    from backend.main import app
+    r = TestClient(app).post("/api/simulate", json={"headline": "Heavy rain alert for Mumbai; JNPT congestion index rising",
+                                                    "snippet": "Container movement slows as rains flood access roads to Nhava Sheva."},
+                             headers={"X-Copilot-Engine": "rules"}).json()
+    sh = r["alert"]["inbound_shipments"]
+    assert len(sh) == 27 and all(s["destination"] == "Nhava Sheva (JNPT)" and s["verdict"] for s in sh)
+    assert "Inbound shipments: 27 shipment(s) in transit to Nhava Sheva (JNPT)" in r["alert"]["brief_text"]
+    assert "No action" in r["alert"]["brief_text"]

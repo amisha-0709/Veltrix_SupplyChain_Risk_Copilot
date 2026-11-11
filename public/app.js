@@ -113,7 +113,14 @@ async function viewAlert(id, tab = "options") {
       <th class="num">Short (d)</th><th>Cover vs delay</th></tr></thead><tbody>${parts}</tbody></table>
       ${skus ? `<h3 style="margin-top:14px">Products that stop</h3><table><thead><tr><th>SKU</th><th>Customer</th><th>Binding part</th><th class="num">Short (d)</th>
       <th class="num">Units</th><th class="num">Revenue at risk</th><th class="num">Margin</th><th class="num">Penalties</th></tr></thead><tbody>${skus}</tbody></table>` : ""}
-      ${otifRows ? `<h3 style="margin-top:14px">Weekly OTIF by customer</h3><table><tbody>${otifRows}</tbody></table>` : ""}`,
+      ${otifRows ? `<h3 style="margin-top:14px">Weekly OTIF by customer</h3><table><tbody>${otifRows}</tbody></table>` : ""}
+      ${(a.inbound_shipments || []).length ? `<h3 style="margin-top:14px">Inbound shipments in transit (${a.inbound_shipments.length})</h3>
+        <table><thead><tr><th>Shipment</th><th>Part</th><th>From</th><th>To</th><th>Planned arrival</th><th class="num">Units</th>
+        <th class="num">Value</th><th class="num">Cover (d)</th><th class="num">Held up (d)</th><th>Verdict</th></tr></thead><tbody>
+        ${a.inbound_shipments.map((s) => `<tr><td>${esc(s.shipment_id)}</td><td>${esc(s.part_id)}</td><td>${esc(s.origin_port)}</td><td>${esc(s.destination)}</td>
+          <td>${date(s.planned_arrival)}${s.due_in_days < 0 ? ' <span class="muted">(overdue)</span>' : ""}</td><td class="num">${s.units.toLocaleString("en-IN")}</td>
+          <td class="num">${inr(s.value_inr)}</td><td class="num">${s.cover_days ?? "—"}</td><td class="num">${s.held_up_days ?? "—"}</td><td>${esc(s.verdict || "")}</td></tr>`).join("")}
+        </tbody></table><p class="muted">Already shipped, so caught by an event at the destination port or on the route: cover counts on-hand stock only.</p>` : ""}`,
     sources: `<table><thead><tr><th>Date</th><th>Source</th><th>Headline</th><th>ID</th></tr></thead><tbody>${srcs}</tbody></table>`,
     decide: `<form class="stack" id="dec">
       <label>Option<select name="option">${opts.map((o) => `<option>${esc((o.part_id ? o.part_id + " · " : "") + o.option)}</option>`).join("")}</select></label>

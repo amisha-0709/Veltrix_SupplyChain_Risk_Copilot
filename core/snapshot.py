@@ -56,6 +56,7 @@ def alert_record(a: dict) -> dict:
         "actual_disruptions": actual, "seconds_to_quantify": a["seconds_to_quantify"],
         "brief": b, "brief_html": render_html(b, standalone=False), "brief_text": render_text(b),
         "options": a["options"], "parts": a["parts"], "skus": a["skus"], "otif": a["otif"], "working": a["working"],
+        "inbound_shipments": a.get("inbound") or [],
     }
 
 

@@ -423,7 +423,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.06
+   "secs": 0.04
   },
   {
    "alert_id": "AL-003",
@@ -440,7 +440,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.03
   },
   {
    "alert_id": "AL-004",
@@ -457,7 +457,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b915.95 cr",
    "owner": "Magnets",
-   "secs": 0.22
+   "secs": 0.16
   },
   {
    "alert_id": "AL-005",
@@ -474,7 +474,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b955.45 cr",
    "owner": "Semiconductors",
-   "secs": 0.26
+   "secs": 0.19
   },
   {
    "alert_id": "AL-006",
@@ -491,7 +491,7 @@
    "confidence": 0.84,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.04
+   "secs": 0.03
   },
   {
    "alert_id": "AL-007",
@@ -508,7 +508,7 @@
    "confidence": 0.84,
    "at_risk": "\u20b90",
    "owner": "Passives",
-   "secs": 0.04
+   "secs": 0.03
   },
   {
    "alert_id": "AL-008",
@@ -525,7 +525,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.04
+   "secs": 0.03
   },
   {
    "alert_id": "AL-009",
@@ -542,7 +542,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-010",
@@ -559,7 +559,7 @@
    "confidence": 0.63,
    "at_risk": "\u20b90",
    "owner": "Li-ion cells",
-   "secs": 0.14
+   "secs": 0.1
   },
   {
    "alert_id": "AL-011",
@@ -576,7 +576,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b93.45 cr",
    "owner": "PCBs",
-   "secs": 0.38
+   "secs": 0.31
   },
   {
    "alert_id": "AL-012",
@@ -593,7 +593,7 @@
    "confidence": 0.72,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.07
+   "secs": 0.06
   },
   {
    "alert_id": "AL-013",
@@ -610,7 +610,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-014",
@@ -627,7 +627,7 @@
    "confidence": 0.79,
    "at_risk": "\u20b90",
    "owner": "Castings",
-   "secs": 0.02
+   "secs": 0.01
   },
   {
    "alert_id": "AL-015",
@@ -644,7 +644,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Connectors",
-   "secs": 0.04
+   "secs": 0.03
   },
   {
    "alert_id": "AL-016",
@@ -661,7 +661,7 @@
    "confidence": 0.78,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-017",
@@ -678,7 +678,7 @@
    "confidence": 0.6,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.04
+   "secs": 0.03
   },
   {
    "alert_id": "AL-018",
@@ -695,7 +695,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Connectors",
-   "secs": 0.03
+   "secs": 0.04
   },
   {
    "alert_id": "AL-019",
@@ -712,7 +712,7 @@
    "confidence": 0.75,
    "at_risk": "\u20b93.87 cr",
    "owner": "Passives",
-   "secs": 0.26
+   "secs": 0.21
   }
  ]
 }

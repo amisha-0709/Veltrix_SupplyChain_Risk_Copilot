@@ -166,6 +166,11 @@ def t7(c):
     return _res("T7", [
         ("dest:Nhava Sheva (JNPT)" in r["triage"]["links"], "linked to Nhava Sheva (JNPT): inbound lanes into JNPT"),
         (len(a.get("parts", [])) >= 10, f"{len(a.get('parts', []))} inbound parts checked: delay vs cover"),
+        (bool(a.get("inbound_shipments")) and all(s.get("verdict") for s in a["inbound_shipments"]),
+         f"{len(a.get('inbound_shipments', []))} inbound shipments due at Nhava Sheva flagged, each with due date, delay and "
+         f"cover verdict" + (f" (next: {a['inbound_shipments'][0]['shipment_id']} {a['inbound_shipments'][0]['part_id']} due "
+                            f"{a['inbound_shipments'][0]['planned_arrival']}, {a['inbound_shipments'][0]['verdict']})"
+                            if a.get("inbound_shipments") else "")),
         (no_action, f"conclusion: {t.get('ask', '')}"),
     ])
 

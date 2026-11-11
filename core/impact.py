@@ -328,3 +328,35 @@ if __name__ == "__main__":
     print(r.skus[["sku_id", "customer", "binding_part", "shortage_days", "units_short", "revenue_at_risk_inr",
                   "margin_at_risk_inr", "penalty_inr"]].to_string())
     print({k: (fmt_inr(v) if k.endswith("_inr") else v) for k, v in r.totals.items()})
+
+
+def inbound_shipments(links, parts: pd.DataFrame, as_of: pd.Timestamp | None = None) -> list[dict]:
+    """Shipments already on the way into a port or through a chokepoint the event sits on (brief T7).
+
+    Due dates are the PLANNED arrival (what is known on the stock date). Each shipment is held up by its part's
+    effective delay; because the event catches it, the part's cover is on-hand stock only, as in the engine.
+    """
+    as_of = SNAPSHOT_DATE if as_of is None else pd.Timestamp(as_of)
+    dests = [n.split(":", 1)[1] for n in links if n.startswith("dest:")]
+    chokes = [n.split(":", 1)[1] for n in links if n.startswith("choke:")]
+    if not dests and not chokes:
+        return []
+    db = load()
+    sh = db["shipments"]
+    lanes = db["lanes"]
+    m = (sh["ship_date"] <= as_of) & (sh["actual_arrival"].fillna(sh["planned_arrival"]) > as_of)
+    lane_ids = set(lanes.loc[lanes["chokepoint"].isin(chokes), "lane_id"]) if chokes else set()
+    m &= sh["destination"].isin(dests) | sh["lane_id"].isin(lane_ids)
+    P = parts.set_index("part_id") if len(parts) else parts
+    rows = []
+    for r in sh.loc[m].sort_values("planned_arrival").itertuples():
+        delay = float(P.loc[r.part_id, "effective_delay_days"]) if r.part_id in P.index else None
+        cover = float(P.loc[r.part_id, "days_of_cover"]) if r.part_id in P.index else None
+        rows.append({
+            "shipment_id": r.shipment_id, "part_id": r.part_id, "origin_port": r.origin_port, "destination": r.destination,
+            "planned_arrival": r.planned_arrival.date().isoformat(), "due_in_days": (r.planned_arrival - as_of).days,
+            "units": int(r.quantity_units), "value_inr": float(r.value_inr), "held_up_days": delay, "cover_days": cover,
+            "verdict": (None if delay is None or cover is None else
+                        "cover holds" if cover >= delay else f"part short {delay - cover:.1f} d"),
+        })
+    return rows

@@ -12,7 +12,7 @@ import pandas as pd
 from core.etl import load
 from core.events import (INBOX_PRIORITY, SPECIFIC, Event, build_events, impact_score, likelihood,
                          response_sla, scenario_for)
-from core.impact import fmt_inr
+from core.impact import fmt_inr, inbound_shipments
 from core.mitigate import recommend
 from core.triage import tune_threshold, triage_all
 
@@ -67,6 +67,7 @@ def build_alert(ev: Event, as_of: pd.Timestamp | None = None) -> dict:
         "totals": rec["expected"].totals, "stress_totals": rec["stress"].totals if rec["stress"] else None,
         "working": basis.working, "parts": basis.parts, "skus": basis.skus, "otif": basis.otif,
         "options": opts, "top_options": top, "plan": rec["plan"], "plan_value": rec["plan_value"],
+        "inbound": inbound_shipments(ev.links, basis.parts, as_of),
         "seconds_to_quantify": round(elapsed, 2),
         "summary": (f"{rec['expected'].totals['parts_short']} of {rec['expected'].totals['parts_affected']} parts short; "
                     f"revenue at risk {fmt_inr(rec['expected'].totals['revenue_at_risk_inr'])}; "

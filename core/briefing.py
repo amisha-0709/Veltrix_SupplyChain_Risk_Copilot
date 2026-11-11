@@ -26,6 +26,27 @@ def _node_label(n: str) -> str:
             "loc": name}.get(t, name)
 
 
+def _inbound_summary(rows: list[dict], fg_absorbs: bool = False) -> dict | None:
+    """T7: shipments already on the way into the affected port / through the affected chokepoint."""
+    if not rows:
+        return None
+    short = [r for r in rows if r["verdict"] and r["verdict"] != "cover holds"]
+    where = ", ".join(sorted({r["destination"] for r in rows}))
+    late = [r for r in rows if r["due_in_days"] < 0]
+    upcoming = [r for r in rows if r["due_in_days"] >= 0]
+    nxt = min(upcoming, key=lambda r: r["planned_arrival"]) if upcoming else None
+    held = max((r["held_up_days"] or 0) for r in rows)
+    line = (f"{len(rows)} shipment(s) in transit to {where} ({fmt_inr(sum(r['value_inr'] for r in rows))})"
+            + (f", {len(late)} already past their planned arrival" if late else "")
+            + (f"; next due {pd.Timestamp(nxt['planned_arrival']):%d %b}" if nxt else "")
+            + f"; each held up by up to {held:.0f} d. "
+            + (f"Cover holds for all {len(rows)}: no action needed for these." if not short else
+               f"{len(short)} {'carries a part that runs' if len(short) == 1 else 'carry parts that run'} short ("
+               + ", ".join(sorted({r['part_id'] for r in short})) + ")"
+               + (", but finished-goods stock covers the gap: no customer impact." if fg_absorbs else ".")))
+    return {"line": line, "count": len(rows), "short": len(short), "rows": rows[:8]}
+
+
 def make_brief(a: dict) -> dict:
     db = load()
     sup = db["suppliers"].set_index("supplier_id")["supplier_name"]
@@ -159,6 +180,7 @@ def make_brief(a: dict) -> dict:
                                                   "parts_affected", "max_shortage_days", "min_cover_days")},
         "exposure": exposure, "skus": skus, "customers": cust,
         "recommended": rec, "alternatives": alts, "plan_value": a["plan_value"], "residual": residual,
+        "inbound": _inbound_summary(a.get("inbound") or [], bool(t["no_action_needed"])),
         "sources": sources_dedup, "n_signals": a["n_signals"], "n_sources": len(a["sources"]),
         "caveats": [c for c in caveats if c], "working": a["working"],
         "seconds_to_quantify": a["seconds_to_quantify"],
@@ -203,6 +225,21 @@ def residual_sentence(r: dict) -> str:
         return ("No lost sales expected with this plan." +
                 (f" Finished-goods stock covers the gaps that remain ({left})." if left else " Every shortage is closed."))
     return f"About {fmt_inr(lost)} of revenue still lost." + (f" {gaps}." if gaps else "")
+
+
+def _inbound_html(b: dict, e) -> str:
+    ib = b.get("inbound")
+    if not ib:
+        return ""
+    rows = "".join(f"<tr><td>{e(r['shipment_id'])}</td><td>{e(r['part_id'])}</td><td>{e(r['origin_port'])}</td>"
+                   f"<td>{pd.Timestamp(r['planned_arrival']):%d %b}</td><td class=num>{r['units']:,}</td>"
+                   f"<td class=num>{r['cover_days'] if r['cover_days'] is not None else '—'}</td>"
+                   f"<td class=num>{r['held_up_days'] if r['held_up_days'] is not None else '—'}</td><td>{e(r['verdict'] or '')}</td></tr>"
+                   for r in ib["rows"][:5])
+    more = f"<p class=note>… and {ib['count'] - 5} more (all listed in the app).</p>" if ib["count"] > 5 else ""
+    return (f"<h2>Inbound shipments</h2><p class=meta>{e(ib['line'])}</p><table><thead><tr><th>Shipment</th><th>Part</th>"
+            f"<th>From</th><th>Due</th><th class=num>Units</th><th class=num>Cover (d)</th><th class=num>Held (d)</th><th>Verdict</th>"
+            f"</tr></thead><tbody>{rows}</tbody></table>{more}")
 
 
 def _residual_html(b: dict, e) -> str:
@@ -251,7 +288,7 @@ def render_html(b: dict, standalone: bool = True) -> str:
 Impact {b['impact']}/5: {e(b['impact_reason'])}. Confidence {b['confidence']:.0%}: {e(b['confidence_reason'])}.</p>
 <h2>Exposure</h2><table><thead><tr><th>Part</th><th>Primary supplier</th><th class=num>Cover (d)</th><th class=num>Delay (d)</th>
 <th class=num>Short (d)</th><th>Fallback</th></tr></thead><tbody>{exp}</tbody></table>
-<div class="two"><div><h2>Products</h2><ul>{skus}</ul></div><div><h2>Customers</h2><ul>{cust}</ul></div></div>
+{_inbound_html(b, e)}<div class="two"><div><h2>Products</h2><ul>{skus}</ul></div><div><h2>Customers</h2><ul>{cust}</ul></div></div>
 <h2>Recommended action</h2><table><thead><tr><th>Option</th><th class=num>Cost</th><th class=num>Effect</th><th class=num>Net value</th>
 <th class=num>ROI</th><th>Approver</th></tr></thead><tbody>{rec}</tbody></table>
 {_residual_html(b, e)}<p class="note">{e(plan_line)} Ranked by playbook §5 net value; on-time options first. Shown for approval, not approved.</p>
@@ -283,6 +320,8 @@ def render_text(b: dict) -> str:
               f"net {fmt_inr(x['net_value'])}; approver {x['approver']}"
               + (" [structural hedge: pays back over future events, not this one]" if x.get("hedge") else "")
               for x in b["recommended"]]
+    if b.get("inbound"):
+        lines += ["", "Inbound shipments: " + b["inbound"]["line"]]
     if b.get("residual"):
         lines += ["", "Left after this plan: " + residual_sentence(b["residual"])]
     if b["customers"]:
