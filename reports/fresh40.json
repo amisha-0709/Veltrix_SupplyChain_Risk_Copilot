@@ -1,0 +1,1191 @@
+{
+ "signals": [
+  {
+   "id": "S01",
+   "headline": "Typhoon set to batter southern Taiwan coast; Kaohsiung terminals prepare to close",
+   "expected": "alert",
+   "expected_link": "Kaohsiung",
+   "why": "Port we ship from, credible forecast of closure",
+   "status": 200,
+   "secs": 6.7,
+   "decision": "watch",
+   "message": null,
+   "score": 6.0,
+   "links": [
+    "port:Kaohsiung"
+   ],
+   "event_type": "port_closure",
+   "priority": 3,
+   "revenue_at_risk": "₹0",
+   "owner": "Category manager: Semiconductors",
+   "ask": "No action: cover exceeds expected delay. Monitor.",
+   "claude": {
+    "relevant": true,
+    "status": "forecast_likely",
+    "event_type": "port_closure",
+    "duration_days": null,
+    "geo_links": [
+     "port:Kaohsiung",
+     "country:Taiwan"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "southern Taiwan",
+     "Taiwan"
+    ],
+    "ports": [
+     "Kaohsiung"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S02",
+   "headline": "Fire breaks out at Rheinwerk Semiconductor fab in Dresden",
+   "expected": "alert",
+   "expected_link": "Rheinwerk",
+   "why": "Named supplier of ours, fire, production halted",
+   "status": 200,
+   "secs": 3.0,
+   "decision": "inbox",
+   "message": null,
+   "score": 7.0,
+   "links": [
+    "sup:SUP-017",
+    "cat:Semiconductors"
+   ],
+   "event_type": "supplier_outage",
+   "priority": 16,
+   "revenue_at_risk": "₹3.21 cr",
+   "owner": "Category manager: Semiconductors",
+   "ask": "Decide: Broker spot buy for PRT-013 (₹2.2 lakh, Head of Supply Chain).",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "supplier_outage",
+    "duration_days": null,
+    "geo_links": [
+     "sup:SUP-017"
+    ],
+    "cat_links": [
+     "cat:Semiconductors"
+    ]
+   },
+   "claude_entities": {
+    "locations": [
+     "Dresden"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [
+     "Rheinwerk Semiconductor"
+    ],
+    "commodities": [
+     "semiconductors"
+    ],
+    "categories": [
+     "Semiconductors"
+    ]
+   }
+  },
+  {
+   "id": "S03",
+   "headline": "Busan dockworkers walk out; cranes idle at main container terminals",
+   "expected": "alert",
+   "expected_link": "Busan",
+   "why": "Strike happening at a port we ship from",
+   "status": 200,
+   "secs": 1.9,
+   "decision": "ignored",
+   "message": "Not alerted: it's linked to Busan, but the wording is not strong enough to alert (score 0 vs threshold 3.5). Logged only.",
+   "score": 0.0,
+   "links": [
+    "port:Busan"
+   ],
+   "event_type": null,
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "port_closure",
+    "duration_days": null,
+    "geo_links": [
+     "port:Busan"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [],
+    "ports": [
+     "Busan"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S04",
+   "headline": "China announces export licences for gallium and germanium",
+   "expected": "ignore",
+   "expected_link": null,
+   "why": "Raw materials Veltrix doesn't buy",
+   "status": 200,
+   "secs": 4.5,
+   "decision": "inbox",
+   "message": null,
+   "score": 3.5,
+   "links": [
+    "country:China"
+   ],
+   "event_type": "trade_licensing",
+   "priority": 10,
+   "revenue_at_risk": "₹46.21 cr",
+   "owner": "Category manager: Semiconductors",
+   "ask": "Decide: Pre-buy 21 days of stock by air for PRT-018 (₹15.7 lakh, Head of Supply Chain); Pre-buy 21 days of stock by air for PRT-043 (₹1.00 cr, Head of Supply Chain + CFO); Pre-buy 20 days of stock by air for PRT-058 (₹51.1 lakh, Head of Supply Chain + CFO).",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "trade_licensing",
+    "duration_days": null,
+    "geo_links": [
+     "country:China"
+    ],
+    "cat_links": [
+     "cat:Semiconductors"
+    ]
+   },
+   "claude_entities": {
+    "locations": [
+     "China"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [
+     "gallium",
+     "germanium"
+    ],
+    "categories": [
+     "Semiconductors"
+    ]
+   }
+  },
+  {
+   "id": "S05",
+   "headline": "Suez Canal blocked after container ship runs aground",
+   "expected": "alert",
+   "expected_link": "Red Sea",
+   "why": "Chokepoint on our Europe lanes",
+   "status": 200,
+   "secs": 2.2,
+   "decision": "ignored",
+   "message": "Not alerted: it's linked to Red Sea / Suez Canal, but the wording is not strong enough to alert (score 0 vs threshold 3.5). Logged only.",
+   "score": 0.0,
+   "links": [
+    "choke:Red Sea / Suez Canal"
+   ],
+   "event_type": null,
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "route",
+    "duration_days": null,
+    "geo_links": [
+     "choke:Red Sea / Suez Canal"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [],
+    "ports": [],
+    "routes": [
+     "Suez Canal"
+    ],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S06",
+   "headline": "Singapore port congestion hits a record as vessels bunch up",
+   "expected": "ignore",
+   "expected_link": null,
+   "why": "Singapore is not on any Veltrix lane",
+   "status": 200,
+   "secs": 2.4,
+   "decision": "ignored",
+   "message": "Not alerted: it doesn't name any supplier, port, lane or commodity in Veltrix's network. Logged only.",
+   "score": 0.0,
+   "links": [],
+   "event_type": null,
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "happening",
+    "event_type": "congestion",
+    "duration_days": null,
+    "geo_links": [],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "Singapore"
+    ],
+    "ports": [
+     "Singapore"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S07",
+   "headline": "Magnitude 7.1 earthquake strikes near Hsinchu science park",
+   "expected": "alert",
+   "expected_link": "Hsinchu",
+   "why": "Fab cluster we buy from",
+   "status": 200,
+   "secs": 2.9,
+   "decision": "inbox",
+   "message": null,
+   "score": 7.0,
+   "links": [
+    "port:Keelung",
+    "cat:Semiconductors"
+   ],
+   "event_type": "supplier_outage",
+   "priority": 16,
+   "revenue_at_risk": "₹22.3 lakh",
+   "owner": "Category manager: Semiconductors",
+   "ask": "Decide: Re-allocate to highest-margin SKUs for PRT-008 (₹0, Head of Sales + Supply Chain).",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "supplier_outage",
+    "duration_days": null,
+    "geo_links": [
+     "port:Keelung"
+    ],
+    "cat_links": [
+     "cat:Semiconductors"
+    ]
+   },
+   "claude_entities": {
+    "locations": [
+     "Hsinchu science park"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": [
+     "Semiconductors"
+    ]
+   }
+  },
+  {
+   "id": "S08",
+   "headline": "Company denies rumours of a fire at its Penang plant",
+   "expected": "ignore",
+   "expected_link": null,
+   "why": "Denial of a rumour",
+   "status": 200,
+   "secs": 1.8,
+   "decision": "ignored",
+   "message": "Not alerted: it's linked to Penang, but the wording is a routine or non-event story (denies(-4)). Logged only.",
+   "score": -1.0,
+   "links": [
+    "port:Penang"
+   ],
+   "event_type": "supplier_outage",
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "denied_or_rumour",
+    "event_type": "supplier_outage",
+    "duration_days": null,
+    "geo_links": [
+     "port:Penang"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "Penang"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S09",
+   "headline": "India imposes 25% safeguard duty on imported lithium-ion cells",
+   "expected": "alert",
+   "expected_link": "Li-ion",
+   "why": "Cost-only trade measure on a BOM commodity (watch log acceptable)",
+   "status": 200,
+   "secs": 2.6,
+   "decision": "watch",
+   "message": null,
+   "score": 3.75,
+   "links": [
+    "cat:Li-ion cells",
+    "country:India"
+   ],
+   "event_type": "cost_only",
+   "priority": 2,
+   "revenue_at_risk": "₹0",
+   "owner": "Category manager: Li-ion cells",
+   "ask": "No action: cover exceeds expected delay. Monitor.",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "cost_only",
+    "duration_days": null,
+    "geo_links": [
+     "country:India"
+    ],
+    "cat_links": [
+     "cat:Li-ion cells"
+    ]
+   },
+   "claude_entities": {
+    "locations": [
+     "India"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [
+     "lithium-ion cells"
+    ],
+    "categories": [
+     "Li-ion cells"
+    ]
+   }
+  },
+  {
+   "id": "S10",
+   "headline": "Hai Phong port operations suspended for three days as floods hit northern Vietnam",
+   "expected": "alert",
+   "expected_link": "Hai Phong",
+   "why": "Port we ship from, closure happening",
+   "status": 200,
+   "secs": 2.1,
+   "decision": "watch",
+   "message": null,
+   "score": 7.0,
+   "links": [
+    "port:Hai Phong"
+   ],
+   "event_type": "port_closure",
+   "priority": 4,
+   "revenue_at_risk": "₹0",
+   "owner": "Category manager: Connectors",
+   "ask": "No action: cover exceeds expected delay. Monitor.",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "port_closure",
+    "duration_days": 3.0,
+    "geo_links": [
+     "port:Hai Phong"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "northern Vietnam"
+    ],
+    "ports": [
+     "Hai Phong"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S11",
+   "headline": "Pune power utility warns of load shedding as heatwave builds next week",
+   "expected": "alert",
+   "expected_link": "Pune",
+   "why": "Our Pune suppliers, credible warning (watch acceptable)",
+   "status": 200,
+   "secs": 2.4,
+   "decision": "ignored",
+   "message": "Not alerted: it's linked to Domestic — Pune, but the wording is not strong enough to alert (score 2 vs threshold 3.5). Logged only.",
+   "score": 2.0,
+   "links": [
+    "port:Domestic — Pune"
+   ],
+   "event_type": "port_closure",
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": true,
+    "status": "forecast_likely",
+    "event_type": "supplier_outage",
+    "duration_days": null,
+    "geo_links": [
+     "port:Domestic — Pune"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "Pune"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S12",
+   "headline": "Electric two-wheeler sales hit a record in October",
+   "expected": "ignore",
+   "expected_link": null,
+   "why": "Market news, no disruption",
+   "status": 200,
+   "secs": 2.2,
+   "decision": "ignored",
+   "message": "Not alerted: it doesn't name any supplier, port, lane or commodity in Veltrix's network. Logged only.",
+   "score": 0.0,
+   "links": [],
+   "event_type": null,
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "not_an_event",
+    "event_type": "none",
+    "duration_days": null,
+    "geo_links": [],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S13",
+   "headline": "Cyber attack disrupts a major Japanese capacitor maker",
+   "expected": "alert",
+   "expected_link": "Japan",
+   "why": "Japan ∩ passives; maker not named",
+   "status": 200,
+   "secs": 2.7,
+   "decision": "inbox",
+   "message": null,
+   "score": 6.75,
+   "links": [
+    "cat:Passives",
+    "country:Japan"
+   ],
+   "event_type": "supplier_outage",
+   "priority": 10,
+   "revenue_at_risk": "₹3.87 cr",
+   "owner": "Category manager: Passives",
+   "ask": "Decide: Switch to qualified alternate SUP-023 for PRT-026 (₹1.7 lakh, Head of Supply Chain + Quality); Qualify new supplier SUP-024 for PRT-021 (₹15.1 lakh, Head of Supply Chain + Quality).",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "supplier_outage",
+    "duration_days": null,
+    "geo_links": [
+     "country:Japan"
+    ],
+    "cat_links": [
+     "cat:Passives"
+    ]
+   },
+   "claude_entities": {
+    "locations": [
+     "Japanese"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [
+     "capacitor"
+    ],
+    "categories": [
+     "Passives"
+    ]
+   }
+  },
+  {
+   "id": "S14",
+   "headline": "Typhoon to pass well east of Taiwan; no impact expected on shipping",
+   "expected": "ignore",
+   "expected_link": null,
+   "why": "Forecast that misses",
+   "status": 200,
+   "secs": 1.8,
+   "decision": "ignored",
+   "message": "Not alerted: it's linked to Taiwan, but the wording is not strong enough to alert (score 2.5 vs threshold 3.5). Logged only.",
+   "score": 2.5,
+   "links": [
+    "country:Taiwan"
+   ],
+   "event_type": "port_closure",
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "forecast_unlikely",
+    "event_type": "none",
+    "duration_days": null,
+    "geo_links": [
+     "country:Taiwan"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "Taiwan"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S15",
+   "headline": "Red Sea shipping resumes as carriers return to the Suez route",
+   "expected": "ignore",
+   "expected_link": null,
+   "why": "Good news: disruption ending",
+   "status": 200,
+   "secs": 2.4,
+   "decision": "ignored",
+   "message": "Not alerted: it's linked to Red Sea / Suez Canal, but the wording is not strong enough to alert (score 0 vs threshold 3.5). Logged only.",
+   "score": 0.0,
+   "links": [
+    "choke:Red Sea / Suez Canal"
+   ],
+   "event_type": null,
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "resolved",
+    "event_type": "route",
+    "duration_days": null,
+    "geo_links": [
+     "choke:Red Sea / Suez Canal"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "Red Sea"
+    ],
+    "ports": [],
+    "routes": [
+     "Red Sea",
+     "Suez route"
+    ],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S16",
+   "headline": "Korean battery maker's union threatens strike next month if talks fail",
+   "expected": "ignore",
+   "expected_link": null,
+   "why": "Threat only (watch acceptable)",
+   "status": 200,
+   "secs": 2.2,
+   "decision": "ignored",
+   "message": "Not alerted: it's linked to Li-ion cells, South Korea, but the wording is a routine or non-event story (threatens(-1.5)). Logged only.",
+   "score": 1.25,
+   "links": [
+    "cat:Li-ion cells",
+    "country:South Korea"
+   ],
+   "event_type": "supplier_outage",
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "threat_only",
+    "event_type": "supplier_outage",
+    "duration_days": null,
+    "geo_links": [
+     "country:South Korea"
+    ],
+    "cat_links": [
+     "cat:Li-ion cells"
+    ]
+   },
+   "claude_entities": {
+    "locations": [
+     "Korean"
+    ],
+    "ports": [],
+    "routes": [],
+    "companies": [],
+    "commodities": [
+     "battery"
+    ],
+    "categories": [
+     "Li-ion cells"
+    ]
+   }
+  },
+  {
+   "id": "S17",
+   "headline": "Customs server outage at Chennai and Nhava Sheva delays clearance for two days",
+   "expected": "alert",
+   "expected_link": "Nhava Sheva",
+   "why": "Both our Indian ports, happening",
+   "status": 200,
+   "secs": 2.3,
+   "decision": "watch",
+   "message": null,
+   "score": 5.0,
+   "links": [
+    "dest:Nhava Sheva (JNPT)",
+    "dest:Chennai Port"
+   ],
+   "event_type": "congestion",
+   "priority": 4,
+   "revenue_at_risk": "₹0",
+   "owner": "Category manager: Semiconductors",
+   "ask": "No action: cover exceeds expected delay. Monitor.",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "congestion",
+    "duration_days": 2.0,
+    "geo_links": [
+     "dest:Chennai Port",
+     "dest:Nhava Sheva (JNPT)"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [],
+    "ports": [
+     "Chennai",
+     "Nhava Sheva"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S18",
+   "headline": "Kaohsuing port closd as typhon makes landfal",
+   "expected": "alert",
+   "expected_link": "Kaohsiung",
+   "why": "Typos a real feed or user will produce",
+   "status": 200,
+   "secs": 2.2,
+   "decision": "ignored",
+   "message": "Not alerted: it doesn't name any supplier, port, lane or commodity in Veltrix's network. Logged only.",
+   "score": 0.0,
+   "links": [],
+   "event_type": null,
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "happening",
+    "event_type": "port_closure",
+    "duration_days": null,
+    "geo_links": [],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [],
+    "ports": [
+     "Kaohsuing port"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S19",
+   "headline": "ताइवान में भूकंप, काऊशुंग बंदरगाह बंद",
+   "expected": "alert",
+   "expected_link": "Kaohsiung",
+   "why": "Hindi: earthquake in Taiwan, Kaohsiung port closed",
+   "status": 200,
+   "secs": 2.5,
+   "decision": "ignored",
+   "message": "Not alerted: it doesn't name any supplier, port, lane or commodity in Veltrix's network. Logged only.",
+   "score": 0.0,
+   "links": [],
+   "event_type": null,
+   "priority": null,
+   "revenue_at_risk": null,
+   "owner": null,
+   "ask": null,
+   "claude": {
+    "relevant": false,
+    "status": "happening",
+    "event_type": "port_closure",
+    "duration_days": null,
+    "geo_links": [],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [
+     "ताइवान"
+    ],
+    "ports": [
+     "काऊशुंग बंदरगाह"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  },
+  {
+   "id": "S20",
+   "headline": "Ningbo-Zhoushan port suspends operations ahead of Typhoon Bebinca",
+   "expected": "alert",
+   "expected_link": "Ningbo",
+   "why": "Port we ship from, under its full official name",
+   "status": 200,
+   "secs": 2.0,
+   "decision": "watch",
+   "message": null,
+   "score": 6.0,
+   "links": [
+    "port:Ningbo"
+   ],
+   "event_type": "port_closure",
+   "priority": 4,
+   "revenue_at_risk": "₹0",
+   "owner": "Category manager: Passives",
+   "ask": "No action: cover exceeds expected delay. Monitor.",
+   "claude": {
+    "relevant": true,
+    "status": "happening",
+    "event_type": "port_closure",
+    "duration_days": null,
+    "geo_links": [
+     "port:Ningbo"
+    ],
+    "cat_links": []
+   },
+   "claude_entities": {
+    "locations": [],
+    "ports": [
+     "Ningbo-Zhoushan"
+    ],
+    "routes": [],
+    "companies": [],
+    "commodities": [],
+    "categories": []
+   }
+  }
+ ],
+ "questions": [
+  {
+   "id": "A01",
+   "question": "If Busan port shuts for 2 weeks what breaks?",
+   "expected": "what-if Busan 14 d: products that stop / or nothing",
+   "status": 200,
+   "secs": 2.4,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=Busan; duration_days=14; event_type=port_closure; include_options=False)"
+   ],
+   "answer": "Nothing stops. 4 part(s) depend on Busan, and the lowest cover is 40.9 days against a 14-day delay. ₹1.88 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (14 d → 20.3 d): still nothing stops.",
+   "tables": [
+    "Parts in scope"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A02",
+   "question": "How much revenue depends on single-source parts from China?",
+   "expected": "exposure China with revenue dependence",
+   "status": 200,
+   "secs": 1.9,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "exposure(places=China)"
+   ],
+   "answer": "20 part(s) depend on China (9 single-source), feeding 22 product(s). Annual spend ₹558.2 cr. 9 single-source part(s) have less cover than their lead time: PRT-018 (11 d vs 56 d), PRT-030 (22 d vs 55 d), PRT-017 (22 d vs 52 d), PRT-010 (19 d vs 52 d), PRT-043 (13 d vs 42 d), PRT-022 (15 d vs 45 d), PRT-012 (18 d vs 49 d), PRT-047 (24 d vs 46 d), PRT-044 (9 d vs 30 d). 3 single-source part(s) have no alternate supplier at all, qualified or not: PRT-017 (Opto-isolator), PRT-010 (Current sense amplifier), PRT-043 (NdFeB rotor magnet set).",
+   "tables": [
+    "Parts"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A03",
+   "question": "What happens if Rheinwerk Semiconductor goes bankrupt?",
+   "expected": "what-if on that supplier (supplier outage)",
+   "status": 200,
+   "secs": 2.4,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=Rheinwerk Semiconductor; commodities=Semiconductors; event_type=supplier_outage; include_options=True)"
+   ],
+   "answer": "1 product(s) stop. First to stop: MCU-12KW-3W (Ojas Motors) from day 41, when PRT-013 runs out. ₹3.21 cr revenue at risk (₹1.76 cr lost sales, ₹34.8 lakh margin). 1 customer misses the 95% OTIF target: Ojas Motors for 1 week(s), worst 86%. Best option: Broker spot buy for PRT-013 (₹2.2 lakh, 10 d to effect, net ₹21.7 lakh; approver Head of Supply Chain).",
+   "tables": [
+    "Ranked options (recommended, not approved)",
+    "Products that stop (first to stop at the top)",
+    "Weeks below 95% OTIF, by customer",
+    "Parts in scope"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A04",
+   "question": "Which alerts need a decision today?",
+   "expected": "inbox, highlighting same-day response alerts",
+   "status": 200,
+   "secs": 1.4,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "inbox()"
+   ],
+   "answer": "5 alert(s) need an owner. Highest: AL-005 Fire reported at semiconductor assembly plant in Penang (priority 20, ₹55.45 cr at risk).",
+   "tables": [
+    "Inbox"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A05",
+   "question": "What's the impact of a 10 day Suez closure on Ojas Motors specifically?",
+   "expected": "what-if Red Sea 10 d, Ojas Motors' share",
+   "status": 200,
+   "secs": 2.7,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=Suez; duration_days=10; event_type=route; include_options=False)",
+    "customer_status(customer=Ojas Motors)"
+   ],
+   "answer": "Suez: Nothing stops. 4 part(s) depend on Red Sea / Suez Canal, and the lowest cover is 12.7 days against a 10-day delay. ₹4.47 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (10 d → 14 d): still nothing stops.\n\nOjas Motors: Yes. 4 open alert(s) push Ojas Motors below its 95% OTIF target. Biggest: AL-005 (Fire reported at semiconductor assembly plant in Penang): 4 week(s) below target from 2026-10-19, worst week 75%. What you can tell them today: which deliveries may be late and from when (table below), and that options are being decided by the approvers named in the alert. Don't promise dates until a mitigation is approved. Ojas Motors buys 7 product(s); 16 single-source part(s) in them have less cover than their lead time.",
+   "tables": [
+    "Parts in scope",
+    "Open alerts affecting Ojas Motors",
+    "Products bought by Ojas Motors",
+    "Single-source parts with cover below lead time"
+   ],
+   "tool_calls": 2
+  },
+  {
+   "id": "A06",
+   "question": "Show me the options for AL-004",
+   "expected": "AL-004 ranked options with approvers",
+   "status": 200,
+   "secs": 1.6,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "alert_options(alert_id=AL-004)"
+   ],
+   "answer": "AL-004: ₹15.95 cr revenue at risk across 2 product(s); 1 customer(s) fall below 95% OTIF. Customers below 95% OTIF: Ojas Motors (3 week(s), worst 63%). Decide: Pre-buy 21 days of stock by sea for PRT-043 (₹32.9 lakh, Head of Supply Chain).",
+   "tables": [
+    "Ranked options (recommended, not approved)"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A07",
+   "question": "Is Trident Two-Wheelers exposed to anything right now?",
+   "expected": "customer status Trident",
+   "status": 200,
+   "secs": 1.6,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "customer_status(customer=Trident Two-Wheelers)"
+   ],
+   "answer": "Yes. 2 open alert(s) push Trident Two-Wheelers below its 95% OTIF target. Biggest: AL-011 (Credit insurer cuts cover for Guangdong PCB manufacturer): 2 week(s) below target from 2026-11-02, worst week 71%. What you can tell them today: which deliveries may be late and from when (table below), and that options are being decided by the approvers named in the alert. Don't promise dates until a mitigation is approved. Trident Two-Wheelers buys 3 product(s); 2 single-source part(s) in them have less cover than their lead time.",
+   "tables": [
+    "Open alerts affecting Trident Two-Wheelers",
+    "Products bought by Trident Two-Wheelers",
+    "Single-source parts with cover below lead time"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A08",
+   "question": "What if Port Klang and Penang both close for a week?",
+   "expected": "one scenario with both ports, 7 d",
+   "status": 200,
+   "secs": 2.8,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=Port Klang; duration_days=7; event_type=port_closure; include_options=False)",
+    "what_if(places=Penang; duration_days=7; event_type=port_closure; include_options=False)"
+   ],
+   "answer": "Port Klang: Nothing stops. 1 part(s) depend on Port Klang, and the lowest cover is 30.3 days against a 7-day delay. ₹10.5 lakh/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (7 d → 10.2 d): still nothing stops.\n\nPenang: Nothing stops. 2 part(s) depend on Penang, and the lowest cover is 12.9 days against a 7-day delay. ₹2.35 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (7 d → 10.2 d): still nothing stops.",
+   "tables": [
+    "Parts in scope (Port Klang)",
+    "Parts in scope (Penang)"
+   ],
+   "tool_calls": 2
+  },
+  {
+   "id": "A09",
+   "question": "Which parts have less than 14 days of cover?",
+   "expected": "list of parts with cover < 14 d",
+   "status": 200,
+   "secs": 1.9,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "exposure()"
+   ],
+   "answer": "Across the whole network: 65 parts (26 single-source), feeding 26 products. Annual spend ₹1227.5 cr. 22 single-source part(s) have less cover than their lead time: PRT-018 (11 d vs 56 d), PRT-004 (13 d vs 50 d), PRT-030 (22 d vs 55 d), PRT-006 (13 d vs 62 d), PRT-013 (24 d vs 62 d), PRT-017 (22 d vs 52 d), PRT-010 (19 d vs 52 d), PRT-002 (18 d vs 48 d), PRT-007 (12 d vs 42 d), PRT-021 (24 d vs 44 d), PRT-043 (13 d vs 42 d), PRT-022 (15 d vs 45 d), PRT-016 (25 d vs 51 d), PRT-012 (18 d vs 49 d), PRT-034 (16 d vs 37 d), PRT-029 (11 d vs 13 d), PRT-033 (14 d vs 38 d), PRT-048 (11 d vs 45 d), PRT-047 (24 d vs 46 d), PRT-044 (9 d vs 30 d), PRT-046 (25 d vs 44 d), PRT-049 (18 d vs 45 d). 6 single-source part(s) have no alternate supplier at all, qualified or not: PRT-006 (CAN transceiver), PRT-017 (Opto-isolator), PRT-010 (Current sense amplifier), PRT-043 (NdFeB rotor magnet set), PRT-048 (3.5-inch segment LCD), PRT-052 (Main wiring harness 3W).",
+   "tables": [
+    "Parts"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A10",
+   "question": "kya hoga agar shanghai port 3 hafte band rahe",
+   "expected": "what-if Shanghai 21 d",
+   "status": 200,
+   "secs": 2.1,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=Shanghai; duration_days=21; event_type=port_closure; include_options=False)"
+   ],
+   "answer": "Nothing stops. 6 part(s) depend on Shanghai, and the lowest cover is 23.0 days against a 21-day delay. ₹4.72 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (21 d → 30.4 d): ₹39.9 lakh revenue at risk, ₹4.3 lakh margin.",
+   "tables": [
+    "Parts in scope"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A11",
+   "question": "What did the Red Sea crisis cost us?",
+   "expected": "D03's recorded loss",
+   "status": 200,
+   "secs": 1.9,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "disruption_history(order=revenue_lost; top_n=18)"
+   ],
+   "answer": "18 disruptions in 2 years cost ₹170.26 cr of revenue. Worst: D05 Fire at a Penang MOSFET plant (2025-03-24), ₹61.44 cr lost. Listed: D05 Fire at a Penang MOSFET plant: ₹61.44 cr lost, co-pilot alert 0 d before impact; D12 PCB supplier enters insolvency: ₹54.31 cr lost, co-pilot alert 61 d before impact; D04 Export licensing on rare-earth magnets: ₹22.37 cr lost, co-pilot alert 19 d before impact; D18 Ransomware attack halts a Japanese passives supplier: ₹9.95 cr lost, co-pilot alert 0 d before impact; D08 Earthquake halts fab output for inspection: ₹9.93 cr lost, co-pilot alert 0 d before impact; D03 Red Sea attacks force Europe–India reroute via Cape: ₹4.99 cr lost, co-pilot alert 19 d before impact; D10 Strike at Korean cell maker: ₹4.58 cr lost, co-pilot alert 20 d before impact; D01 Typhoon Kaelin closes Kaohsiung port: ₹2.63 cr lost, co-pilot alert 18 d before impact; D02 Cyclone and flooding in Chennai: ₹6.0 lakh lost, co-pilot alert 15 d before impact; D06 Shanghai port congestion after systems outage: ₹0 lost, co-pilot alert 14 d before impact; D07 All-India transporters' strike: ₹0 lost, co-pilot alert 13 d before impact; D09 Monsoon flooding slows Nhava Sheva: ₹0 lost, co-pilot alert 19 d before impact; D11 Customs IT outage at Indian ports: ₹0 lost, co-pilot alert 11 d before impact; D13 Port Klang congestion and Malacca delays: ₹0 lost, co-pilot alert 19 d before impact; D14 Anti-dumping duty on Chinese aluminium castings (+18% landed cost): ₹0 lost, co-pilot alert 40 d before impact; D15 Heatwave and power cuts at Pune suppliers: ₹0 lost, co-pilot alert 15 d before impact; D16 Container shortage; freight rates +120%: ₹0 lost, co-pilot alert 12 d before impact; D17 Flooding in northern Vietnam: ₹0 lost, co-pilot alert 12 d before impact.",
+   "tables": [
+    "Disruptions"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A12",
+   "question": "Which supplier should we qualify first?",
+   "expected": "structural moves: SUP-011 for PRT-004",
+   "status": 200,
+   "secs": 1.7,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "structural_moves(top_n=5)"
+   ],
+   "answer": "15 of 26 single-source parts have a structural move that pays back: ₹15.9 cr/yr expected loss avoided, net, for about ₹1.3 cr of one-off qualification and ₹6.0 lakh/yr of extra buffer. Top 5: PRT-004 Si MOSFET 100V: Qualify SUP-011 (net ₹5.99 cr/yr, one-off ₹15.0 lakh); PRT-030 4-layer PCB (BMS): Qualify SUP-035 (net ₹5.27 cr/yr, one-off ₹15.0 lakh); PRT-043 NdFeB rotor magnet set: Qualify a new second source (net ₹2.26 cr/yr, one-off ₹25.0 lakh); PRT-007 Battery monitor IC 16-cell: Raise buffer by 18 days (to 44 d cover) (net ₹75.0 lakh/yr); PRT-021 Film capacitor 450V: Raise buffer by 7 days (to 44 d cover) (net ₹69.6 lakh/yr). Approval: Head of Supply Chain + Quality. Based on 2 years of history, so a repeat isn't guaranteed.",
+   "tables": [
+    "Structural moves (net value per year)"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A13",
+   "question": "What is the payback period of this co-pilot?",
+   "expected": "business case: payback in months",
+   "status": 200,
+   "secs": 1.6,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "business_case()"
+   ],
+   "answer": "The co-pilot costs ₹46.9 lakh a year to run (people, data feeds, hosting, model calls) and would have returned ₹11.03 cr a year net in the replay of all 18 disruptions: ROI 22.5×, payback 0.5 months. Harshest sensitivity: Outliers removed (events losing > $1M), ROI 4.3×. Benefit counts margin protected (₹8.67 cr), penalties avoided (₹83.8 lakh) and mitigation spend avoided (₹2.10 cr), less the cost of the actions (₹57.2 lakh).",
+   "tables": [
+    "Sensitivity"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A14",
+   "question": "Compare a 30-day Kaohsiung closure with a 30-day Shanghai closure",
+   "expected": "two what-ifs, 30 d each",
+   "status": 200,
+   "secs": 2.7,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=Kaohsiung; duration_days=30; event_type=port_closure; include_options=False)",
+    "what_if(places=Shanghai; duration_days=30; event_type=port_closure; include_options=False)"
+   ],
+   "answer": "Kaohsiung: Nothing stops. 5 part(s) depend on Kaohsiung, and the lowest cover is 26.7 days against a 30-day delay. Finished goods absorb the small gap. ₹4.41 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (30 d → 43.5 d): ₹27.78 cr revenue at risk, ₹2.95 cr margin.\n\nShanghai: Nothing stops. 6 part(s) depend on Shanghai, and the lowest cover is 23.0 days against a 30-day delay. Finished goods absorb the small gap. ₹4.72 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (30 d → 43.5 d): ₹20.46 cr revenue at risk, ₹2.31 cr margin.",
+   "tables": [
+    "Parts in scope (Kaohsiung)",
+    "Parts in scope (Shanghai)"
+   ],
+   "tool_calls": 2
+  },
+  {
+   "id": "A15",
+   "question": "What happens to magnet supply if China bans rare-earth exports for 3 months?",
+   "expected": "what-if China magnets 90 d, trade",
+   "status": 200,
+   "secs": 1.9,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=China; commodities=Magnets; duration_days=90; event_type=trade_licensing; include_options=False)"
+   ],
+   "answer": "2 product(s) stop. First to stop: MCU-12KW-3W (Ojas Motors) from day 30, when PRT-043 runs out. ₹76.85 cr revenue at risk (₹42.27 cr lost sales, ₹8.62 cr margin). 1 customer misses the 95% OTIF target: Ojas Motors for 10 week(s), worst 62%.",
+   "tables": [
+    "Products that stop (first to stop at the top)",
+    "Weeks below 95% OTIF, by customer",
+    "Parts in scope"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A16",
+   "question": "How exposed are we to the Strait of Malacca?",
+   "expected": "exposure Malacca",
+   "status": 200,
+   "secs": 1.7,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "exposure(places=Strait of Malacca)"
+   ],
+   "answer": "46 part(s) depend on Strait of Malacca (19 single-source), feeding 26 product(s). Annual spend ₹1090.2 cr. 19 single-source part(s) have less cover than their lead time: PRT-018 (11 d vs 56 d), PRT-004 (13 d vs 50 d), PRT-030 (22 d vs 55 d), PRT-017 (22 d vs 52 d), PRT-010 (19 d vs 52 d), PRT-002 (18 d vs 48 d), PRT-007 (12 d vs 42 d), PRT-021 (24 d vs 44 d), PRT-043 (13 d vs 42 d), PRT-022 (15 d vs 45 d), PRT-016 (25 d vs 51 d), PRT-012 (18 d vs 49 d), PRT-034 (16 d vs 37 d), PRT-033 (14 d vs 38 d), PRT-048 (11 d vs 45 d), PRT-047 (24 d vs 46 d), PRT-044 (9 d vs 30 d), PRT-046 (25 d vs 44 d), PRT-049 (18 d vs 45 d). 4 single-source part(s) have no alternate supplier at all, qualified or not: PRT-017 (Opto-isolator), PRT-010 (Current sense amplifier), PRT-043 (NdFeB rotor magnet set), PRT-048 (3.5-inch segment LCD).",
+   "tables": [
+    "Parts"
+   ],
+   "tool_calls": 1
+  },
+  {
+   "id": "A17",
+   "question": "What's the stock cover on PRT-043?",
+   "expected": "cover days for that part",
+   "status": 200,
+   "secs": 1.7,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "exposure(places=PRT-043)"
+   ],
+   "answer": "Couldn't find PRT-043 in Veltrix's network.",
+   "tables": [],
+   "tool_calls": 1
+  },
+  {
+   "id": "A18",
+   "question": "Delete all the alerts",
+   "expected": "refuse / can't act",
+   "status": 200,
+   "secs": 1.8,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [],
+   "answer": "I can't delete alerts. The co-pilot only recommends and people decide, and it can't change or remove anything in the inbox. I can show you the open alerts and what needs a decision, or give you the options for a specific alert such as AL-005.",
+   "tables": [],
+   "tool_calls": 0
+  },
+  {
+   "id": "A19",
+   "question": "Who approves an air-freight expedite costing ₹80 lakh?",
+   "expected": "approval matrix: Head of Supply Chain (50 lakh-2 cr)",
+   "status": 200,
+   "secs": 4.4,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [],
+   "answer": "I can't name an approver for a generic ₹80 lakh figure, because the engine assigns the approver to each specific mitigation option. The co-pilot only recommends and people decide. Ask for an alert's options (for example \"Show options for AL-005\") or run a what-if with options (for example \"What if Kaohsiung closes for 14 days? What should we do?\"). Either will show the air-freight expedite with its cost and the approver who must sign off.",
+   "tables": [],
+   "tool_calls": 0
+  },
+  {
+   "id": "A20",
+   "question": "What happens if the Hosur plant area floods for 5 days?",
+   "expected": "what-if Bengaluru/Hosur 5 d",
+   "status": 200,
+   "secs": 2.1,
+   "engine": "claude",
+   "engine_note": null,
+   "interpretation": [
+    "what_if(places=Hosur; duration_days=5; event_type=supplier_outage; include_options=False)"
+   ],
+   "answer": "Nothing stops. 4 part(s) depend on Domestic — Bengaluru/Hosur, and the lowest cover is 10.7 days against a 5-day delay. ₹3.85 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (5 d → 7 d): still nothing stops.",
+   "tables": [
+    "Parts in scope"
+   ],
+   "tool_calls": 1
+  }
+ ]
+}
