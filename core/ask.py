@@ -205,7 +205,7 @@ def answer_what_if(q: str, nodes: list[str], dur=_PARSE, et: str | None = None,
         # so the same scenario never shows two unexplained numbers in two places.
         r2 = run(Scenario(parts=parts, nodes=nodes, event_type=et, duration_days=dur, label=q))
         d2 = float(r2.parts["effective_delay_days"].max()) if len(r2.parts) else dur
-        if abs(d2 - dur) >= 1:
+        if d2 - dur >= 1:          # only when recovery time makes the stop longer than stated (not fixed-delay classes)
             lead = (f"Allowing the typical recovery time after supply restarts, as alert briefings do "
                     f"({dur:g} d → {d2:g} d): ")
             recovery_note = lead + ("still nothing stops." if r2.totals["no_action_needed"] else

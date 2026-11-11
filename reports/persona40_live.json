@@ -1,0 +1,362 @@
+[
+ {
+  "id": 1,
+  "persona": "Category manager",
+  "area": "Inbox",
+  "case": "Inbox lists only real alerts, priority-sorted, each with owner, response time and ₹ at risk",
+  "pass": true,
+  "observed": "5 inbox alerts, priorities [20, 20, 16, 15, 9]",
+  "secs": 0.35
+ },
+ {
+  "id": 2,
+  "persona": "Category manager",
+  "area": "Briefing",
+  "case": "Top alert's briefing says what is happening in words from its own sources",
+  "pass": true,
+  "observed": "Penang MOSFET maker declares force majeure on some product lines. Customers told to expect allocation for several weeks.",
+  "secs": 0.33
+ },
+ {
+  "id": 3,
+  "persona": "Category manager",
+  "area": "Briefing",
+  "case": "Briefing fits one page and states the ask, approvers, residual loss and that nothing was ordered",
+  "pass": true,
+  "observed": "1953 chars; residual: About ₹30.50 cr of revenue still lost. PRT-004 stays 32 d short (Broker spot buy would close it in 10 d but costs ₹16.78",
+  "secs": 0.3
+ },
+ {
+  "id": 4,
+  "persona": "Category manager",
+  "area": "Decisions",
+  "case": "Recording a decision works and the log says nothing was executed",
+  "pass": true,
+  "observed": "200 Recorded only. The co-pilot never places orders, books freight or contacts suppliers. On the hosted ",
+  "secs": 0.3
+ },
+ {
+  "id": 5,
+  "persona": "Category manager",
+  "area": "Decisions",
+  "case": "'ordered' and 'executed' are not accepted as decisions",
+  "pass": true,
+  "observed": "422, 422",
+  "secs": 0.58
+ },
+ {
+  "id": 6,
+  "persona": "Category manager",
+  "area": "Ask",
+  "case": "Kaohsiung 10 days: nothing stops, with the parts table",
+  "pass": true,
+  "observed": "Nothing stops. 5 part(s) depend on Kaohsiung, and the lowest cover is 26.7 days against a 10-day delay. ₹4.41 cr/day of revenue depends on t",
+  "secs": 0.36
+ },
+ {
+  "id": 7,
+  "persona": "Head of Supply Chain",
+  "area": "Register",
+  "case": "Register shows every real alert with L×I, owner and the latest decision",
+  "pass": true,
+  "observed": "19 rows; AL-019 status: proposed by Category manager: Passives",
+  "secs": 0.31
+ },
+ {
+  "id": 8,
+  "persona": "Head of Supply Chain",
+  "area": "Consistency",
+  "case": "Ask and Try-a-signal agree on a 6-week Penang outage (Ask shows the recovery-time figure)",
+  "pass": true,
+  "observed": "simulate ₹90.30 cr; ask mentions it: True",
+  "secs": 1.11
+ },
+ {
+  "id": 9,
+  "persona": "Head of Supply Chain",
+  "area": "Replay",
+  "case": "D05 replay: co-pilot alerted before the team and shows the structural fix",
+  "pass": true,
+  "observed": "co-pilot 2025-03-24 vs team 2025-03-27",
+  "secs": 0.34
+ },
+ {
+  "id": 10,
+  "persona": "Head of Supply Chain",
+  "area": "Replay",
+  "case": "All 18 disruptions replay without error",
+  "pass": true,
+  "observed": "18 replays, failing: []",
+  "secs": 6.03
+ },
+ {
+  "id": 11,
+  "persona": "Head of Supply Chain",
+  "area": "Briefing",
+  "case": "PCB alert labels the loss-making qualification as a structural hedge and explains its cost",
+  "pass": true,
+  "observed": "PPAP + customer approval ≈ 7 weeks. Cost = ₹15.0 lakh one-off qualification + ₹17.0 lakh for a 10% price premium on what we buy from them du",
+  "secs": 0.32
+ },
+ {
+  "id": 12,
+  "persona": "COO",
+  "area": "Business case",
+  "case": "Business case: cost, net benefit and five sensitivities, all ROI > 1",
+  "pass": true,
+  "observed": "cost 46.9 lakh; ROI [22.5, 16.3, 4.3, 10.1, 10.8]",
+  "secs": 0.3
+ },
+ {
+  "id": 13,
+  "persona": "COO",
+  "area": "Ask",
+  "case": "'What's in the inbox' counts only real alerts for a new visitor",
+  "pass": true,
+  "observed": "5 alert(s) need an owner. Highest: AL-005 Fire reported at semiconductor assembly plant in Penang (p",
+  "secs": 0.29
+ },
+ {
+  "id": 14,
+  "persona": "COO",
+  "area": "Reports",
+  "case": "COO one-pager and M6 report are served",
+  "pass": true,
+  "observed": "200, 200",
+  "secs": 0.63
+ },
+ {
+  "id": 15,
+  "persona": "CFO",
+  "area": "Ask",
+  "case": "Margin question gets an explicit ₹ margin answer",
+  "pass": true,
+  "observed": "r/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case and still ₹0 at the slowest recovery seen in history. Extra freight or surcharges are not included.",
+  "secs": 0.38
+ },
+ {
+  "id": 16,
+  "persona": "CFO",
+  "area": "Ask",
+  "case": "Margin question with a duration gets a ₹ figure",
+  "pass": true,
+  "observed": "9 product(s) stop. First to stop: BMS-48V-16S (Kairo EV) from day 16, when PRT-004 runs out. ₹21.54 cr revenue at risk (₹11.85 cr lost sales, ₹2.32 cr margin). 5 customer(s) miss the 95% OTIF target: ",
+  "secs": 0.38
+ },
+ {
+  "id": 17,
+  "persona": "CFO",
+  "area": "Replay",
+  "case": "D16 replay shows the freight spend the co-pilot would not have recommended",
+  "pass": true,
+  "observed": "avoided 3.29 cr of 3.67 cr",
+  "secs": 0.29
+ },
+ {
+  "id": 18,
+  "persona": "Head of Sales",
+  "area": "Ask",
+  "case": "Customer question returns that customer's alerts and products",
+  "pass": true,
+  "observed": "Yes. 2 open alert(s) push Kairo EV below its 95% OTIF target. Biggest: AL-005 (Fire reported at semiconductor assembly plant in Penang): 5 week(s) below target ",
+  "secs": 0.37
+ },
+ {
+  "id": 19,
+  "persona": "Head of Sales",
+  "area": "Ask",
+  "case": "Customer with no open alert gets a clear 'no'",
+  "pass": true,
+  "observed": "Yes. 2 open alert(s) push Trident Two-Wheelers below its 95% OTIF target. Biggest: AL-011 (Credit insurer cuts cover for Guangdong PCB manufacturer): 2 week(s) ",
+  "secs": 0.37
+ },
+ {
+  "id": 20,
+  "persona": "Head of Sales",
+  "area": "Ask",
+  "case": "T6 OTIF answer lists customers with weeks below 95%",
+  "pass": true,
+  "observed": "9 product(s) stop. First to stop: BMS-48V-16S (Kairo EV) from day 16, when PRT-004 runs out. ₹49.80 cr revenue at risk (",
+  "secs": 0.53
+ },
+ {
+  "id": 21,
+  "persona": "Quality manager",
+  "area": "Ask",
+  "case": "Options question returns ranked options with approvers",
+  "pass": true,
+  "observed": "7 options; first: Re-allocate to highest-margin SKUs",
+  "secs": 0.72
+ },
+ {
+  "id": 22,
+  "persona": "Quality manager",
+  "area": "Ask",
+  "case": "Options for a specific alert by ID",
+  "pass": true,
+  "observed": "AL-019: ₹3.87 cr revenue at risk across 5 product(s); 3 customer(s) fall below 95% OTIF. Decide: Switch to qualified alternate SUP-023 for P",
+  "secs": 0.34
+ },
+ {
+  "id": 23,
+  "persona": "Quality manager",
+  "area": "Options",
+  "case": "No option anywhere is marked approved; every option names an approver",
+  "pass": true,
+  "observed": "problems: []",
+  "secs": 1.55
+ },
+ {
+  "id": 24,
+  "persona": "Risk analyst",
+  "area": "Triage",
+  "case": "Denied rumour is logged only",
+  "pass": true,
+  "observed": "Not alerted: it's linked to Kaohsiung, but the wording is a routine or non-event story (rumours(-4)). Logged only.",
+  "secs": 0.33
+ },
+ {
+  "id": 25,
+  "persona": "Risk analyst",
+  "area": "Triage",
+  "case": "Story about an off-network place is dropped, not sent to review",
+  "pass": true,
+  "observed": "Strong disruption cues, but it's about Odisha, which isn't in Veltrix's network (no supplier, port, lane or commodity there). Logged only.",
+  "secs": 0.33
+ },
+ {
+  "id": 26,
+  "persona": "Risk analyst",
+  "area": "Triage",
+  "case": "Unnamed maker with strong cues goes to Needs review and appears in my queue only",
+  "pass": true,
+  "observed": "mine 1, other 0",
+  "secs": 0.89
+ },
+ {
+  "id": 27,
+  "persona": "Risk analyst",
+  "area": "Triage",
+  "case": "Threat-only story ('port workers threaten strike') does not alert",
+  "pass": true,
+  "observed": "ignored: Not alerted: it's linked to Busan, but the wording is a routine or non-event story (threaten(-1.5)). Logged only.",
+  "secs": 0.3
+ },
+ {
+  "id": 28,
+  "persona": "Logistics manager",
+  "area": "Triage",
+  "case": "Port Klang 5-day waits raise an alert",
+  "pass": true,
+  "observed": "watch score 4.0",
+  "secs": 0.37
+ },
+ {
+  "id": 29,
+  "persona": "Logistics manager",
+  "area": "Triage",
+  "case": "Weak linked story is explained with its score, not 'not linked'",
+  "pass": true,
+  "observed": "Not alerted: it's linked to Shanghai, but the wording is not strong enough to alert (score 0 vs threshold 3.5). Logged only.",
+  "secs": 0.3
+ },
+ {
+  "id": 30,
+  "persona": "Logistics manager",
+  "area": "Ask",
+  "case": "Nhava Sheva 3-day closure answered with parts in scope",
+  "pass": true,
+  "observed": "Nothing stops. 38 part(s) depend on Nhava Sheva (JNPT), and the lowest cover is 9.1 days against a 3-day delay. ₹5.38 cr",
+  "secs": 0.37
+ },
+ {
+  "id": 31,
+  "persona": "Logistics manager",
+  "area": "Ask",
+  "case": "Red Sea what-if uses the route class",
+  "pass": true,
+  "observed": "Nothing stops. 4 part(s) depend on Red Sea / Suez Canal, and the lowest cover is 12.7 days against a 14-day delay. Finis",
+  "secs": 0.35
+ },
+ {
+  "id": 32,
+  "persona": "Production planner",
+  "area": "Ask",
+  "case": "'forty days' is read as 40",
+  "pass": true,
+  "observed": "delays {40.0}",
+  "secs": 0.42
+ },
+ {
+  "id": 33,
+  "persona": "Production planner",
+  "area": "Ask",
+  "case": "Unreadable duration gets a question back",
+  "pass": true,
+  "observed": "I couldn't read how long \"for several weeks\" is, so I won't guess a duration. Please give a number, e.g. \"for 40 days\" o",
+  "secs": 0.3
+ },
+ {
+  "id": 34,
+  "persona": "Production planner",
+  "area": "Ask",
+  "case": "Plant + commodity with no overlap falls back to the commodity and says so",
+  "pass": true,
+  "observed": "No Magnets part is supplied from or shipped through Domestic — Pune, so I used every Magnets part wherever it comes from. Nothing stops. 2 part(s) depend on Mag",
+  "secs": 0.38
+ },
+ {
+  "id": 35,
+  "persona": "Production planner",
+  "area": "Exposure",
+  "case": "Exposure lists 65 parts and the 26 single-source",
+  "pass": true,
+  "observed": "65 parts, 26 single-source",
+  "secs": 0.33
+ },
+ {
+  "id": 36,
+  "persona": "IT / security",
+  "area": "Isolation",
+  "case": "My simulation is invisible to another session and to anonymous visitors",
+  "pass": true,
+  "observed": "SIM-AL-c326d338",
+  "secs": 1.62
+ },
+ {
+  "id": 37,
+  "persona": "IT / security",
+  "area": "Safety",
+  "case": "Request to order is refused plainly",
+  "pass": true,
+  "observed": "I can't place orders, book freight, contact suppliers or customers, or approve anything. The co-pilo",
+  "secs": 0.29
+ },
+ {
+  "id": 38,
+  "persona": "IT / security",
+  "area": "Validation",
+  "case": "Oversized and empty inputs are rejected; unknown ids are 404",
+  "pass": true,
+  "observed": "[422, 422, 422, 404, 404, 404]",
+  "secs": 1.86
+ },
+ {
+  "id": 39,
+  "persona": "IT / security",
+  "area": "Safety",
+  "case": "HTML in a headline is escaped in the briefing",
+  "pass": true,
+  "observed": "200",
+  "secs": 1.01
+ },
+ {
+  "id": 40,
+  "persona": "IT / security",
+  "area": "Performance",
+  "case": "Every API call in this run answered in under 5 s; signal → quantified alert < 5 min",
+  "pass": true,
+  "observed": "0.37s, decision watch",
+  "secs": 0.37
+ }
+]

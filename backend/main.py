@@ -211,7 +211,8 @@ def _llm_allowed(key: str) -> tuple[bool, str]:
 
 
 @app.post("/api/ask")
-def ask_endpoint(q: AskIn, request: Request, x_copilot_session: str | None = Header(default=None)):
+def ask_endpoint(q: AskIn, request: Request, x_copilot_session: str | None = Header(default=None),
+                 x_copilot_engine: str | None = Header(default=None)):
     """Conversational layer. With an API key, Claude answers by calling the impact engine as tools (core/llm_chat.py);
     otherwise, or if Claude is unavailable or rate-limited, the rule-based parser answers (core/ask.py). Either way
     every number comes from the engine, and the working is returned."""
@@ -226,7 +227,7 @@ def ask_endpoint(q: AskIn, request: Request, x_copilot_session: str | None = Hea
             return None
     al = alerts(x_copilot_session=x_copilot_session)
     note = None
-    if llm_chat.enabled():
+    if llm_chat.enabled() and (x_copilot_engine or "").lower() != "rules":   # header lets tests pin the rule engine
         who = (request.headers.get("x-forwarded-for", "").split(",")[0].strip()
                or (request.client.host if request.client else "")) + "|" + (_session(x_copilot_session) or "")
         ok, why = _llm_allowed(who)

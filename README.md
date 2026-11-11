@@ -11,7 +11,7 @@ orders, books freight or contacts suppliers. All data is synthetic (Veltrix Comp
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements-dev.txt
 .venv/Scripts/python -m uvicorn app:app --port 8000      # UI + API at http://localhost:8000
-.venv/Scripts/python -m pytest -q                         # 52 tests: M1–M6 incl. acceptance scenarios T1–T10
+.venv/Scripts/python -m pytest -q                         # 80 tests: M1–M6, acceptance T1–T10, persona fixes, Claude chat (mocked)
 ```
 
 ## Rebuild data and reports (after changing rules or the engine)
@@ -27,6 +27,17 @@ python -m venv .venv
 ```
 
 Copy `reports/*.html` into `public/reports/` after rebuilding them.
+
+## Claude chat
+
+Set `ANTHROPIC_API_KEY` (on Vercel: Project → Settings → Environment Variables, then redeploy). Limits: 20 Claude
+answers per visitor per hour and 300 per server instance per day (`COPILOT_CHAT_PER_HOUR`, `COPILOT_CHAT_PER_DAY`);
+beyond them, or on any error, the rule-based chat answers. Send `X-Copilot-Engine: rules` to force the rule engine.
+
+```bash
+.venv/Scripts/python scripts/claude_eval.py https://veltrix-risk-copilot.vercel.app reports/claude_eval.json   # 14 Claude questions, ~$0.06
+.venv/Scripts/python scripts/persona40.py https://veltrix-risk-copilot.vercel.app reports/persona40_live.json  # 40 persona cases
+```
 
 ## Deploy (Vercel)
 
@@ -51,7 +62,8 @@ for a real pilot.
 | `core/triage.py`, `core/events.py`, `core/alerts.py` | signal triage, dedup into events, L×I scoring |
 | `core/briefing.py` | one-page briefing (HTML + text), numbers straight from the engine |
 | `core/backtest.py`, `core/validate_impact.py` | T9 back-test, D01–D18 impact validation |
-| `core/ask.py` | conversational layer: what-ifs, exposure, inbox, options; answered by the engine with working |
+| `core/llm_chat.py` | Claude chat: Claude (Sonnet 5.5) answers by calling the engine as tools; every number comes from a tool result |
+| `core/ask.py` | rule-based chat: the fallback when there's no API key, Claude fails or a limit is hit; also the tools' backend |
 | `core/replay.py` | T10 replay of any disruption as if live + structural counterfactual; business case |
 | `core/acceptance.py` | brief §6 T1–T10 checks with evidence, end to end through the API |
 | `core/roi.py`, `core/structural.py`, `core/false_alarms.py` | M6: co-pilot ROI with running costs, dual-sourcing / buffer moves, false-alarm ablations |

@@ -14,8 +14,10 @@ BASE, OUT = sys.argv[1], sys.argv[2]
 S1, S2 = "p40-" + uuid.uuid4().hex[:12], "p40-" + uuid.uuid4().hex[:12]
 
 
-def call(method, path, body=None, session=None, raw=False):
+def call(method, path, body=None, session=None, raw=False, engine=None):
     h = {"Content-Type": "application/json", "User-Agent": "persona40"}
+    if engine:
+        h["X-Copilot-Engine"] = engine
     if session:
         h["X-Copilot-Session"] = session
     req = urllib.request.Request(BASE + path, method=method, headers=h,
@@ -36,7 +38,7 @@ def call(method, path, body=None, session=None, raw=False):
 
 
 def ask(q, s=None):
-    return call("POST", "/api/ask", {"question": q}, s)
+    return call("POST", "/api/ask", {"question": q}, s, engine="rules")   # these cases test the rule engine; see claude_eval.py
 
 
 def sim(h, d=None, s=None, snippet=""):
