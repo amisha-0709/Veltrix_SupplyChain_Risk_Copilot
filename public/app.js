@@ -287,25 +287,30 @@ const ASK_EXAMPLES = [
 const chat = [];
 const tableHtml = (t) => `<h3 style="margin-top:12px">${esc(t.title)}</h3><div style="overflow-x:auto"><table><thead><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
   <tbody>${t.rows.map((r) => `<tr>${r.map((v) => `<td>${esc(v === true ? "yes" : v === false ? "no" : v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+const engineBadge = (r) => r.engine === "claude"
+  ? `<p class="muted" style="margin-top:0">Answered by Claude (${esc(r.model)}) using the impact engine · ${r.tool_calls} tool call(s) · ${r.seconds}s. Every number comes from the engine.</p>`
+  : r.engine === "rules" ? `<p class="muted" style="margin-top:0">Rule-based answer${r.engine_note ? ": " + esc(r.engine_note) : ""}</p>` : "";
 function renderChat() {
   $("#log").innerHTML = chat.map((m) => m.role === "user"
     ? `<div class="result" style="border-color:var(--axis)"><b>You</b><p>${esc(m.text)}</p></div>`
-    : `<div class="card"><p style="white-space:pre-line;margin-top:0">${esc(m.r.answer)}</p>
+    : `<div class="card">${engineBadge(m.r)}<p style="white-space:pre-line;margin-top:0">${esc(m.r.answer)}</p>
         ${(m.r.tables || []).map(tableHtml).join("")}
-        ${m.r.working?.length ? `<details><summary class="muted">Working (playbook §3)</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
+        ${m.r.working?.length ? `<details><summary class="muted">${m.r.engine === "claude" ? "Working: tool calls and engine steps" : "Working (playbook §3)"}</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
         ${m.r.assumptions?.length ? `<details><summary class="muted">Assumptions</summary><ul>${m.r.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></details>` : ""}</div>`).join("");
 }
 async function viewAsk() {
   $("#app").innerHTML = `<h1>Ask the co-pilot</h1>
-    <p class="sub">Questions are answered by the same impact engine that quantifies alerts: places and commodities are matched to Veltrix's network, and every
-    answer shows its working. If a question can't be linked to the network, it asks rather than guesses.</p>
+    <p class="sub">Claude reads your question and calls the same impact engine that quantifies alerts as tools, so every number comes from the
+    engine and every answer shows the tool calls it made. It recommends; people decide. If Claude is unavailable, a rule-based parser answers instead.
+    <span id="eng" class="muted"></span></p>
     <div class="examples">${ASK_EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e)}</button>`).join("")}</div>
     <div id="log"></div>
     <form class="card stack" id="askf"><label>Your question<input name="q" required maxlength="400" placeholder="e.g. Which products stop first if Ningbo closes for three weeks?"></label>
       <div class="btns"><button class="btn" type="submit">Ask</button></div></form>`;
   renderChat();
+  api("/api/chat-engine").then((e) => { const el = $("#eng"); if (el) el.textContent = e.engine === "claude" ? `Now answering: Claude (${e.model}).` : "Now answering: rule-based parser (no API key set)."; }).catch(() => {});
   const send = async (q) => {
-    chat.push({ role: "user", text: q }); renderChat();
+    chat.push({ role: "user", text: q }); chat.push({ role: "bot", r: { answer: "Thinking… (Claude answers take 5–20 seconds)" } }); renderChat(); chat.pop();
     try { const r = await api("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q }) });
       chat.push({ role: "bot", r }); } catch (e) { chat.push({ role: "bot", r: { answer: "Error: " + e.message.slice(0, 200) } }); }
     renderChat(); $("#askf").scrollIntoView({ behavior: "smooth", block: "end" });

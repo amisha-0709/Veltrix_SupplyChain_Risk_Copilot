@@ -136,14 +136,20 @@ def _table(title: str, df: pd.DataFrame, cols: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------------------------
-def answer_what_if(q: str, nodes: list[str]) -> dict:
-    dur = _duration_days(q)
-    unread = _unread_duration(q)
+_PARSE = object()
+
+
+def answer_what_if(q: str, nodes: list[str], dur=_PARSE, et: str | None = None,
+                   want_options: bool | None = None, want_cost: bool | None = None) -> dict:
+    """Answer a what-if. Free text (`q`) is parsed; the Claude chat passes the fields explicitly instead."""
+    unread = _unread_duration(q) if dur is _PARSE else None
+    if dur is _PARSE:
+        dur = _duration_days(q)
     if unread:
         return {"intent": "clarify", "answer": f"I couldn't read how long \"{unread}\" is, so I won't guess a duration. "
                 "Please give a number, e.g. \"for 40 days\" or \"for six weeks\".", "tables": [], "working": [],
                 "assumptions": []}
-    et = _event_type(q, nodes)
+    et = et or _event_type(q, nodes)
     parts, how, scope_note = _scope(nodes)
     if not parts:
         return {"intent": "clarify", "answer": "I couldn't link " + ", ".join(_node_name(n) for n in nodes)
@@ -172,7 +178,7 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
                f"{t['min_cover_days']} days against a {r.parts['effective_delay_days'].max():g}-day delay"
                + (". Finished goods absorb the small gap" if t["parts_short"] else "") + ". "
                f"{fmt_inr(t['revenue_exposed_per_day_inr'])}/day of revenue depends on these parts.")
-        if re.search(r"\bcost|\bmargin|\bhow much|\blose\b|\bloss", q, re.I):
+        if (re.search(r"\bcost|\bmargin|\bhow much|\blose\b|\bloss", q, re.I) if want_cost is None else want_cost):
             from dataclasses import replace as _replace
             st = run(_replace(sc, stress=True)).totals if dur is None else None
             ans += (" Margin at risk: ₹0 in the expected case"
@@ -209,7 +215,7 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
     if scope_note:
         ans = scope_note + " " + ans
     opt_table = None
-    if OPTIONS_Q.search(q) and not t["no_action_needed"]:
+    if (OPTIONS_Q.search(q) if want_options is None else want_options) and not t["no_action_needed"]:
         from core.mitigate import recommend
         rec = recommend(sc, 0.0)
         o = rec["options"]

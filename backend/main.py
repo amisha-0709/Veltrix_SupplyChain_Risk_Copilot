@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from fastapi import FastAPI, Header, HTTPException  # noqa: E402
+from fastapi import FastAPI, Header, HTTPException, Request  # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
 from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
@@ -187,9 +187,35 @@ class AskIn(BaseModel):
     question: str = Field(min_length=1, max_length=400)
 
 
+# Claude chat budget guards (per server instance): a public URL must not be able to run up the API bill.
+LLM_PER_CLIENT_HOUR = int(os.environ.get("COPILOT_CHAT_PER_HOUR", "20"))
+LLM_PER_DAY = int(os.environ.get("COPILOT_CHAT_PER_DAY", "300"))
+_llm_hits: dict[str, list[float]] = {}
+_llm_day: list[float] = []
+
+
+def _llm_allowed(key: str) -> tuple[bool, str]:
+    import time as _t
+    now = _t.time()
+    with _lock:
+        _llm_day[:] = [t for t in _llm_day if now - t < 86400]
+        hits = _llm_hits.setdefault(key, [])
+        hits[:] = [t for t in hits if now - t < 3600]
+        if len(_llm_day) >= LLM_PER_DAY:
+            return False, "the demo's daily limit for Claude answers is used up"
+        if len(hits) >= LLM_PER_CLIENT_HOUR:
+            return False, f"you've asked {LLM_PER_CLIENT_HOUR} Claude questions in the last hour"
+        hits.append(now)
+        _llm_day.append(now)
+    return True, ""
+
+
 @app.post("/api/ask")
-def ask_endpoint(q: AskIn, x_copilot_session: str | None = Header(default=None)):
-    """Conversational layer: questions answered by the impact engine, with the working shown."""
+def ask_endpoint(q: AskIn, request: Request, x_copilot_session: str | None = Header(default=None)):
+    """Conversational layer. With an API key, Claude answers by calling the impact engine as tools (core/llm_chat.py);
+    otherwise, or if Claude is unavailable or rate-limited, the rule-based parser answers (core/ask.py). Either way
+    every number comes from the engine, and the working is returned."""
+    from core import llm_chat
     from core.ask import ask
     from core.snapshot import clean
 
@@ -198,7 +224,30 @@ def ask_endpoint(q: AskIn, x_copilot_session: str | None = Header(default=None))
             return _alert(aid)
         except HTTPException:
             return None
-    return clean(ask(q.question, alerts=alerts(x_copilot_session=x_copilot_session), get_alert=get))
+    al = alerts(x_copilot_session=x_copilot_session)
+    note = None
+    if llm_chat.enabled():
+        who = (request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+               or (request.client.host if request.client else "")) + "|" + (_session(x_copilot_session) or "")
+        ok, why = _llm_allowed(who)
+        if ok:
+            try:
+                return clean(llm_chat.chat(q.question, alerts=al, get_alert=get))
+            except Exception as e:      # never break the chat: fall back to the rule-based answer
+                note = f"Claude was unavailable ({type(e).__name__}), so the rule-based chat answered."
+        else:
+            note = f"Answered by the rule-based chat because {why}."
+    r = ask(q.question, alerts=al, get_alert=get)
+    r["engine"] = "rules"
+    if note:
+        r["engine_note"] = note
+    return clean(r)
+
+
+@app.get("/api/chat-engine")
+def chat_engine():
+    from core import llm_chat
+    return {"engine": "claude" if llm_chat.enabled() else "rules", "model": llm_chat.MODEL if llm_chat.enabled() else None}
 
 
 class SignalIn(BaseModel):
