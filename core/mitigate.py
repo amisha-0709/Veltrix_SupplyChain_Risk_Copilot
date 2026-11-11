@@ -25,7 +25,7 @@ import pandas as pd
 
 from core.etl import load
 from core.graph import build_network
-from core.impact import ImpactResult, Scenario, run
+from core.impact import ImpactResult, Scenario, fmt_inr, run
 
 # Sea freight as a share of goods value. The data pack has no weights, so this is calibrated to the
 # playbook worked example (3 weeks of two Kaohsiung semiconductors by air ≈ ₹18 lakh) → ~1.5%.
@@ -190,14 +190,19 @@ def options_for_part(sc: Scenario, base: ImpactResult, part: str, lead_days: flo
     ua = pr["unqualified_alternate_supplier_id"]
     if pd.notna(ua) and pd.notna(pr["qualification_weeks_if_unqualified"]):
         tte = float(pr["qualification_weeks_if_unqualified"]) * 7
+        prem_cost = 0.10 * k * u * max(0.0, D - max(0.0, tte - L))
         add(f"Qualify new supplier {ua}", "switch", tte, end_shortage_at(tte - L),
-            QUAL_FIXED_INR + 0.10 * k * u * max(0.0, D - max(0.0, tte - L)), 0.7, False,
-            f"PPAP + customer approval ≈ {tte/7:.0f} weeks. Too slow for short events; start early for structural risk.")
+            QUAL_FIXED_INR + prem_cost, 0.7, False,
+            f"PPAP + customer approval ≈ {tte/7:.0f} weeks. Cost = {fmt_inr(QUAL_FIXED_INR)} one-off qualification + "
+            f"{fmt_inr(prem_cost)} for a 10% price premium on what we buy from them during this event. "
+            "Too slow for short events; start early for structural risk.")
     elif pd.isna(alt):
         tte = 16 * 7                                     # playbook worst case: none identified yet
+        prem_cost = 0.10 * k * u * max(0.0, D - max(0.0, tte - L))
         add("Qualify a new supplier (to be identified)", "switch", tte, end_shortage_at(tte - L),
-            25e5 + 0.10 * k * u * max(0.0, D - max(0.0, tte - L)), 0.5, False,
-            "No alternate exists. Sourcing + PPAP 6–16 weeks: a structural fix, start now for the next event.")
+            25e5 + prem_cost, 0.5, False,
+            f"No alternate exists. Sourcing + PPAP 6–16 weeks. Cost = {fmt_inr(25e5)} one-off search and qualification + "
+            f"{fmt_inr(prem_cost)} price premium during this event. A structural fix: start now for the next event.")
     # 3. Air-freight expedite (goods exist, sea route blocked or slow)
     if sc.event_type in ("port_closure", "congestion", "route") and pr["category"] != "Li-ion cells":
         tte = 4

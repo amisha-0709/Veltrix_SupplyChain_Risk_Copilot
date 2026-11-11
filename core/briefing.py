@@ -66,10 +66,14 @@ def make_brief(a: dict) -> dict:
     else:
         src = plan if len(plan) else opts.head(1)
         for r in src.itertuples():
+            hedge = float(r.net_value_inr) < 0
             rec.append({"action": r.option, "part": r.part_id, "cost": float(r.cost_inr),
                         "time_to_effect": float(r.time_to_effect_days), "net_value": float(r.net_value_inr),
                         "roi": None if pd.isna(r.roi) else float(r.roi), "approver": r.approver,
-                        "on_time": bool(r.on_time), "note": r.note})
+                        "on_time": bool(r.on_time), "hedge": hedge,
+                        "note": ("Structural hedge: costs more than it saves in this event, but removes the single-source "
+                                 "risk for future ones (see the business case's structural table). " if hedge else "")
+                                + str(r.note)})
     chosen = {(x["part"], x["action"]) for x in rec}
     alts = [{"action": r.option, "part": r.part_id, "cost": float(r.cost_inr), "net_value": float(r.net_value_inr),
              "on_time": bool(r.on_time), "approver": r.approver}
@@ -98,7 +102,9 @@ def make_brief(a: dict) -> dict:
          if n_short else "Cover holds: no shortage expected. ")
         + f"{fmt_inr(t['revenue_exposed_per_day_inr'])}/day of revenue depends on the {n_aff} linked part(s)."
     )
-    what = sigs[-1]["text"] if len(sigs) > 1 else sigs[0]["text"]
+    # The strongest signal (highest triage score, latest on a tie) says what is happening. Follow-ups in the same
+    # event can be weaker side stories (e.g. 'distributors report tightening supply' after a plant fire).
+    what = max(enumerate(sigs), key=lambda x: (float(x[1].get("score") or 0), x[0]))[1]["text"]
     rec.sort(key=lambda x: -x["net_value"])
     actionable = [x for x in rec if x["approver"] != "Category manager (log only)"]
     if actionable:
@@ -107,6 +113,28 @@ def make_brief(a: dict) -> dict:
             for x in actionable[:3]) + "."
     else:
         ask = rec[0]["action"] if rec else "Log and watch."
+    residual = None
+    if len(short) and rec and rec[0]["part"]:
+        gaps = []
+        for r in short.itertuples():
+            rows = plan[plan["part_id"] == r.part_id] if len(plan) else plan
+            after = float(rows["shortage_days_after"].min()) if len(rows) else float(r.shortage_days)
+            if after > 0.5:
+                po = opts[(opts["part_id"] == r.part_id) & (opts["shortage_days_after"] < r.shortage_days)
+                          & (opts["kind"].isin(["switch", "broker", "expedite", "prebuy"]))] if len(opts) else opts
+                ontime = po[po["on_time"]] if len(po) else po
+                if len(ontime):          # it can be closed in time, just not at a price worth paying
+                    c = ontime.sort_values("net_value_inr", ascending=False).iloc[0]
+                    why = (f"{c['option']} would close it in {c['time_to_effect_days']:.0f} d but costs "
+                           f"{fmt_inr(c['cost_inr'])}, more than it saves")
+                elif len(po):
+                    c = po.sort_values("time_to_effect_days").iloc[0]
+                    why = f"no option lands in time; fastest is {c['option']} in {c['time_to_effect_days']:.0f} d"
+                else:
+                    why = "no option shortens it"
+                gaps.append({"part": r.part_id, "short_after": after, "why": why})
+        pv = a["plan_value"] or {}
+        residual = {"revenue_lost_after_inr": float(pv.get("revenue_lost_after_inr", t["revenue_lost_inr"])), "gaps": gaps}
     caveats = [f"Stock position as of {SNAPSHOT_DATE:%d %b %Y} (on hand + in transit)."]
     caveats.append(next((w for w in a["working"] if w.startswith("2.")), "")[3:])
     if a["mode"] == "precautionary":
@@ -130,7 +158,7 @@ def make_brief(a: dict) -> dict:
                                                   "penalty_inr", "units_short", "skus_stopped", "parts_short",
                                                   "parts_affected", "max_shortage_days", "min_cover_days")},
         "exposure": exposure, "skus": skus, "customers": cust,
-        "recommended": rec, "alternatives": alts, "plan_value": a["plan_value"],
+        "recommended": rec, "alternatives": alts, "plan_value": a["plan_value"], "residual": residual,
         "sources": sources_dedup, "n_signals": a["n_signals"], "n_sources": len(a["sources"]),
         "caveats": [c for c in caveats if c], "working": a["working"],
         "seconds_to_quantify": a["seconds_to_quantify"],
@@ -167,6 +195,21 @@ def _pcls(p: int) -> str:
     return "p-crit" if p >= 20 else "p-high" if p >= 12 else "p-med" if p >= 6 else "p-low"
 
 
+def residual_sentence(r: dict) -> str:
+    lost = r["revenue_lost_after_inr"]
+    gaps = "; ".join(f"{g['part']} stays {g['short_after']:.0f} d short ({g['why']})" for g in r["gaps"])
+    if lost < 1e5:
+        left = ", ".join(f"{g['part']} {g['short_after']:.0f} d" for g in r["gaps"])
+        return ("No lost sales expected with this plan." +
+                (f" Finished-goods stock covers the gaps that remain ({left})." if left else " Every shortage is closed."))
+    return f"About {fmt_inr(lost)} of revenue still lost." + (f" {gaps}." if gaps else "")
+
+
+def _residual_html(b: dict, e) -> str:
+    r = b.get("residual")
+    return f'<p class="meta"><b>Left after this plan:</b> {e(residual_sentence(r))}</p>' if r else ""
+
+
 def render_html(b: dict, standalone: bool = True) -> str:
     e = H.escape
     n = b["numbers"]
@@ -194,7 +237,7 @@ def render_html(b: dict, standalone: bool = True) -> str:
     plan_line = (f"Plan: cost {fmt_inr(pv['cost_inr'])}, margin protected {fmt_inr(pv['margin_protected_inr'])}"
                  + (f", ROI {pv['roi']:.1f}×" if pv.get("roi") is not None else "") + ".") if pv else ""
     body = f"""<div class="sheet">
-<div class="top"><div><div class="kicker">Veltrix supply risk briefing · {e(b['alert_id'])} · {e(b['kind'])} · first seen {e(b['first_seen'])}</div>
+<div class="top"><div><div class="kicker">Veltrix supply risk briefing · {e(b['alert_id'])} · {e(b['kind'])} · first seen {e(b['first_seen'])} · impact on stock as of {SNAPSHOT_DATE:%d %b %Y}</div>
 <h1>{e(b['title'])}</h1><div class="meta">Owner: {e(b['owner'])} · Response: {e(b['response'])}</div></div>
 <div class="badge {_pcls(b['priority'])}">Priority {b['priority']} <span style="font-weight:400">(L{b['likelihood']} × I{b['impact']})</span></div></div>
 <p class="lead">{e(b['headline_impact'])}</p>
@@ -211,7 +254,7 @@ Impact {b['impact']}/5: {e(b['impact_reason'])}. Confidence {b['confidence']:.0%
 <div class="two"><div><h2>Products</h2><ul>{skus}</ul></div><div><h2>Customers</h2><ul>{cust}</ul></div></div>
 <h2>Recommended action</h2><table><thead><tr><th>Option</th><th class=num>Cost</th><th class=num>Effect</th><th class=num>Net value</th>
 <th class=num>ROI</th><th>Approver</th></tr></thead><tbody>{rec}</tbody></table>
-<p class="note">{e(plan_line)} Ranked by playbook §5 net value; on-time options first. Shown for approval, not approved.</p>
+{_residual_html(b, e)}<p class="note">{e(plan_line)} Ranked by playbook §5 net value; on-time options first. Shown for approval, not approved.</p>
 {f'<h2>Alternatives considered</h2><ul>{alts}</ul>' if alts else ''}
 <h2>Sources ({b['n_signals']} signals, {b['n_sources']} sources)</h2><ul>{srcs}{f'<li>… and {more} more</li>' if more > 0 else ''}</ul>
 <h2>Assumptions</h2><ul>{''.join(f'<li>{e(c)}</li>' for c in b['caveats'])}</ul>
@@ -237,7 +280,11 @@ def render_text(b: dict) -> str:
               f"→ short {x['shortage_days']:.1f} d; fallback {x['fallback']}" for x in b["exposure"]]
     lines += ["", "Recommended (for approval):" if b["recommended"] and b["recommended"][0]["cost"] > 0 else "Recommended:"]
     lines += [f"  - {x['action']} {x['part']}: {fmt_inr(x['cost'])}, {x['time_to_effect']:.0f} d to effect, "
-              f"net {fmt_inr(x['net_value'])}; approver {x['approver']}" for x in b["recommended"]]
+              f"net {fmt_inr(x['net_value'])}; approver {x['approver']}"
+              + (" [structural hedge: pays back over future events, not this one]" if x.get("hedge") else "")
+              for x in b["recommended"]]
+    if b.get("residual"):
+        lines += ["", "Left after this plan: " + residual_sentence(b["residual"])]
     if b["customers"]:
         lines += ["", "Customers below 95% OTIF: " + ", ".join(f"{c['customer']} ({c['weeks_below']} wk)" for c in b["customers"])]
     lines += ["", f"Sources: {b['n_signals']} signals from {b['n_sources']} sources, first {b['sources'][0]['date']}."]

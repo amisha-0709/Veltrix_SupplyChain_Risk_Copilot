@@ -66,6 +66,7 @@ _SIMULATED: dict[str, dict[str, dict]] = {}     # session -> alert_id -> record
 _SIM_BY_ID: dict[str, dict] = {}
 _SIM_MAX = 500
 _SESSION_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
+_REVIEW: dict[str, list[dict]] = {}             # session -> signals 'Try a signal' sent to Needs review
 
 
 def _session(x_copilot_session: str | None) -> str | None:
@@ -159,8 +160,10 @@ def business_case():
 
 
 @app.get("/api/needs-review")
-def needs_review():
-    return snap()["needs_review"]
+def needs_review(x_copilot_session: str | None = Header(default=None)):
+    """Signals with strong cues that name nothing of ours: a person decides. Includes your own 'Try a signal' items."""
+    s = _session(x_copilot_session)
+    return list(snap()["needs_review"]) + (list(_REVIEW.get(s, [])) if s else [])
 
 
 @app.get("/api/replays")
@@ -221,13 +224,33 @@ def simulate(sig: SignalIn, x_copilot_session: str | None = Header(default=None)
         t["duration_days"] = sig.duration_days
     base = {"triage": clean({k: t[k] for k in ("text", "links", "link_strength", "cues", "cue_score", "score",
                                                 "event_type", "reason")}), "threshold": th}
+    from core.triage import off_network_places
     if t["link_strength"] == 0 and t["cue_score"] >= th:
+        elsewhere = off_network_places(f"{sig.headline} {sig.snippet}")
+        if elsewhere:      # it names a place, and that place isn't one we depend on: not our problem
+            return {**base, "decision": "ignored",
+                    "message": f"Strong disruption cues, but it's about {', '.join(elsewhere)}, which isn't in Veltrix's "
+                               "network (no supplier, port, lane or commodity there). Logged only."}
+        item = {"signal_id": t["signal_id"], "published": pd.Timestamp.now().isoformat(timespec="seconds"),
+                "source": sig.source, "text": t["text"], "score": t["cue_score"],
+                "reason": "Strong cues but no supplier, port, lane or commodity of ours named", "simulated": True}
+        if session:
+            _REVIEW.setdefault(session, []).append(item)
+            del _REVIEW[session][:-50]
         return {**base, "decision": "needs_review",
                 "message": "Strong disruption cues, but nothing in the signal names a supplier, port, lane or commodity "
-                           "we depend on. Marked for human review rather than guessed onto the network."}
+                           "we depend on. Added to Needs review for a person to check, rather than guessed onto the network."}
     if t["score"] < th:
-        return {**base, "decision": "ignored",
-                "message": "Below the alert threshold: not linked to our network, or a routine / dampened story. Logged only."}
+        damp = [c for c in t["cues"] if "(-" in c]
+        if t["link_strength"] == 0:
+            why = "it doesn't name any supplier, port, lane or commodity in Veltrix's network"
+        elif damp:
+            why = (f"it's linked to {', '.join(n.split(':', 1)[1] for n in t['links'])}, but the wording is a routine or "
+                   f"non-event story ({', '.join(damp)})")
+        else:
+            why = (f"it's linked to {', '.join(n.split(':', 1)[1] for n in t['links'])}, but the wording is not strong "
+                   f"enough to alert (score {t['score']:g} vs threshold {th:g})")
+        return {**base, "decision": "ignored", "message": f"Not alerted: {why}. Logged only."}
     events, _ = build_events(pd.DataFrame([t]), th)
     a = build_alert(events[0])
     rec = alert_record(a)
@@ -252,7 +275,7 @@ class DecisionIn(BaseModel):
     alert_id: str
     option: str = Field(max_length=200)
     decision: str = Field(pattern="^(proposed|approved|escalated|rejected|dismissed|watching)$")
-    by: str = Field(min_length=2, max_length=60)          # role, e.g. "Head of Supply Chain"
+    by: str = Field(min_length=2, max_length=60)          # role, self-declared on the demo (no sign-in)
     note: str = Field(default="", max_length=500)
 
 

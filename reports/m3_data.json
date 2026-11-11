@@ -406,7 +406,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-002",
@@ -457,7 +457,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b915.95 cr",
    "owner": "Magnets",
-   "secs": 0.28
+   "secs": 0.21
   },
   {
    "alert_id": "AL-005",
@@ -474,7 +474,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b955.45 cr",
    "owner": "Semiconductors",
-   "secs": 0.32
+   "secs": 0.26
   },
   {
    "alert_id": "AL-006",
@@ -491,7 +491,7 @@
    "confidence": 0.84,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-007",
@@ -508,7 +508,7 @@
    "confidence": 0.84,
    "at_risk": "\u20b90",
    "owner": "Passives",
-   "secs": 0.06
+   "secs": 0.05
   },
   {
    "alert_id": "AL-008",
@@ -525,7 +525,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.04
+   "secs": 0.05
   },
   {
    "alert_id": "AL-009",
@@ -559,7 +559,7 @@
    "confidence": 0.63,
    "at_risk": "\u20b90",
    "owner": "Li-ion cells",
-   "secs": 0.15
+   "secs": 0.13
   },
   {
    "alert_id": "AL-011",
@@ -576,7 +576,7 @@
    "confidence": 0.9,
    "at_risk": "\u20b93.45 cr",
    "owner": "PCBs",
-   "secs": 0.32
+   "secs": 0.36
   },
   {
    "alert_id": "AL-012",
@@ -593,7 +593,7 @@
    "confidence": 0.72,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.05
+   "secs": 0.06
   },
   {
    "alert_id": "AL-013",
@@ -644,7 +644,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Connectors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-016",
@@ -661,7 +661,7 @@
    "confidence": 0.78,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.08
+   "secs": 0.05
   },
   {
    "alert_id": "AL-017",
@@ -678,7 +678,7 @@
    "confidence": 0.6,
    "at_risk": "\u20b90",
    "owner": "Semiconductors",
-   "secs": 0.06
+   "secs": 0.05
   },
   {
    "alert_id": "AL-018",
@@ -695,7 +695,7 @@
    "confidence": 0.95,
    "at_risk": "\u20b90",
    "owner": "Connectors",
-   "secs": 0.05
+   "secs": 0.04
   },
   {
    "alert_id": "AL-019",
@@ -712,7 +712,7 @@
    "confidence": 0.75,
    "at_risk": "\u20b93.87 cr",
    "owner": "Passives",
-   "secs": 0.38
+   "secs": 0.27
   }
  ]
 }

@@ -27,6 +27,7 @@ TEMPLATE_SUFFIX = re.compile(r"\s*(— update|\(report\)|: what we know|as situa
 CUES: list[tuple[str, float, str]] = [
     # --- weather & seismic
     (r"typhoon|cyclone|hurricane", 2, "weather"), (r"red alert", 3, "weather"),
+    (r"\b(?:forecast|expected|set|likely|due) to (?:hit|strike|make landfall)|\bmakes? landfall\b", 1.5, "weather"),  # persona test
     (r"(sea|storm|typhoon|cyclone|rain|weather) warning", 2, "weather"),
     (r"extremely heavy|very heavy", 2, "weather"), (r"\bflood(s|ing|ed)?\b", 3, "weather"),
     (r"intensif(ies|y|ying)|strengthens|likely to become", 2, "weather"),
@@ -40,6 +41,7 @@ CUES: list[tuple[str, float, str]] = [
     (r"attacks? on", 2, "route"), (r"escalat", 1, "route"),
     (r"congestion (builds|worsens|rises)|congestion surcharge|backlog", 2, "congestion"),
     (r"waiting times?\b[^.]{0,30}\b(rise|rises|rising|climb|up)", 2, "congestion"),
+    (r"waiting times?\b[^.]{0,40}\b\d+(?:\.\d+)?\s*days", 1, "congestion"),  # stated wait in days (persona test)
     (r"rolled bookings|blank sailings", 2, "congestion"),
     (r"surcharges?|longer lead times", 1, "congestion"),
     (r"volumes surge|yard utilisation|utilization above", 1, "congestion"),
@@ -296,3 +298,26 @@ if __name__ == "__main__":
     print(tr[(tr.score < th) & tr.relevant_to_veltrix][["signal_id", "score", "text", "reason"]].drop_duplicates("text").to_string())
     print("\n-- train false alarms")
     print(tr[(tr.score >= th) & ~tr.relevant_to_veltrix].groupby("story_key").agg(n=("signal_id", "size"), score=("score", "max"), reason=("reason", "first")).sort_values("n", ascending=False).head(25).to_string())
+
+
+# Places a story can be about that are NOT in Veltrix's network. Used only to drop strong-cue stories that name one of
+# these and nothing of ours (e.g. "Cyclone makes landfall in Odisha"), instead of sending them to Needs review.
+# Anything the network gazetteer recognises is removed from this list at first use, so it can never hide our own nodes.
+_OFF_NETWORK_CANDIDATES = [
+    "Odisha", "Andhra Pradesh", "West Bengal", "Kolkata", "Bihar", "Assam", "Kerala", "Goa", "Gujarat", "Rajasthan",
+    "Punjab", "Uttar Pradesh", "Delhi", "Madhya Pradesh", "Jharkhand", "Telangana", "Hyderabad", "Karnataka", "Bengaluru",
+    "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Myanmar", "Philippines", "Indonesia", "Australia", "Brazil",
+    "Mexico", "Canada", "United States", "USA", "Argentina", "Chile", "Peru", "Nigeria", "Kenya", "South Africa",
+    "Egypt", "Turkey", "Russia", "Ukraine", "Poland", "France", "Italy", "Spain", "United Kingdom", "UK",
+    "Florida", "Texas", "California", "New Zealand", "Saudi Arabia", "Iran", "Iraq",
+]
+_OFF_RE = None
+
+
+def off_network_places(text: str) -> list[str]:
+    global _OFF_RE
+    if _OFF_RE is None:
+        net = build_network()
+        keep = [p for p in _OFF_NETWORK_CANDIDATES if not net.match(p)]
+        _OFF_RE = re.compile(r"\b(" + "|".join(re.escape(p) for p in keep) + r")\b", re.I)
+    return sorted({m.group(1) for m in _OFF_RE.finditer(text)})

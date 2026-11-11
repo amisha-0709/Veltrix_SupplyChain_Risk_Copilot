@@ -36,9 +36,11 @@ const node = (n) => { const [t, name] = n.split(":"); return `<span class="tag" 
 
 /* ---------------- views ---------------- */
 async function viewInbox(tab = "inbox") {
-  const [meta, alerts] = await Promise.all([get("/api/meta"), api("/api/alerts")]);
+  const [meta, alerts, review] = await Promise.all([get("/api/meta"), api("/api/alerts"), api("/api/needs-review").catch(() => [])]);
   const inbox = alerts.filter((a) => a.inbox), watch = alerts.filter((a) => !a.inbox);
   const bt = meta.backtest;
+  const reviewRows = review.map((r) => `<tr><td>${date(r.published)}</td><td>${esc(r.source)}</td><td>${esc(r.text)}${r.simulated ? ' <span class="tag">simulated</span>' : ""}</td>
+      <td class="muted">${esc(r.reason || "")}</td></tr>`).join("");
   const rows = (tab === "inbox" ? inbox : watch).map((a) => `
     <tr class="click" data-id="${esc(a.alert_id)}">
       <td>${pill(a.priority, a.likelihood, a.impact)}</td>
@@ -55,16 +57,20 @@ async function viewInbox(tab = "inbox") {
     <p class="sub">Every external signal that touches Veltrix's suppliers, ports, lanes or commodities becomes one alert per event, quantified with
     the playbook method. Priority ≥ 6 goes to the inbox; the rest is the watch log. Stock position: ${esc(meta.snapshot_date)}.</p>
     <div class="tiles">
-      <div class="tile"><b>${meta.counts.inbox}</b><span>alerts needing an owner (priority ≥ 6)</span></div>
+      <div class="tile"><b>${inbox.length}</b><span>alerts needing an owner (priority ≥ 6)</span></div>
       <div class="tile"><b>${(bt.signals.test.recall * 100).toFixed(1)}%</b><span>recall on the test period (target ≥ 80%)</span></div>
       <div class="tile"><b>${Math.round(bt.alerts.test.precision * 100)}%</b><span>alert precision on test (target ≥ 60%)</span></div>
       <div class="tile"><b>${bt.lead.test.median_lead_days.toFixed(1)} d</b><span>median warning before impact (team today: ${bt.lead_all.median_team_lead_days > 0 ? "" : "+"}${-bt.lead_all.median_team_lead_days} d after)</span></div>
     </div>
     <div class="tabs"><button data-t="inbox" class="${tab === "inbox" ? "on" : ""}">Inbox (${inbox.length})</button>
-      <button data-t="watch" class="${tab === "watch" ? "on" : ""}">Watch log (${watch.length})</button></div>
-    <div class="card"><table><thead><tr><th>Priority</th><th>Alert</th><th>First seen</th><th class="num">Revenue at risk</th>
+      <button data-t="watch" class="${tab === "watch" ? "on" : ""}">Watch log (${watch.length})</button>
+      <button data-t="review" class="${tab === "review" ? "on" : ""}">Needs review (${review.length})</button></div>
+    ${tab === "review" ? `<div class="card"><p class="muted" style="margin-top:0">Strong disruption wording, but nothing in the signal names a supplier, port, lane or
+      commodity of ours. A person decides; the co-pilot never guesses a link.</p><table><thead><tr><th>Date</th><th>Source</th><th>Signal</th><th>Why it's here</th></tr></thead>
+      <tbody>${reviewRows || '<tr><td colspan="4" class="muted">Nothing waiting for review.</td></tr>'}</tbody></table></div>` :
+    `<div class="card"><table><thead><tr><th>Priority</th><th>Alert</th><th>First seen</th><th class="num">Revenue at risk</th>
       <th>Owner</th><th class="num">Sources / signals</th><th class="num">Confidence</th><th>Response</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="8" class="muted">Nothing here.</td></tr>'}</tbody></table></div>
+      <tbody>${rows || '<tr><td colspan="8" class="muted">Nothing here.</td></tr>'}</tbody></table></div>`}
     <p class="muted">Alerts are replayed from two years of signals (Oct 2024 – Sep 2026) and quantified on today's stock. Open an alert for its one-page briefing.</p>`;
   document.querySelectorAll("tr[data-id]").forEach((r) => (r.onclick = () => (location.hash = `#/alert/${r.dataset.id}`)));
   document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => viewInbox(b.dataset.t)));
@@ -112,10 +118,12 @@ async function viewAlert(id, tab = "options") {
     decide: `<form class="stack" id="dec">
       <label>Option<select name="option">${opts.map((o) => `<option>${esc((o.part_id ? o.part_id + " · " : "") + o.option)}</option>`).join("")}</select></label>
       <label>Decision<select name="decision"><option>proposed</option><option>approved</option><option>escalated</option><option>rejected</option><option>watching</option><option>dismissed</option></select></label>
-      <label>Decided by (role)<input name="by" required placeholder="e.g. Head of Supply Chain" value="${esc(a.owner)}"></label>
+      <label>Decided by (role)<select name="by">${[a.owner, ...["Category manager", "Head of Supply Chain", "Head of Supply Chain + Quality", "Head of Supply Chain + CFO", "Head of Sales + Supply Chain", "COO", "COO + CFO", "CEO", "Risk analyst"]].filter((v, i, x) => x.indexOf(v) === i)
+        .map((r) => `<option>${esc(r)}</option>`).join("")}</select></label>
       <label>Note<textarea name="note" placeholder="Why, and any conditions"></textarea></label>
       <div class="btns"><button class="btn" type="submit">Record decision</button></div>
-      <p class="muted">This only records what a person decided (playbook §8). Nothing is ordered, booked or sent.</p></form>
+      <p class="muted">This only records what a person decided (playbook §8). Nothing is ordered, booked or sent. On this demo the role is
+      self-declared and the log is temporary; a pilot needs sign-in and a database.</p></form>
       ${decRows ? `<h3 style="margin-top:14px">Decision log</h3><table><thead><tr><th>When</th><th>Who</th><th>Decision</th><th>Option</th><th>Note</th></tr></thead><tbody>${decRows}</tbody></table>` : ""}`,
   };
   $("#app").innerHTML = `
@@ -125,7 +133,7 @@ async function viewAlert(id, tab = "options") {
       <div class="btns"><a class="btn secondary" href="/api/alerts/${encodeURIComponent(a.alert_id)}/briefing" target="_blank" rel="noopener">Printable briefing</a>
       <button class="btn secondary" id="copy">Copy as email</button></div></div>
     <p class="muted">${esc(a.alert_id)} · ${esc(a.kind)} · first seen ${date(a.first_seen)} · ${a.n_signals} signals from ${a.n_sources} sources
-      · quantified in ${a.seconds_to_quantify}s${a.actual_disruptions?.length ? ` · history: ${esc(a.actual_disruptions.join(", "))}` : ""}</p>
+      · impact on stock as of 30 Sep 2026 · quantified in ${a.seconds_to_quantify}s${a.actual_disruptions?.length ? ` · history: ${esc(a.actual_disruptions.join(", "))}` : ""}</p>
     <div class="row">
       <div class="card" style="padding:0"><iframe class="brief" id="brief" title="One-page briefing"></iframe></div>
       <div><div class="tabs">${["options", "working", "sources", "decide"].map((t) =>

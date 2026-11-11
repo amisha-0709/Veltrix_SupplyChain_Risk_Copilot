@@ -35,7 +35,12 @@ FORTNIGHT = re.compile(r"\b(a|one|two|\d+)\s+fortnights?\b", re.I)
 # "for <words> days/weeks/months" that we could not read as a number → ask, never guess
 UNREAD_DUR = re.compile(r"\b(?:for|lasting|over|about|around)\s+((?:[a-z]+[\s-]){0,2}?[a-z]+)\s+(?:days?|weeks?|months?)\b", re.I)
 
-WHAT_IF = re.compile(r"\bif\b|\bwhat happens\b|\bsuppose\b|\bwhat would\b|\bstops?\b|\bcloses?\b|\bshut", re.I)
+WHAT_IF = re.compile(r"\bif\b|\bwhat happens\b|\bsuppose\b|\bwhat would\b|\bstops?\b|\bclos(?:es?|ed|ure)\b|\bshut"
+                     r"|\bcost(?:s)? us\b|\bhow much\b|\bmargin\b|\blose\b|\bloss\b|\bfails?\b|\bcut\b", re.I)
+OPTIONS_Q = re.compile(r"\boptions?\b|what (?:should|can|could) (?:we|i) do|\bmitigat|\brecommend", re.I)
+# Requests to act. The co-pilot never orders, books, contacts or approves: say so plainly.
+ACTION_Q = re.compile(r"^\s*(?:please\s+|can you\s+|could you\s+)?(?:ignore\b|order\b|buy\b|purchase\b|book\b|email\b|"
+                      r"contact\b|send\b|place\b|cancel\b|approve\b|expedite\b|call\b)|\bignore (?:your|the|all) (?:rules|instructions)", re.I)
 EXPOSURE = re.compile(r"exposed|exposure|depend|reliant|rely|single[- ]source|concentrat", re.I)
 ALERTS = re.compile(r"\b(open|inbox|alerts?|risks?|register|right now|this week|this month)\b", re.I)
 ALERT_ID = re.compile(r"\b(AL-\d{3}|SIM-AL-\d{3})\b", re.I)
@@ -167,6 +172,14 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
                f"{t['min_cover_days']} days against a {r.parts['effective_delay_days'].max():g}-day delay"
                + (". Finished goods absorb the small gap" if t["parts_short"] else "") + ". "
                f"{fmt_inr(t['revenue_exposed_per_day_inr'])}/day of revenue depends on these parts.")
+        if re.search(r"\bcost|\bmargin|\bhow much|\blose\b|\bloss", q, re.I):
+            from dataclasses import replace as _replace
+            st = run(_replace(sc, stress=True)).totals if dur is None else None
+            ans += (" Margin at risk: ₹0 in the expected case"
+                    + ((" and still ₹0 at the slowest recovery seen in history" if st["margin_at_risk_inr"] < 1 else
+                        f"; if it runs as long as the slowest recovery seen in history, {fmt_inr(st['margin_at_risk_inr'])} "
+                        f"margin ({fmt_inr(st['revenue_at_risk_inr'])} revenue)") if st else "")
+                    + ". Extra freight or surcharges are not included.")
     else:
         first = S.iloc[0]
         cust = below.groupby("customer").agg(weeks=("week_start", "nunique"), worst=("otif", "min"),
@@ -195,7 +208,23 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
             ans += " " + recovery_note
     if scope_note:
         ans = scope_note + " " + ans
-    tables = []
+    opt_table = None
+    if OPTIONS_Q.search(q) and not t["no_action_needed"]:
+        from core.mitigate import recommend
+        rec = recommend(sc, 0.0)
+        o = rec["options"]
+        o = o[o["kind"] != "none"] if len(o) else o
+        if len(o):
+            o = o.copy()
+            o["rank"] = range(1, len(o) + 1)
+            opt_table = _table("Ranked options (recommended, not approved)", o.head(8), {
+                "rank": "#", "part_id": "Part", "option": "Option", "time_to_effect_days": "Effect (d)",
+                "cost_inr": "Cost", "net_value_inr": "Net value", "approver": "Approver"})
+            best = o.iloc[0]
+            ans += (f" Best option: {best['option']} for {best['part_id']} ({fmt_inr(best['cost_inr'])}, "
+                    f"{best['time_to_effect_days']:.0f} d to effect, net {fmt_inr(best['net_value_inr'])}; "
+                    f"approver {best['approver']}).")
+    tables = [opt_table] if opt_table else []
     if len(S):
         tables.append(_table("Products that stop (first to stop at the top)", S, {
             "sku_id": "SKU", "customer": "Customer", "binding_part": "Binding part", "stops_from_day": "Stops from day",
@@ -244,6 +273,57 @@ def answer_exposure(q: str, nodes: list[str]) -> dict:
                 "revenue_dependent_inr_cr": "Revenue dep. (₹ cr/yr)", "fallback": "Fallback"})]}
 
 
+def _customers() -> list[str]:
+    from core.etl import load
+    return sorted(load()["skus"]["primary_customer"].dropna().unique())
+
+
+def answer_customer(q: str, customer: str, alerts: list[dict] | None, get_alert) -> dict:
+    """'Is Kairo EV at risk?': the customer's products, the open alerts that hit them, and what we can say."""
+    from core.etl import load
+    from core.exposure import part_exposure
+    S = load()["skus"]
+    mine = S[S["primary_customer"] == customer]
+    hits = []
+    for a in (alerts or []):
+        if not a.get("inbox") or get_alert is None:
+            continue
+        full = get_alert(a["alert_id"])
+        if not full:
+            continue
+        o = [r for r in full.get("otif", []) if r["customer"] == customer and r["below_target"]]
+        if o:
+            hits.append({"alert": a["alert_id"], "title": a["title"], "weeks": len(o),
+                         "worst": min(r["otif"] for r in o), "from": min(r["week_start"] for r in o),
+                         "simulated": bool(a.get("simulated"))})
+    pe = part_exposure()
+    fragile = pe[pe["customers"].map(lambda c: customer in c) & pe["single_source"] & pe["cover_below_lead_time"]]
+    if hits:
+        h = hits[0]
+        ans = (f"Yes. {len(hits)} open alert(s) push {customer} below its 95% OTIF target. Biggest: {h['alert']} "
+               f"({h['title']}): {h['weeks']} week(s) below target from {h['from']}, worst week {h['worst']:.0%}. "
+               "What you can tell them today: which deliveries may be late and from when (table below), and that options "
+               "are being decided by the approvers named in the alert. Don't promise dates until a mitigation is approved.")
+    else:
+        ans = f"No open alert pushes {customer} below 95% OTIF right now."
+    ans += (f" {customer} buys {len(mine)} product(s); {len(fragile)} single-source part(s) in them have less cover "
+            "than their lead time.")
+    tables = []
+    if hits:
+        tables.append({"title": f"Open alerts affecting {customer}", "columns": ["Alert", "Title", "Weeks below 95%",
+                       "Worst week", "From"], "rows": [[h["alert"] + (" (simulated)" if h["simulated"] else ""), h["title"],
+                                                       h["weeks"], f"{h['worst']:.0%}", h["from"]] for h in hits]})
+    tables.append({"title": f"Products bought by {customer}", "columns": ["SKU", "Name", "Plant", "Weekly demand",
+                   "Finished goods (days)"], "rows": [[r.sku_id, r.sku_name, r.plant, int(r.avg_weekly_demand_units),
+                                                       round(float(r.fg_days_of_cover), 1)] for r in mine.itertuples()]})
+    if len(fragile):
+        tables.append(_table("Single-source parts with cover below lead time", fragile, {
+            "part_id": "Part", "description": "Description", "days_of_cover": "Cover (d)", "lead_time_days": "Lead (d)"}))
+    return {"intent": "customer", "answer": ans, "tables": tables, "working": [],
+            "assumptions": ["Inbox alerts as quantified on today's stock (30 Sep 2026).",
+                            "Products are linked to their primary customer in the data pack."]}
+
+
 def answer_alerts(alerts: list[dict]) -> dict:
     inbox = [a for a in alerts if a.get("inbox")]
     inbox.sort(key=lambda a: -a["priority"])
@@ -272,13 +352,24 @@ HELP = ("I can answer questions like:\n"
         "• Which customers miss their 95% OTIF target if Penang semiconductor output stops for six weeks?\n"
         "• How exposed are we to Shanghai?\n"
         "• What's in the inbox right now?\n"
-        "• What should we do about AL-005?")
+        "• What should we do about AL-005?\n"
+        "• Is Kairo EV at risk right now?\n"
+        "• What does a Red Sea closure cost us in margin?")
 
 
 def ask(question: str, alerts: list[dict] | None = None, get_alert=None) -> dict:
     q = question.strip()
     if len(q) < 4:
         return {"intent": "help", "answer": HELP, "tables": [], "working": [], "assumptions": []}
+    if ACTION_Q.search(q):
+        return {"intent": "refuse",
+                "answer": "I can't place orders, book freight, contact suppliers or customers, or approve anything. The "
+                          "co-pilot recommends and people decide. I can tell you what's at risk and which options are worth "
+                          "approving, and who has to approve them.\n\n" + HELP,
+                "tables": [], "working": [], "assumptions": []}
+    cust = next((c for c in _customers() if re.search(r"\b" + re.escape(c) + r"\b", q, re.I)), None)
+    if cust:
+        return answer_customer(q, cust, alerts, get_alert)
     m = ALERT_ID.search(q)
     if m and get_alert is not None:
         a = get_alert(m.group(1).upper())
