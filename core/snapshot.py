@@ -93,6 +93,8 @@ def build_snapshot() -> dict:
     snap["replays"] = reps
     snap["replay_summary"] = summarise(flat) | {
         "structural_protected_cr": round(float(flat["structural_protected_inr"].clip(lower=0).sum()) / 1e7, 1)}
+    from core.leading import leading_indicators
+    snap["leading"] = leading_indicators()
     for k in ("m2_data.json", "m3_data.json", "m6_data.json"):
         p = ROOT / "reports" / k
         if p.exists():

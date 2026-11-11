@@ -192,6 +192,12 @@ def persona(x_copilot_session: str | None = Header(default=None)):
             "as_of": "30 Sep 2026"}
 
 
+@app.get("/api/leading")
+def leading():
+    """Port-congestion and shipment-delay trends: watch signals shown alongside news (no alert, no back-test change)."""
+    return snap().get("leading") or {"ports": [], "shipments": [], "history": [], "rule": ""}
+
+
 @app.get("/api/exposure")
 def exposure():
     return snap()["exposure"]

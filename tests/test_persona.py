@@ -29,3 +29,11 @@ def test_ui_ships_persona_pages():
     assert "personas.js" in html and "#/p/coo" in html
     for v in ("viewCategory", "viewHosc", "viewCoo", "viewSales"):
         assert v in js
+
+
+def test_leading_indicators():
+    j = c.get("/api/leading").json()
+    assert j["ports"] and j["rule"]
+    port_cases = [h for h in j["history"] if h["type"] in ("Weather", "Logistics")]
+    assert sum(h["flagged_before"] for h in port_cases) >= 3          # 3 of 4 port disruptions flagged ahead
+    assert not any(h["flagged_before"] for h in j["history"] if h["type"] in ("Supplier incident", "Cyber"))

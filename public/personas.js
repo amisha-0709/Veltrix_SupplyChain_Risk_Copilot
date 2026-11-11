@@ -144,8 +144,23 @@ async function viewCategory() {
 }
 
 /* ---------- Head of Supply Chain ---------- */
+function leadingBlock(li) {
+  if (!li || !li.ports?.length) return "";
+  const ports = li.ports.filter((r) => r.in_network).slice(0, 6);
+  const ships = (li.shipments || []).filter((r) => (r.change_days || 0) >= 2);
+  const hit = li.history.filter((h) => h.flagged_before && !/Supplier|Cyber/.test(h.type));
+  const portCases = li.history.filter((h) => !/Supplier|Cyber/.test(h.type));
+  return `<section class="block"><h2>Leading indicators: ports to watch</h2>
+    <p class="muted" style="margin-top:0">Weekly port congestion, week of ${esc(date(ports[0]?.week))}. ${esc(li.rule)}
+    In history this flagged ${hit.length} of ${portCases.length} port disruptions ${hit.length ? `${Math.min(...hit.map((h) => h.days_ahead))} to ${Math.max(...hit.map((h) => h.days_ahead))}` : "0"} days ahead (the fire and cyber attack gave no sign, as expected). Shown to watch, not an alert.</p>
+    <div style="overflow-x:auto"><table><thead><tr><th>Port</th><th class="num">Congestion now</th><th class="num">8-week mean</th><th class="num">Change</th><th class="num">Vessel wait (h)</th><th></th></tr></thead><tbody>
+    ${ports.map((r) => `<tr><td><b>${esc(r.port)}</b></td><td class="num">${r.index}</td><td class="num">${r.prior_mean}</td><td class="num">${r.change > 0 ? "+" : ""}${r.change}</td>
+      <td class="num">${r.wait_hours}</td><td>${r.rising ? '<span class="status s-warn">rising: watch</span>' : '<span class="status">normal</span>'}</td></tr>`).join("")}</tbody></table></div>
+    ${ships.length ? `<p class="qline">Shipments running late: ${ships.map((s) => `<b>${esc(s.origin_port)}</b> ${s.recent_mean_delay_days} days late on average (usually ${s.baseline_mean_delay_days})`).join("; ")}.</p>` : ""}</section>`;
+}
+
 async function viewHosc() {
-  const p = await personaData();
+  const [p, li] = await Promise.all([personaData(), get("/api/leading").catch(() => null)]);
   const queue = p.alerts.filter((a) => a.inbox && openStatus(a));
   const done = p.alerts.filter((a) => a.inbox && !openStatus(a));
   const proposed = queue.filter((a) => a.last_decision?.decision === "proposed").length;
@@ -172,7 +187,7 @@ async function viewHosc() {
     <section class="block"><h2>Weekly risk review</h2><div style="overflow-x:auto"><table><thead><tr><th>Priority</th><th>Risk</th><th>Owner</th><th class="num">At risk</th><th>Status</th></tr></thead><tbody>
       ${p.alerts.slice(0, 8).map((a) => `<tr class="click" data-go="${esc(a.alert_id)}"><td>${pill(a.priority)}</td><td>${esc(a.title)}</td><td>${esc(a.category)}</td>
         <td class="num">${esc(a.revenue_at_risk_fmt || "—")}</td><td>${esc(a.status || "")}</td></tr>`).join("")}</tbody></table></div>
-      <p class="muted"><a href="#/register">Full risk register</a></p></section>` + askBlock("hosc");
+      <p class="muted"><a href="#/register">Full risk register</a></p></section>` + leadingBlock(li) + askBlock("hosc");
   document.querySelectorAll("[data-d]").forEach((b) => (b.onclick = async () => {
     const a = p.alerts.find((x) => x.alert_id === b.dataset.a);
     await decide(a.alert_id, b.dataset.d, "Head of Supply Chain", a.options.map(optLabel).join("; ") || "No action"); viewHosc();
