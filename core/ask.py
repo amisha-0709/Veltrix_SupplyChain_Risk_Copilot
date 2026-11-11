@@ -195,8 +195,13 @@ def answer_what_if(q: str, nodes: list[str], dur=_PARSE, et: str | None = None,
                f"{fmt_inr(t['revenue_at_risk_inr'])} revenue at risk ({fmt_inr(t['revenue_lost_inr'])} lost sales, "
                f"{fmt_inr(t['margin_at_risk_inr'])} margin). ")
         if len(cust):
-            ans += (f"{len(cust)} customer(s) miss the 95% OTIF target: "
-                    + "; ".join(f"{c.customer} for {c.weeks} week(s), worst {c.worst:.0%}" for c in cust.itertuples()) + ".")
+            cust = cust.sort_values(["worst", "weeks"], ascending=[True, False])     # hardest hit first
+            h = cust.iloc[0]
+            ans += (f"{len(cust)} customer(s) miss the 95% OTIF target. Hardest hit: {h['customer']} "
+                    f"({h['weeks']} week(s) below target, worst week {h['worst']:.0%}). Others: "
+                    + "; ".join(f"{c.customer} for {c.weeks} week(s), worst {c.worst:.0%}" for c in cust.iloc[1:].itertuples())
+                    + "." if len(cust) > 1 else
+                    f"1 customer misses the 95% OTIF target: {h['customer']} for {h['weeks']} week(s), worst {h['worst']:.0%}.")
         else:
             ans += "No customer falls below 95% OTIF."
     recovery_note = None
@@ -253,23 +258,32 @@ def answer_what_if(q: str, nodes: list[str], dur=_PARSE, et: str | None = None,
 
 def answer_exposure(q: str, nodes: list[str]) -> dict:
     from core.exposure import part_exposure
-    parts, how, scope_note = _scope(nodes)
     pe = part_exposure()
+    if not nodes:                                       # nothing named: the whole network
+        parts, how, scope_note = list(pe["part_id"]), "any", None
+    else:
+        parts, how, scope_note = _scope(nodes)
     d = pe[pe["part_id"].isin(parts)].copy()
-    where = " ∩ ".join(_node_name(n) for n in nodes) if how == "all" else ", ".join(_node_name(n) for n in nodes)
+    where = (" ∩ ".join(_node_name(n) for n in nodes) if how == "all" else ", ".join(_node_name(n) for n in nodes)) \
+        or "the whole network"
     if d.empty:
         return {"intent": "clarify", "answer": f"I couldn't link {where} to any part we buy, so I can't size the exposure.",
                 "tables": [], "working": [], "assumptions": []}
     ss = d[d["single_source"]]
     skus = sorted({s for lst in d["skus"] for s in lst})
     below = ss[ss["cover_below_lead_time"]]
-    ans = (f"{len(d)} part(s) depend on {where} ({len(ss)} single-source), feeding {len(skus)} product(s). "
-           f"Annual spend ₹{d['annual_spend_inr_cr'].sum():.1f} cr. "
+    ans = ((f"{len(d)} part(s) depend on {where} ({len(ss)} single-source), feeding {len(skus)} product(s). " if nodes else
+            f"Across the whole network: {len(d)} parts ({len(ss)} single-source), feeding {len(skus)} products. ")
+           + f"Annual spend ₹{d['annual_spend_inr_cr'].sum():.1f} cr. "
            + (f"{len(below)} single-source part(s) have less cover than their lead time: "
               + ", ".join(f"{r.part_id} ({r.days_of_cover:.0f} d vs {r.lead_time_days:.0f} d)" for r in below.itertuples())
               + "." if len(below) else "Every single-source part here has cover above its lead time."))
     d["fallback"] = [("qualified " + a) if isinstance(a, str) else ("unqualified " + b) if isinstance(b, str) else "none"
                      for a, b in zip(d["qualified_alternate_supplier_id"], d["unqualified_alternate_supplier_id"])]
+    nob = ss[ss["qualified_alternate_supplier_id"].isna() & ss["unqualified_alternate_supplier_id"].isna()]
+    ans += (f" {len(nob)} single-source part(s) have no alternate supplier at all, qualified or not: "
+            + ", ".join(f"{r.part_id} ({r.description})" for r in nob.itertuples()) + "." if len(nob) else
+            " Every single-source part here has at least an unqualified alternate.")
     if scope_note:
         ans = scope_note + " " + ans
     return {"intent": "exposure", "answer": ans, "working": [], "assumptions": ["Stock: 30 Sep 2026 snapshot."],
@@ -330,6 +344,60 @@ def answer_customer(q: str, customer: str, alerts: list[dict] | None, get_alert)
                             "Products are linked to their primary customer in the data pack."]}
 
 
+def answer_structural(m6: dict, n: int = 5) -> dict:
+    """Dual-sourcing / buffer moves for single-source parts, ranked by net annual value (M6 structural table)."""
+    rows = [r for r in m6["structural"] if r["net_annual_value_inr"] > 0][:n]
+    s = m6["structural_summary"]
+    ans = (f"{s['parts_with_positive_move']} of 26 single-source parts have a structural move that pays back: "
+           f"₹{s['net_annual_value_cr']:.1f} cr/yr expected loss avoided, net, for about ₹{s['one_off_qualification_cost_cr']:.1f} cr "
+           f"of one-off qualification and {fmt_inr(s['annual_buffer_cost_cr'] * 1e7)}/yr of extra buffer. Top {len(rows)}: "
+           + "; ".join(f"{r['part_id']} {r['description']}: {r['recommendation']} (net {fmt_inr(r['net_annual_value_inr'])}/yr"
+                       + (f", one-off {fmt_inr(r['qualify_cost_once_inr'])}" if r['recommendation'].startswith('Qualify') else "")
+                       + ")" for r in rows)
+           + ". Approval: Head of Supply Chain + Quality. Based on 2 years of history, so a repeat isn't guaranteed.")
+    return {"intent": "structural", "answer": ans, "working": [], "assumptions": [
+        "Expected loss = outage rate per supplier per year × loss if the supplier goes down + the part's share of past losses.",
+        "Qualifying an alternate in advance cuts a future switch to ~19 days (observed); cost ₹15 lakh (₹25 lakh if none known)."],
+        "tables": [{"title": "Structural moves (net value per year)", "columns": ["Part", "Description", "Cover (d)", "Move",
+                    "Net value / yr"], "rows": [[r["part_id"], r["description"], round(r["cover_days"], 1), r["recommendation"],
+                                                 fmt_inr(r["net_annual_value_inr"])] for r in rows]}]}
+
+
+def answer_business_case(m6: dict) -> dict:
+    """ROI of the co-pilot itself, including running costs (M6 business case)."""
+    b, sc = m6["base"], m6["scenarios"]
+    worst = min(sc, key=lambda r: r["roi"])
+    ans = (f"The co-pilot costs {fmt_inr(m6['annual_cost_inr'])} a year to run (people, data feeds, hosting, model calls) and "
+           f"would have returned {fmt_inr(b['net'])} a year net in the replay of all 18 disruptions: ROI {sc[0]['roi']:.1f}×, "
+           f"payback {sc[0]['payback_months']:.1f} months. Harshest sensitivity: {worst['scenario']}, ROI {worst['roi']:.1f}×. "
+           f"Benefit counts margin protected ({fmt_inr(b['margin_protected'])}), penalties avoided ({fmt_inr(b['penalties_avoided'])}) "
+           f"and mitigation spend avoided ({fmt_inr(b['waste_avoided'])}), less the cost of the actions ({fmt_inr(b['mitigation_cost'])}).")
+    return {"intent": "business_case", "answer": ans, "working": [], "assumptions": [
+        "Annualised over 2 years of history; probability-weighted; margin, not revenue.",
+        "Only what the co-pilot adds over the team's own actions is credited."],
+        "tables": [{"title": "Sensitivity", "columns": ["Scenario", "Net benefit / yr", "Cost / yr", "ROI"],
+                    "rows": [[r["scenario"], fmt_inr(r["net_benefit_inr"]), fmt_inr(r["copilot_cost_inr"]), f"{r['roi']:.1f}×"]
+                             for r in sc]}]}
+
+
+def answer_history(replays: list[dict], order: str = "revenue_lost", n: int = 5) -> dict:
+    """Past disruptions (D01–D18) with what they cost and what the co-pilot would have done."""
+    key = (lambda r: -r["actual_revenue_lost_inr"]) if order == "revenue_lost" else (lambda r: str(r["start_date"]))
+    rows = sorted(replays, key=key, reverse=(order == "recent"))[:n]
+    total = sum(r["actual_revenue_lost_inr"] for r in replays)
+    w = rows[0]
+    ans = (f"{len(replays)} disruptions in 2 years cost {fmt_inr(total)} of revenue. "
+           + (f"Worst: {w['disruption_id']} {w['title']} ({str(w['start_date'])[:10]}), {fmt_inr(w['actual_revenue_lost_inr'])} lost. "
+              if order == "revenue_lost" else f"Most recent: {w['disruption_id']} {w['title']} ({str(w['start_date'])[:10]}). ")
+           + "Listed: " + "; ".join(f"{r['disruption_id']} {r['title']}: {fmt_inr(r['actual_revenue_lost_inr'])} lost, co-pilot "
+                                    f"alert {r['copilot_lead_days']:.0f} d before impact" for r in rows) + ".")
+    return {"intent": "history", "answer": ans, "working": [], "assumptions": ["Disruption history D01–D18, Oct 2024 – Sep 2026."],
+            "tables": [{"title": "Disruptions", "columns": ["ID", "Disruption", "Start", "Revenue lost", "Co-pilot lead (d)",
+                                                             "Team spend wasted"],
+                        "rows": [[r["disruption_id"], r["title"], str(r["start_date"])[:10], fmt_inr(r["actual_revenue_lost_inr"]),
+                                  round(r["copilot_lead_days"], 1), fmt_inr(r.get("team_wasted_inr") or 0)] for r in rows]}]}
+
+
 def answer_alerts(alerts: list[dict]) -> dict:
     inbox = [a for a in alerts if a.get("inbox")]
     inbox.sort(key=lambda a: -a["priority"])
@@ -346,7 +414,10 @@ def answer_alerts(alerts: list[dict]) -> dict:
 def answer_options(alert: dict) -> dict:
     o = pd.DataFrame(alert["options"])
     b = alert["brief"]
-    return {"intent": "options", "answer": f"{alert['alert_id']}: {b['headline_impact']} {b['ask']}",
+    cust = b.get("customers") or []
+    who = ("Customers below 95% OTIF: " + "; ".join(f"{c['customer']} ({c['weeks_below']} week(s), worst {c['worst_otif']:.0%})"
+                                                   for c in sorted(cust, key=lambda c: c["worst_otif"])) + ". ") if cust else ""
+    return {"intent": "options", "answer": f"{alert['alert_id']}: {b['headline_impact']} {who}{b['ask']}",
             "working": alert.get("working", []), "assumptions": b.get("caveats", []),
             "tables": [_table("Ranked options (recommended, not approved)", o.head(8), {
                 "rank": "#", "part_id": "Part", "option": "Option", "time_to_effect_days": "Effect (d)",

@@ -233,7 +233,9 @@ def ask_endpoint(q: AskIn, request: Request, x_copilot_session: str | None = Hea
         ok, why = _llm_allowed(who)
         if ok:
             try:
-                return clean(llm_chat.chat(q.question, alerts=al, get_alert=get))
+                s = snap()
+                return clean(llm_chat.chat(q.question, alerts=al, get_alert=get,
+                                           extras={"m6": s.get("m6"), "replays": s.get("replays")}))
             except Exception as e:      # never break the chat: fall back to the rule-based answer
                 note = f"Claude was unavailable ({type(e).__name__}), so the rule-based chat answered."
         else:

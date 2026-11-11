@@ -272,7 +272,9 @@ async function viewBacktest() {
       ${b.false_alarms.map((m) => `<tr><td>false alarm</td><td></td><td>${esc(m.text)}</td><td class="num">score ${m.score}</td></tr>`).join("")}</tbody></table>
       <p class="muted">Full exhibits: <a href="reports/stage1.html" target="_blank" rel="noopener">Stage 1</a> ·
       <a href="reports/m2.html" target="_blank" rel="noopener">Impact engine</a> · <a href="reports/m3.html" target="_blank" rel="noopener">Signal back-test</a> ·
-      <a href="reports/acceptance.html" target="_blank" rel="noopener">Acceptance tests T1–T10</a> · <a href="#/replay/D05">D05 replay (T10)</a></p></div>`;
+      <a href="reports/acceptance.html" target="_blank" rel="noopener">Acceptance tests T1–T10</a> · <a href="#/replay/D05">D05 replay (T10)</a> ·
+      Persona tests: <a href="reports/persona_test.html" target="_blank" rel="noopener">round 1</a>, <a href="reports/persona_test_round2.html" target="_blank" rel="noopener">round 2</a>,
+      <a href="reports/persona_test_round3.html" target="_blank" rel="noopener">round 3 (Claude chat)</a></p></div>`;
 }
 
 /* ---------------- ask (chat) ---------------- */
@@ -288,20 +290,23 @@ const chat = [];
 const tableHtml = (t) => `<h3 style="margin-top:12px">${esc(t.title)}</h3><div style="overflow-x:auto"><table><thead><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
   <tbody>${t.rows.map((r) => `<tr>${r.map((v) => `<td>${esc(v === true ? "yes" : v === false ? "no" : v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 const engineBadge = (r) => r.engine === "claude"
-  ? `<p class="muted" style="margin-top:0">Answered by Claude (${esc(r.model)}) using the impact engine · ${r.tool_calls} tool call(s) · ${r.seconds}s. Every number comes from the engine.</p>`
+  ? (r.tool_calls ? `<p class="muted" style="margin-top:0">Claude (${esc(r.model)}) read your question as: <span class="mono">${(r.interpretation || []).map(esc).join(" + ")}</span>.
+      The answer below is the engine's own text · ${r.seconds}s.</p>`
+      : `<p class="muted" style="margin-top:0">Claude (${esc(r.model)}): no engine query fits this question.</p>`)
   : r.engine === "rules" ? `<p class="muted" style="margin-top:0">Rule-based answer${r.engine_note ? ": " + esc(r.engine_note) : ""}</p>` : "";
 function renderChat() {
   $("#log").innerHTML = chat.map((m) => m.role === "user"
     ? `<div class="result" style="border-color:var(--axis)"><b>You</b><p>${esc(m.text)}</p></div>`
     : `<div class="card">${engineBadge(m.r)}<p style="white-space:pre-line;margin-top:0">${esc(m.r.answer)}</p>
         ${(m.r.tables || []).map(tableHtml).join("")}
-        ${m.r.working?.length ? `<details><summary class="muted">${m.r.engine === "claude" ? "Working: tool calls and engine steps" : "Working (playbook §3)"}</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
+        ${m.r.working?.length ? `<details><summary class="muted">${m.r.engine === "claude" ? "Working: Claude's reading and the engine's steps" : "Working (playbook §3)"}</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
         ${m.r.assumptions?.length ? `<details><summary class="muted">Assumptions</summary><ul>${m.r.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></details>` : ""}</div>`).join("");
 }
 async function viewAsk() {
   $("#app").innerHTML = `<h1>Ask the co-pilot</h1>
-    <p class="sub">Claude reads your question and calls the same impact engine that quantifies alerts as tools, so every number comes from the
-    engine and every answer shows the tool calls it made. It recommends; people decide. If Claude is unavailable, a rule-based parser answers instead.
+    <p class="sub">Claude reads your question (typos, Hinglish and comparisons are fine) and turns it into a query for the impact engine that
+    quantifies alerts. The answer is the engine's own text, so every number is reproducible, and you can see how Claude read the question.
+    It recommends; people decide. If Claude is unavailable, a rule-based parser reads the question instead.
     <span id="eng" class="muted"></span></p>
     <div class="examples">${ASK_EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e)}</button>`).join("")}</div>
     <div id="log"></div>
@@ -310,7 +315,7 @@ async function viewAsk() {
   renderChat();
   api("/api/chat-engine").then((e) => { const el = $("#eng"); if (el) el.textContent = e.engine === "claude" ? `Now answering: Claude (${e.model}).` : "Now answering: rule-based parser (no API key set)."; }).catch(() => {});
   const send = async (q) => {
-    chat.push({ role: "user", text: q }); chat.push({ role: "bot", r: { answer: "Thinking… (Claude answers take 5–20 seconds)" } }); renderChat(); chat.pop();
+    chat.push({ role: "user", text: q }); chat.push({ role: "bot", r: { answer: "Reading your question…" } }); renderChat(); chat.pop();
     try { const r = await api("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q }) });
       chat.push({ role: "bot", r }); } catch (e) { chat.push({ role: "bot", r: { answer: "Error: " + e.message.slice(0, 200) } }); }
     renderChat(); $("#askf").scrollIntoView({ behavior: "smooth", block: "end" });

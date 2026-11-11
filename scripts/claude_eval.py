@@ -27,7 +27,7 @@ CASES = [
     ("Free-form incident", "Our Penang chip supplier just had a fire. How bad is it and what should we do?", True,
      lambda a, e: "what_if(" in e and ("approver" in a.lower() or "head of" in a.lower())),
     ("Which customer worst", "Which customer gets hurt most if Kaohsiung shuts for forty days?", True,
-     lambda a, e: "duration_days=40" in e and any(c in a for c in ["Kairo EV", "Pratham Auto", "VoltRide", "Ojas", "Sarthi", "Trident"])),
+     lambda a, e: "duration_days=40" in e and "Hardest hit:" in a),
     ("Compare two places", "Compare our exposure to Kaohsiung and Shanghai.", True,
      lambda a, e: e.count("exposure(") >= 2 or ("Kaohsiung" in e and "Shanghai" in e)),
     ("Alert options", "What should we do about AL-011?", True, lambda a, e: "alert_options(" in e and "SUP-035" in a + e),
