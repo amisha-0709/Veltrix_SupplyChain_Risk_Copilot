@@ -423,10 +423,16 @@ async function viewBusiness() {
 
 /* ---------------- router ---------------- */
 async function route() {
-  const [, r, id] = (location.hash || "#/inbox").split("/");
-  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.r === (r === "alert" ? "inbox" : r)));
+  const [, r, id] = (location.hash || "#/home").split("/");
+  const persona = r === "p" && PERSONA_VIEWS[id] ? id : null;
+  const isTool = !persona && r !== "home" && r !== undefined && r !== "";
+  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", persona ? a.dataset.r === `p-${persona}` : isTool ? a.dataset.r === "tools" : a.dataset.r === "home"));
+  $("#tools").hidden = !isTool;
+  document.querySelectorAll("#tools a").forEach((a) => a.classList.toggle("on", a.dataset.r === (r === "alert" ? "inbox" : r)));
   try {
-    if (r === "alert" && id) await viewAlert(decodeURIComponent(id));
+    if (persona) await PERSONA_VIEWS[persona]();
+    else if (!isTool) await viewHome();
+    else if (r === "alert" && id) await viewAlert(decodeURIComponent(id));
     else if (r === "register") await viewRegister();
     else if (r === "exposure") await viewExposure();
     else if (r === "simulate") await viewSimulate();
@@ -439,4 +445,4 @@ async function route() {
   } catch (e) { $("#app").innerHTML = `<div class="result needs_review">Could not load: ${esc(e.message.slice(0, 300))}</div>`; }
 }
 addEventListener("hashchange", route);
-route();
+addEventListener("DOMContentLoaded", route);   /* after personas.js has loaded */

@@ -140,6 +140,58 @@ def register(x_copilot_session: str | None = Header(default=None)):
     return sorted(rows, key=lambda r: -r["priority"])
 
 
+def _persona_alert(a: dict, last: dict | None) -> dict:
+    """One alert, cut down to what the persona pages show (read-only view of the snapshot)."""
+    cust = {}
+    for s in a.get("skus") or []:
+        if (s.get("units_short") or 0) > 0:
+            c = cust.setdefault(s["customer"], {"customer": s["customer"], "products": [], "weeks_below": 0,
+                                                "worst_otif": None, "first_week_below": None, "revenue_at_risk_inr": 0.0})
+            c["products"].append({"sku_id": s["sku_id"], "sku_name": s.get("sku_name"), "units_short": s["units_short"],
+                                  "revenue_at_risk_inr": s.get("revenue_at_risk_inr"), "stops_from_day": s.get("stops_from_day")})
+            c["revenue_at_risk_inr"] += s.get("revenue_at_risk_inr") or 0
+    for w in a.get("otif") or []:
+        c = cust.get(w["customer"])
+        if c and w.get("below_target"):
+            c["weeks_below"] += 1
+            c["worst_otif"] = w["otif"] if c["worst_otif"] is None else min(c["worst_otif"], w["otif"])
+            c["first_week_below"] = c["first_week_below"] or w["week_start"]
+    top = [o for o in (a.get("options") or []) if o.get("rank_in_part", o.get("rank")) == 1 and o.get("worth_it", True)]
+    owner = a.get("owner") or ""
+    return {k: a.get(k) for k in ("alert_id", "title", "first_seen", "priority", "inbox", "kind", "owner", "response",
+                                  "revenue_at_risk", "revenue_at_risk_fmt", "confidence", "mode")} | {
+        "category": owner.split(":", 1)[1].strip() if ":" in owner else owner,
+        "ask": (a.get("brief") or {}).get("ask"),
+        "status": f"{last['decision']} by {last['by']}" if last else a.get("status"),
+        "last_decision": last,
+        "customers": sorted(cust.values(), key=lambda c: -c["revenue_at_risk_inr"]),
+        "options": [{k: o.get(k) for k in ("part_id", "option", "cost_inr", "net_value_inr", "time_to_effect_days",
+                                           "approver", "on_time")} for o in top[:4]],
+        "parts_short": [{k: p.get(k) for k in ("part_id", "description", "days_of_cover", "effective_delay_days",
+                                               "shortage_days", "single_source")}
+                        for p in (a.get("parts") or []) if (p.get("shortage_days") or 0) > 0],
+    }
+
+
+@app.get("/api/persona")
+def persona(x_copilot_session: str | None = Header(default=None)):
+    """Compact read-only bundle for the persona pages (category manager, Head of SC, COO, sales)."""
+    last = {}
+    for d in _read_decisions():
+        last[d["alert_id"]] = d
+    al = list(snap()["alerts"]) + _sims(_session(x_copilot_session))
+    ex = snap()["exposure"]
+    customers = sorted({c for p in ex["parts"] for c in (p.get("customers") or [])})
+    return {"alerts": sorted([_persona_alert(a, last.get(a["alert_id"])) for a in al], key=lambda r: -r["priority"]),
+            "categories": sorted({p["category"] for p in ex["parts"]}),
+            "customers": customers,
+            "parts": [{k: p.get(k) for k in ("part_id", "description", "category", "single_source", "supplier_name", "country",
+                                             "days_of_cover", "lead_time_days", "cover_below_lead_time",
+                                             "qualified_alternate_supplier_id", "unqualified_alternate_supplier_id",
+                                             "customers", "revenue_dependent_inr_cr")} for p in ex["parts"]],
+            "as_of": "30 Sep 2026"}
+
+
 @app.get("/api/exposure")
 def exposure():
     return snap()["exposure"]
