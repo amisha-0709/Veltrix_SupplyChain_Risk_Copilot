@@ -1,0 +1,190 @@
+{
+ "met": [
+  1.0,
+  1.0,
+  true,
+  true,
+  true,
+  true,
+  true
+ ],
+ "extraction": {
+  "signals": 179,
+  "signal_link_recall": 0.95,
+  "signal_link_recall_test": 0.884,
+  "location_recall": 0.944,
+  "location_recall_test": 0.837,
+  "commodity_named": 59,
+  "commodity_precision": 1.0,
+  "by_disruption": {
+   "D01": 1.0,
+   "D02": 1.0,
+   "D03": 1.0,
+   "D04": 1.0,
+   "D05": 0.62,
+   "D06": 1.0,
+   "D07": 1.0,
+   "D08": 1.0,
+   "D09": 1.0,
+   "D10": 1.0,
+   "D11": 1.0,
+   "D12": 1.0,
+   "D13": 1.0,
+   "D14": 1.0,
+   "D15": 1.0,
+   "D16": 0.67,
+   "D17": 1.0,
+   "D18": 0.55
+  }
+ },
+ "mitigation": {
+  "options": 37,
+  "missing_fields": 0,
+  "approver_mismatch": 0
+ },
+ "impact": {
+  "within_25pct": "7/9 loss events",
+  "median_abs_err_pct": 2.8,
+  "total_predicted_cr": 161.9,
+  "total_actual_cr": 170.3,
+  "zero_loss_correct": "9/9 no-loss events"
+ },
+ "briefings_pass": 19,
+ "live": [
+  [
+   "/",
+   200
+  ],
+  [
+   "/api/meta",
+   200
+  ],
+  [
+   "/api/alerts",
+   200
+  ],
+  [
+   "/api/alerts/AL-005/briefing",
+   200
+  ],
+  [
+   "/api/register",
+   200
+  ],
+  [
+   "/api/exposure",
+   200
+  ],
+  [
+   "/api/backtest",
+   200
+  ],
+  [
+   "/api/business-case",
+   200
+  ],
+  [
+   "/api/chat-engine",
+   200
+  ],
+  [
+   "/reports/m3.html",
+   200
+  ],
+  [
+   "/reports/coo_onepager.html",
+   200
+  ]
+ ],
+ "triage_rule": "rules",
+ "triage_variants": [
+  {
+   "rule": "rules",
+   "split": "train",
+   "flagged": 136,
+   "tp": 136,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  {
+   "rule": "rules",
+   "split": "test",
+   "flagged": 38,
+   "tp": 38,
+   "fp": 0,
+   "fn": 5,
+   "precision": 1.0,
+   "recall": 0.884,
+   "f1": 0.938
+  },
+  {
+   "rule": "claude",
+   "split": "train",
+   "flagged": 0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 136,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  {
+   "rule": "claude",
+   "split": "test",
+   "flagged": 0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 43,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  {
+   "rule": "either",
+   "split": "train",
+   "flagged": 136,
+   "tp": 136,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  {
+   "rule": "either",
+   "split": "test",
+   "flagged": 38,
+   "tp": 38,
+   "fp": 0,
+   "fn": 5,
+   "precision": 1.0,
+   "recall": 0.884,
+   "f1": 0.938
+  },
+  {
+   "rule": "both",
+   "split": "train",
+   "flagged": 0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 136,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  {
+   "rule": "both",
+   "split": "test",
+   "flagged": 0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 43,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
+  }
+ ]
+}

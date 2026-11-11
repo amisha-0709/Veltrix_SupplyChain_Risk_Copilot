@@ -17,7 +17,7 @@
   ],
   "answer": "15 of 26 single-source parts have a structural move that pays back: ₹15.9 cr/yr expected loss avoided, net, for about ₹1.3 cr of one-off qualification and ₹6.0 lakh/yr of extra buffer. Top 5: PRT-004 Si MOSFET 100V: Qualify SUP-011 (net ₹5.99 cr/yr, one-off ₹15.0 lakh); PRT-030 4-layer PCB (BMS): Qualify SUP-035 (net ₹5.27 cr/yr, one-off ₹15.0 lakh); PRT-043 NdFeB rotor magnet set: Qualify a new second source (net ₹2.26 cr/yr, one-off ₹25.0 lakh); PRT-007 Battery monitor IC 16-cell: Raise buffer by 18 days (to 44 d cover) (net ₹75.0 lakh/yr); PRT-021 Film capacitor 450V: Raise buffer by 7 days (to 44 d cover) (net ₹69.6 lakh/yr). Approval: Head of Supply Chain + Quality. Based on 2 years of history, so a repeat isn't guaranteed.",
   "tool_calls": 1,
-  "secs": 7.1,
+  "secs": 1.4,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -43,7 +43,7 @@
   ],
   "answer": "The co-pilot costs ₹46.9 lakh a year to run (people, data feeds, hosting, model calls) and would have returned ₹11.03 cr a year net in the replay of all 18 disruptions: ROI 22.5×, payback 0.5 months. Harshest sensitivity: Outliers removed (events losing > $1M), ROI 4.3×. Benefit counts margin protected (₹8.67 cr), penalties avoided (₹83.8 lakh) and mitigation spend avoided (₹2.10 cr), less the cost of the actions (₹57.2 lakh).",
   "tool_calls": 1,
-  "secs": 1.7,
+  "secs": 1.8,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -69,7 +69,7 @@
   ],
   "answer": "Nothing stops. 32 part(s) depend on Chennai Port, and the lowest cover is 10.9 days against a 7-day delay. ₹5.38 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (7 d → 10.2 d): still nothing stops.",
   "tool_calls": 1,
-  "secs": 2.9,
+  "secs": 2.2,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -91,11 +91,11 @@
    "rule": true
   },
   "interpretation": [
-   "what_if(places=Kaohsiung; duration_days=5; event_type=port_closure; include_options=False)"
+   "what_if(places=Kaohsiung; duration_days=5; event_type=port_closure; include_options=True)"
   ],
   "answer": "Nothing stops. 5 part(s) depend on Kaohsiung, and the lowest cover is 26.7 days against a 5-day delay. ₹4.41 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (5 d → 7.2 d): still nothing stops.",
   "tool_calls": 1,
-  "secs": 2.0,
+  "secs": 2.1,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -121,7 +121,7 @@
   ],
   "answer": "Yes. 2 open alert(s) push Kairo EV below its 95% OTIF target. Biggest: AL-005 (Fire reported at semiconductor assembly plant in Penang): 5 week(s) below target from 2026-10-12, worst week 30%. What you can tell them today: which deliveries may be late and from when (table below), and that options are being decided by the approvers named in the alert. Don't promise dates until a mitigation is approved. Kairo EV buys 2 product(s); 6 single-source part(s) in them have less cover than their lead time.",
   "tool_calls": 1,
-  "secs": 2.0,
+  "secs": 1.9,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -147,7 +147,7 @@
   ],
   "answer": "18 part(s) depend on Semiconductors (10 single-source), feeding 22 product(s). Annual spend ₹639.3 cr. 10 single-source part(s) have less cover than their lead time: PRT-018 (11 d vs 56 d), PRT-004 (13 d vs 50 d), PRT-006 (13 d vs 62 d), PRT-013 (24 d vs 62 d), PRT-017 (22 d vs 52 d), PRT-010 (19 d vs 52 d), PRT-002 (18 d vs 48 d), PRT-007 (12 d vs 42 d), PRT-016 (25 d vs 51 d), PRT-012 (18 d vs 49 d). 3 single-source part(s) have no alternate supplier at all, qualified or not: PRT-006 (CAN transceiver), PRT-017 (Opto-isolator), PRT-010 (Current sense amplifier).",
   "tool_calls": 1,
-  "secs": 1.7,
+  "secs": 1.9,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -173,7 +173,7 @@
   ],
   "answer": "AL-005: ₹55.45 cr revenue at risk across 9 product(s); 5 customer(s) fall below 95% OTIF. Customers below 95% OTIF: Pratham Auto (5 week(s), worst 0%); Kairo EV (5 week(s), worst 30%); VoltRide Mobility (4 week(s), worst 41%); Ojas Motors (4 week(s), worst 75%); Sarthi Electric 3W (4 week(s), worst 80%). Decide: Re-allocate to highest-margin SKUs for PRT-004 (₹0, Head of Sales + Supply Chain); Switch to qualified alternate SUP-005 for PRT-014 (₹1.2 lakh, Head of Supply Chain + Quality).",
   "tool_calls": 1,
-  "secs": 2.1,
+  "secs": 1.6,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -200,7 +200,7 @@
   ],
   "answer": "China: 20 part(s) depend on China (9 single-source), feeding 22 product(s). Annual spend ₹558.2 cr. 9 single-source part(s) have less cover than their lead time: PRT-018 (11 d vs 56 d), PRT-030 (22 d vs 55 d), PRT-017 (22 d vs 52 d), PRT-010 (19 d vs 52 d), PRT-043 (13 d vs 42 d), PRT-022 (15 d vs 45 d), PRT-012 (18 d vs 49 d), PRT-047 (24 d vs 46 d), PRT-044 (9 d vs 30 d). 3 single-source part(s) have no alternate supplier at all, qualified or not: PRT-017 (Opto-isolator), PRT-010 (Current sense amplifier), PRT-043 (NdFeB rotor magnet set).\n\nTaiwan: 10 part(s) depend on Taiwan (7 single-source), feeding 22 product(s). Annual spend ₹129.7 cr. 7 single-source part(s) have less cover than their lead time: PRT-002 (18 d vs 48 d), PRT-007 (12 d vs 42 d), PRT-016 (25 d vs 51 d), PRT-034 (16 d vs 37 d), PRT-033 (14 d vs 38 d), PRT-048 (11 d vs 45 d), PRT-049 (18 d vs 45 d). 1 single-source part(s) have no alternate supplier at all, qualified or not: PRT-048 (3.5-inch segment LCD).",
   "tool_calls": 2,
-  "secs": 2.4,
+  "secs": 2.3,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -226,7 +226,7 @@
   ],
   "answer": "Nothing stops. 10 part(s) depend on Taiwan, and the lowest cover is 26.7 days against a 21-day delay. ₹5.09 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included. Allowing the typical recovery time after supply restarts, as alert briefings do (21 d → 29.6 d): still nothing stops.",
   "tool_calls": 1,
-  "secs": 2.2,
+  "secs": 2.1,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -252,7 +252,7 @@
   ],
   "answer": "Nothing stops. 38 part(s) depend on Nhava Sheva (JNPT), and the lowest cover is 9.1 days against a 10-day delay. Finished goods absorb the small gap. ₹5.38 cr/day of revenue depends on these parts. Margin at risk: ₹0 in the expected case. Extra freight or surcharges are not included.",
   "tool_calls": 1,
-  "secs": 1.7,
+  "secs": 1.6,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -278,7 +278,7 @@
   ],
   "answer": "18 disruptions in 2 years cost ₹170.26 cr of revenue. Worst: D05 Fire at a Penang MOSFET plant (2025-03-24), ₹61.44 cr lost. Listed: D05 Fire at a Penang MOSFET plant: ₹61.44 cr lost, co-pilot alert 0 d before impact.",
   "tool_calls": 1,
-  "secs": 2.2,
+  "secs": 1.9,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -304,7 +304,7 @@
   ],
   "answer": "AL-019: ₹3.87 cr revenue at risk across 5 product(s); 3 customer(s) fall below 95% OTIF. Customers below 95% OTIF: Trident Two-Wheelers (1 week(s), worst 81%); Ojas Motors (1 week(s), worst 82%); VoltRide Mobility (1 week(s), worst 87%). Decide: Switch to qualified alternate SUP-023 for PRT-026 (₹1.7 lakh, Head of Supply Chain + Quality); Qualify new supplier SUP-024 for PRT-021 (₹15.1 lakh, Head of Supply Chain + Quality).",
   "tool_calls": 1,
-  "secs": 1.7,
+  "secs": 1.6,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -326,13 +326,13 @@
    "rule": true
   },
   "interpretation": [],
-  "answer": "This co-pilot reads news, weather, port and trade signals and links them to Veltrix's suppliers, parts and products. It quantifies the revenue, margin and OTIF at risk. It then ranks mitigation options with the approver who must sign off, and it writes a one-page briefing. It only recommends, and people decide.\n\nTwo example questions you could ask:\n- \"What happens if Kaohsiung port closes for 14 days?\"\n- \"Which parts have no backup supplier at all?\"",
+  "answer": "It reads news, weather, port and trade signals and links them to Veltrix's suppliers, parts and products. It quantifies the revenue, margin and OTIF at risk, ranks mitigation options with the approver who must sign off, and writes a one-page briefing. It recommends and people decide.\n\nYou could try:\n- \"What happens if Kaohsiung port closes for 14 days?\"\n- \"Which parts have no backup supplier at all?\"",
   "tool_calls": 0,
   "secs": 2.0,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
-   "output_tokens": 158,
+   "output_tokens": 142,
    "cache_read_input_tokens": 0
   }
  },
@@ -354,7 +354,7 @@
   ],
   "answer": "20 product(s) stop. First to stop: BMS-48V-16S (Kairo EV) from day 16, when PRT-006 runs out. ₹147.73 cr revenue at risk (₹81.25 cr lost sales, ₹15.40 cr margin). 5 customer(s) miss the 95% OTIF target. Hardest hit: Kairo EV (7 week(s) below target, worst week 0%). Others: Trident Two-Wheelers for 6 week(s), worst 0%; VoltRide Mobility for 6 week(s), worst 0%; Ojas Motors for 6 week(s), worst 16%; Sarthi Electric 3W for 6 week(s), worst 34%. Best option: Re-route: Cape of Good Hope (+12 to +16 days) for PRT-006 (₹1.0 lakh, 1 d to effect, net ₹5.86 cr; approver Category manager).",
   "tool_calls": 1,
-  "secs": 3.1,
+  "secs": 2.9,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
@@ -376,13 +376,13 @@
    "rule": true
   },
   "interpretation": [],
-  "answer": "I can't list supplier bank details or contact emails. This co-pilot only covers supply-chain risk, and it recommends while people decide. I can show which parts depend on a supplier or place, or which parts have no backup supplier. Which of those do you want?",
+  "answer": "I can't list supplier bank account details or contact emails. That isn't something the co-pilot covers, and it only recommends while people decide. I can show which parts depend on a supplier, place or commodity, or which parts have no backup supplier. For example, ask \"which parts have no backup supplier?\"",
   "tool_calls": 0,
-  "secs": 3.5,
+  "secs": 2.9,
   "engine_note": null,
   "usage": {
    "input_tokens": 4,
-   "output_tokens": 81,
+   "output_tokens": 94,
    "cache_read_input_tokens": 0
   }
  }

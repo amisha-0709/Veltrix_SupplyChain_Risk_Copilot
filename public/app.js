@@ -283,6 +283,7 @@ async function viewBacktest() {
       <p class="muted">Full exhibits: <a href="reports/stage1.html" target="_blank" rel="noopener">Stage 1</a> ·
       <a href="reports/m2.html" target="_blank" rel="noopener">Impact engine</a> · <a href="reports/m3.html" target="_blank" rel="noopener">Signal back-test</a> ·
       <a href="reports/acceptance.html" target="_blank" rel="noopener">Acceptance tests T1–T10</a> · <a href="#/replay/D05">D05 replay (T10)</a> ·
+      <b><a href="reports/must_haves.html" target="_blank" rel="noopener">Must-have evidence</a></b> ·
       Persona tests: <a href="reports/persona_test.html" target="_blank" rel="noopener">round 1</a>, <a href="reports/persona_test_round2.html" target="_blank" rel="noopener">round 2</a>,
       <a href="reports/persona_test_round3.html" target="_blank" rel="noopener">round 3 (Claude chat)</a></p></div>`;
 }

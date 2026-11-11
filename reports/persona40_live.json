@@ -6,7 +6,7 @@
   "case": "Inbox lists only real alerts, priority-sorted, each with owner, response time and ₹ at risk",
   "pass": true,
   "observed": "5 inbox alerts, priorities [20, 20, 16, 15, 9]",
-  "secs": 0.36
+  "secs": 0.39
  },
  {
   "id": 2,
@@ -15,7 +15,7 @@
   "case": "Top alert's briefing says what is happening in words from its own sources",
   "pass": true,
   "observed": "Penang MOSFET maker declares force majeure on some product lines. Customers told to expect allocation for several weeks.",
-  "secs": 0.3
+  "secs": 0.54
  },
  {
   "id": 3,
@@ -24,7 +24,7 @@
   "case": "Briefing fits one page and states the ask, approvers, residual loss and that nothing was ordered",
   "pass": true,
   "observed": "1953 chars; residual: About ₹30.50 cr of revenue still lost. PRT-004 stays 32 d short (Broker spot buy would close it in 10 d but costs ₹16.78",
-  "secs": 0.3
+  "secs": 0.32
  },
  {
   "id": 4,
@@ -33,7 +33,7 @@
   "case": "Recording a decision works and the log says nothing was executed",
   "pass": true,
   "observed": "200 Recorded only. The co-pilot never places orders, books freight or contacts suppliers. On the hosted ",
-  "secs": 0.31
+  "secs": 0.58
  },
  {
   "id": 5,
@@ -42,7 +42,7 @@
   "case": "'ordered' and 'executed' are not accepted as decisions",
   "pass": true,
   "observed": "422, 422",
-  "secs": 0.6
+  "secs": 0.82
  },
  {
   "id": 6,
@@ -51,7 +51,7 @@
   "case": "Kaohsiung 10 days: nothing stops, with the parts table",
   "pass": true,
   "observed": "Nothing stops. 5 part(s) depend on Kaohsiung, and the lowest cover is 26.7 days against a 10-day delay. ₹4.41 cr/day of revenue depends on t",
-  "secs": 0.36
+  "secs": 0.38
  },
  {
   "id": 7,
@@ -60,7 +60,7 @@
   "case": "Register shows every real alert with L×I, owner and the latest decision",
   "pass": true,
   "observed": "19 rows; AL-019 status: proposed by Category manager: Passives",
-  "secs": 0.31
+  "secs": 0.29
  },
  {
   "id": 8,
@@ -69,7 +69,7 @@
   "case": "Ask and Try-a-signal agree on a 6-week Penang outage (Ask shows the recovery-time figure)",
   "pass": true,
   "observed": "simulate ₹90.30 cr; ask mentions it: True",
-  "secs": 1.12
+  "secs": 3.55
  },
  {
   "id": 9,
@@ -78,7 +78,7 @@
   "case": "D05 replay: co-pilot alerted before the team and shows the structural fix",
   "pass": true,
   "observed": "co-pilot 2025-03-24 vs team 2025-03-27",
-  "secs": 0.29
+  "secs": 0.32
  },
  {
   "id": 10,
@@ -87,7 +87,7 @@
   "case": "All 18 disruptions replay without error",
   "pass": true,
   "observed": "18 replays, failing: []",
-  "secs": 5.65
+  "secs": 5.88
  },
  {
   "id": 11,
@@ -105,7 +105,7 @@
   "case": "Business case: cost, net benefit and five sensitivities, all ROI > 1",
   "pass": true,
   "observed": "cost 46.9 lakh; ROI [22.5, 16.3, 4.3, 10.1, 10.8]",
-  "secs": 0.3
+  "secs": 0.34
  },
  {
   "id": 13,
@@ -123,7 +123,7 @@
   "case": "COO one-pager and M6 report are served",
   "pass": true,
   "observed": "200, 200",
-  "secs": 0.77
+  "secs": 0.64
  },
  {
   "id": 15,
@@ -141,7 +141,7 @@
   "case": "Margin question with a duration gets a ₹ figure",
   "pass": true,
   "observed": "9 product(s) stop. First to stop: BMS-48V-16S (Kairo EV) from day 16, when PRT-004 runs out. ₹21.54 cr revenue at risk (₹11.85 cr lost sales, ₹2.32 cr margin). 5 customer(s) miss the 95% OTIF target. ",
-  "secs": 0.38
+  "secs": 0.41
  },
  {
   "id": 17,
@@ -150,7 +150,7 @@
   "case": "D16 replay shows the freight spend the co-pilot would not have recommended",
   "pass": true,
   "observed": "avoided 3.29 cr of 3.67 cr",
-  "secs": 0.29
+  "secs": 0.31
  },
  {
   "id": 18,
@@ -159,7 +159,7 @@
   "case": "Customer question returns that customer's alerts and products",
   "pass": true,
   "observed": "Yes. 2 open alert(s) push Kairo EV below its 95% OTIF target. Biggest: AL-005 (Fire reported at semiconductor assembly plant in Penang): 5 week(s) below target ",
-  "secs": 0.39
+  "secs": 0.4
  },
  {
   "id": 19,
@@ -177,7 +177,7 @@
   "case": "T6 OTIF answer lists customers with weeks below 95%",
   "pass": true,
   "observed": "9 product(s) stop. First to stop: BMS-48V-16S (Kairo EV) from day 16, when PRT-004 runs out. ₹49.80 cr revenue at risk (",
-  "secs": 0.38
+  "secs": 0.4
  },
  {
   "id": 21,
@@ -195,7 +195,7 @@
   "case": "Options for a specific alert by ID",
   "pass": true,
   "observed": "AL-019: ₹3.87 cr revenue at risk across 5 product(s); 3 customer(s) fall below 95% OTIF. Customers below 95% OTIF: Trident Two-Wheelers (1 w",
-  "secs": 0.29
+  "secs": 0.3
  },
  {
   "id": 23,
@@ -204,7 +204,7 @@
   "case": "No option anywhere is marked approved; every option names an approver",
   "pass": true,
   "observed": "problems: []",
-  "secs": 1.5
+  "secs": 1.6
  },
  {
   "id": 24,
@@ -213,7 +213,7 @@
   "case": "Denied rumour is logged only",
   "pass": true,
   "observed": "Not alerted: it's linked to Kaohsiung, but the wording is a routine or non-event story (rumours(-4)). Logged only.",
-  "secs": 0.3
+  "secs": 2.18
  },
  {
   "id": 25,
@@ -222,7 +222,7 @@
   "case": "Story about an off-network place is dropped, not sent to review",
   "pass": true,
   "observed": "Strong disruption cues, but it's about Odisha, which isn't in Veltrix's network (no supplier, port, lane or commodity there). Logged only.",
-  "secs": 0.31
+  "secs": 2.25
  },
  {
   "id": 26,
@@ -231,7 +231,7 @@
   "case": "Unnamed maker with strong cues goes to Needs review and appears in my queue only",
   "pass": true,
   "observed": "mine 1, other 0",
-  "secs": 0.87
+  "secs": 2.74
  },
  {
   "id": 27,
@@ -240,7 +240,7 @@
   "case": "Threat-only story ('port workers threaten strike') does not alert",
   "pass": true,
   "observed": "ignored: Not alerted: it's linked to Busan, but the wording is a routine or non-event story (threaten(-1.5)). Logged only.",
-  "secs": 0.31
+  "secs": 2.14
  },
  {
   "id": 28,
@@ -249,7 +249,7 @@
   "case": "Port Klang 5-day waits raise an alert",
   "pass": true,
   "observed": "watch score 4.0",
-  "secs": 0.38
+  "secs": 2.13
  },
  {
   "id": 29,
@@ -258,7 +258,7 @@
   "case": "Weak linked story is explained with its score, not 'not linked'",
   "pass": true,
   "observed": "Not alerted: it's linked to Shanghai, but the wording is not strong enough to alert (score 0 vs threshold 3.5). Logged only.",
-  "secs": 0.29
+  "secs": 2.38
  },
  {
   "id": 30,
@@ -267,7 +267,7 @@
   "case": "Nhava Sheva 3-day closure answered with parts in scope",
   "pass": true,
   "observed": "Nothing stops. 38 part(s) depend on Nhava Sheva (JNPT), and the lowest cover is 9.1 days against a 3-day delay. ₹5.38 cr",
-  "secs": 0.4
+  "secs": 0.39
  },
  {
   "id": 31,
@@ -276,7 +276,7 @@
   "case": "Red Sea what-if uses the route class",
   "pass": true,
   "observed": "Nothing stops. 4 part(s) depend on Red Sea / Suez Canal, and the lowest cover is 12.7 days against a 14-day delay. Finis",
-  "secs": 0.34
+  "secs": 0.37
  },
  {
   "id": 32,
@@ -285,7 +285,7 @@
   "case": "'forty days' is read as 40",
   "pass": true,
   "observed": "delays {40.0}",
-  "secs": 0.41
+  "secs": 0.44
  },
  {
   "id": 33,
@@ -294,7 +294,7 @@
   "case": "Unreadable duration gets a question back",
   "pass": true,
   "observed": "I couldn't read how long \"for several weeks\" is, so I won't guess a duration. Please give a number, e.g. \"for 40 days\" o",
-  "secs": 0.29
+  "secs": 0.33
  },
  {
   "id": 34,
@@ -320,8 +320,8 @@
   "area": "Isolation",
   "case": "My simulation is invisible to another session and to anonymous visitors",
   "pass": true,
-  "observed": "SIM-AL-a3d68e41",
-  "secs": 1.59
+  "observed": "SIM-AL-9389df0a",
+  "secs": 3.56
  },
  {
   "id": 37,
@@ -330,7 +330,7 @@
   "case": "Request to order is refused plainly",
   "pass": true,
   "observed": "I can't place orders, book freight, contact suppliers or customers, or approve anything. The co-pilo",
-  "secs": 0.29
+  "secs": 0.31
  },
  {
   "id": 38,
@@ -339,7 +339,7 @@
   "case": "Oversized and empty inputs are rejected; unknown ids are 404",
   "pass": true,
   "observed": "[422, 422, 422, 404, 404, 404]",
-  "secs": 1.81
+  "secs": 1.83
  },
  {
   "id": 39,
@@ -348,7 +348,7 @@
   "case": "HTML in a headline is escaped in the briefing",
   "pass": true,
   "observed": "200",
-  "secs": 1.01
+  "secs": 3.27
  },
  {
   "id": 40,
@@ -356,7 +356,7 @@
   "area": "Performance",
   "case": "Every API call in this run answered in under 5 s; signal → quantified alert < 5 min",
   "pass": true,
-  "observed": "0.38s, decision watch",
-  "secs": 0.38
+  "observed": "2.26s, decision watch",
+  "secs": 2.26
  }
 ]
