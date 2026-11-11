@@ -43,9 +43,9 @@
   "approver_mismatch": 0
  },
  "impact": {
-  "within_25pct": "7/9 loss events",
-  "median_abs_err_pct": 2.8,
-  "total_predicted_cr": 161.9,
+  "within_25pct": "9/9 loss events",
+  "median_abs_err_pct": 1.5,
+  "total_predicted_cr": 171.1,
   "total_actual_cr": 170.3,
   "zero_loss_correct": "9/9 no-loss events"
  },

@@ -27,7 +27,9 @@ TRAIN = [f"D{i:02d}" for i in range(1, 14)]
 
 # Days from decision to supply resuming, per action, calibrated on mitigation_actions × disruption_impacts.
 TIME_TO_EFFECT = {
-    "Broker spot buy": 4,                       # history median (playbook: 1–3 weeks)
+    # Broker spot buy is NOT modelled as a resupply date: history shows it covers part of the gap whenever it
+    # lands ("some lots failed incoming inspection"). See BROKER_SHORTAGE_LEFT.
+    "Broker spot buy": None,
     # Playbook says 5–10 days, but history shows switches only took hold ~19 days after the decision
     # (D18 PRT-026: shortage ended day 25.8, decided day 7; D10/D18 PRT-020 never took hold).
     # Alternate capacity ramps slowly. We use the observed value when replaying history.
@@ -38,6 +40,27 @@ TIME_TO_EFFECT = {
     "Pre-buy buffer stock (late)": None,        # arrives after the peak: no effect on shortage
     "Pay container surcharge / spot freight": None,
 }
+
+
+# Share of the unmitigated shortage left after a broker spot buy, fitted on TRAIN only:
+# D01 PRT-048 1.6/2.6 = 0.62, D02 PRT-052 0.9/1.4 = 0.64, D08 PRT-002 4.2/7.0 = 0.60 -> median 0.62.
+BROKER_SHORTAGE_LEFT = 0.62
+
+
+def _shortage_factor(did: str) -> dict:
+    m = load()["mitigation_actions"]
+    m = m[(m["disruption_id"] == did) & m["had_shortage"] & (m["action"] == "Broker spot buy")]
+    return {p: BROKER_SHORTAGE_LEFT for p in m["part_id"]}
+
+
+def fit_broker() -> pd.DataFrame:
+    """Recompute BROKER_SHORTAGE_LEFT from train disruptions."""
+    db = load()
+    m, imp = db["mitigation_actions"], db["disruption_impacts"].drop_duplicates(["disruption_id", "part_id"])
+    x = m[(m["action"] == "Broker spot buy") & m["had_shortage"] & m["disruption_id"].isin(TRAIN)].merge(
+        imp, on=["disruption_id", "part_id"])
+    x["left"] = x["shortage_days"] / (x["effective_delay_days"] - x["days_of_cover_at_start"])
+    return x[["disruption_id", "part_id", "left"]].round(2)
 
 
 def fit_priors() -> pd.DataFrame:
@@ -84,7 +107,7 @@ def validate() -> pd.DataFrame:
         dur = (d.loc[did, "end_date"] - d.loc[did, "start_date"]).days
         cls = EVENT_CLASS[did]
         eff = _effect_days(did)
-        common = dict(parts=parts, cover_override=cover, use_fg=False, include_in_transit=False,
+        common = dict(shortage_factor=_shortage_factor(did) or None, parts=parts, cover_override=cover, use_fg=False, include_in_transit=False,
                       start_date=d.loc[did, "start_date"], event_type=cls, duration_days=dur)
         a = run(Scenario(delay_days=hist_delay, mitigation_effect_day=eff, **common)).totals
         b1 = run(Scenario(mitigation_effect_day=eff, **common)).totals

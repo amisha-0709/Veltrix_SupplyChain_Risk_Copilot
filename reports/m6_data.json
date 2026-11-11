@@ -38,7 +38,7 @@
   "waste_avoided": 20986283.5,
   "mitigation_cost": 5723624.0,
   "net": 110295273.54997188,
-  "revenue_protected": 325553520.22798747
+  "revenue_protected": 295553441.42798746
  },
  "scenarios": [
   {
@@ -681,8 +681,8 @@
    "flagged_train": 183,
    "false_alarm_signals_train": 47,
    "precision_train": 0.743,
-   "alerts_train": 45,
-   "false_alerts_train": 31,
+   "alerts_train": 44,
+   "false_alerts_train": 30,
    "flagged_test": 56,
    "false_alarm_signals_test": 20,
    "precision_test": 0.643,

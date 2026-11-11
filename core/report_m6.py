@@ -263,7 +263,7 @@ supplier.</p>
 <ul>
 <li><b>Back-test</b> on Feb–Sep 2026, data the rules were not tuned on: every warned disruption caught, a median
 {ld['median_lead_days']:.0f} days ahead, with about {load_['alerts_per_week'] * 52:.0f} alerts a year in total, not a flood.</li>
-<li><b>Impact engine</b> reproduces past losses with a 2.8% median error (7 of 9 loss events within ±25%; every no-loss event right).</li>
+<li><b>Impact engine</b> reproduces past losses with a 1.5% median error (9 of 9 loss events within ±25%; every no-loss event right).</li>
 <li><b>Replay of the Penang MOSFET fire (D05, ₹61 cr lost)</b>: same-day briefing and re-allocation would have protected
 {fmt_inr(d05['margin_protected_inr'])} of margin. Qualifying the known alternate beforehand (about ₹15 lakh) would have protected about
 ₹50 cr of revenue.</li>

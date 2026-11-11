@@ -25,7 +25,7 @@ import pandas as pd
 from core.etl import load
 from core.impact import Scenario, fmt_inr, run
 from core.mitigate import recommend, roi
-from core.validate_impact import EVENT_CLASS, _effect_days
+from core.validate_impact import EVENT_CLASS, _effect_days, _shortage_factor
 
 _BT = None
 OBSERVED_SWITCH_DAYS = 19.0     # calibrated on mitigation_actions (see validate_impact.TIME_TO_EFFECT)
@@ -105,8 +105,10 @@ def replay(did: str) -> dict:
     real = Scenario(delay_days=delay, label=f"{did} reality", **common)
     unmit = run(real)
     team_eff = _effect_days(did)
-    team = run(replace(real, mitigation_effect_day=team_eff or None))
+    team_sf = _shortage_factor(did) or None       # the team's broker buys cover part of the gap, in every world
+    team = run(replace(real, mitigation_effect_day=team_eff or None, shortage_factor=team_sf))
     sc_plan, extra = _apply_plan(real, unmit, plan, lead, team_eff)
+    sc_plan = replace(sc_plan, shortage_factor=team_sf)
     withplan = run(sc_plan)
     p = float((plan["p_works"] * plan["cost_inr"]).sum() / plan["cost_inr"].sum()) if len(plan) and plan["cost_inr"].sum() else 0.9
     cost = float(plan["cost_inr"].sum()) if len(plan) else 0.0
@@ -126,7 +128,7 @@ def replay(did: str) -> dict:
         s_eff = dict(team_eff)
         for p_ in struct_parts:
             s_eff[p_] = min(s_eff.get(p_, float("inf")), OBSERVED_SWITCH_DAYS)
-        s_run = run(replace(real, mitigation_effect_day=s_eff))
+        s_run = run(replace(real, mitigation_effect_day=s_eff, shortage_factor=team_sf))
         struct = {"parts": [f"{p_} → qualify {parts_tbl.loc[p_, 'unqualified_alternate_supplier_id']} "
                             f"({parts_tbl.loc[p_, 'qualification_weeks_if_unqualified']:.0f} wk) in advance"
                             for p_ in struct_parts],

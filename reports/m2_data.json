@@ -8,13 +8,13 @@
    "delay_actual": 11.7,
    "delay_predicted": 13.0,
    "actual_cr": 2.63,
-   "A_method_cr": 2.69,
-   "B1_forecast_cr": 3.79,
-   "B2_at_risk_no_action_cr": 3.79,
+   "A_method_cr": 2.67,
+   "B1_forecast_cr": 3.76,
+   "B2_at_risk_no_action_cr": 3.76,
    "actual_units": 5140,
-   "A_units": 5400,
-   "A_err_pct": 2.3,
-   "B1_err_pct": 44.1
+   "A_units": 5211,
+   "A_err_pct": 1.5,
+   "B1_err_pct": 43.0
   },
   {
    "disruption_id": "D02",
@@ -24,13 +24,13 @@
    "delay_actual": 9.6,
    "delay_predicted": 8.7,
    "actual_cr": 0.06,
-   "A_method_cr": 0.1,
-   "B1_forecast_cr": 0.03,
-   "B2_at_risk_no_action_cr": 0.03,
+   "A_method_cr": 0.06,
+   "B1_forecast_cr": 0.02,
+   "B2_at_risk_no_action_cr": 0.02,
    "actual_units": 266,
-   "A_units": 432,
-   "A_err_pct": 66.7,
-   "B1_err_pct": -50.0
+   "A_units": 278,
+   "A_err_pct": 0.0,
+   "B1_err_pct": -66.7
   },
   {
    "disruption_id": "D03",
@@ -120,13 +120,13 @@
    "delay_actual": 18.3,
    "delay_predicted": 29.6,
    "actual_cr": 9.93,
-   "A_method_cr": 8.32,
-   "B1_forecast_cr": 23.82,
-   "B2_at_risk_no_action_cr": 40.92,
+   "A_method_cr": 10.08,
+   "B1_forecast_cr": 33.2,
+   "B2_at_risk_no_action_cr": 33.2,
    "actual_units": 15126,
-   "A_units": 13316,
-   "A_err_pct": -16.2,
-   "B1_err_pct": 139.9
+   "A_units": 15297,
+   "A_err_pct": 1.5,
+   "B1_err_pct": 234.3
   },
   {
    "disruption_id": "D09",
@@ -280,27 +280,27 @@
    "delay_actual": 26.0,
    "delay_predicted": 21.1,
    "actual_cr": 9.95,
-   "A_method_cr": 2.68,
-   "B1_forecast_cr": 0.81,
-   "B2_at_risk_no_action_cr": 7.54,
+   "A_method_cr": 10.18,
+   "B1_forecast_cr": 5.0,
+   "B2_at_risk_no_action_cr": 5.0,
    "actual_units": 26351,
-   "A_units": 18390,
-   "A_err_pct": -73.1,
-   "B1_err_pct": -91.9
+   "A_units": 26811,
+   "A_err_pct": 2.3,
+   "B1_err_pct": -49.7
   }
  ],
  "summary": {
   "A": {
-   "within_25pct": "7/9 loss events",
-   "median_abs_err_pct": 2.8,
-   "total_predicted_cr": 161.9,
+   "within_25pct": "9/9 loss events",
+   "median_abs_err_pct": 1.5,
+   "total_predicted_cr": 171.1,
    "total_actual_cr": 170.3,
    "zero_loss_correct": "9/9 no-loss events"
   },
   "B1": {
    "within_25pct": "5/9 loss events",
    "median_abs_err_pct": 24.2,
-   "total_predicted_cr": 178.9,
+   "total_predicted_cr": 192.4,
    "total_actual_cr": 170.3,
    "zero_loss_correct": "9/9 no-loss events"
   }
@@ -551,7 +551,7 @@
      "reversible": false,
      "approver": "Head of Supply Chain + Quality",
      "status": "Recommended: requires approval",
-     "note": "PPAP + customer approval \u2248 6 weeks. Too slow for short events; start early for structural risk.",
+     "note": "PPAP + customer approval \u2248 6 weeks. Cost = \u20b915.0 lakh one-off qualification + \u20b91.6 lakh for a 10% price premium on what we buy from them during this event. Too slow for short events; start early for structural risk.",
      "fixes_shortage": true,
      "worth_it": false,
      "rank": 5,
@@ -577,7 +577,7 @@
      "reversible": false,
      "approver": "Head of Supply Chain + Quality",
      "status": "Recommended: requires approval",
-     "note": "No alternate exists. Sourcing + PPAP 6\u201316 weeks: a structural fix, start now for the next event.",
+     "note": "No alternate exists. Sourcing + PPAP 6\u201316 weeks. Cost = \u20b925.0 lakh one-off search and qualification + \u20b90 price premium during this event. A structural fix: start now for the next event.",
      "fixes_shortage": false,
      "worth_it": false,
      "rank": 6,
@@ -679,7 +679,7 @@
      "reversible": false,
      "approver": "Head of Supply Chain + Quality",
      "status": "Recommended: requires approval",
-     "note": "PPAP + customer approval \u2248 7 weeks. Too slow for short events; start early for structural risk.",
+     "note": "PPAP + customer approval \u2248 7 weeks. Cost = \u20b915.0 lakh one-off qualification + \u20b953.9 lakh for a 10% price premium on what we buy from them during this event. Too slow for short events; start early for structural risk.",
      "fixes_shortage": true,
      "worth_it": true,
      "rank": 1,
@@ -1115,7 +1115,7 @@
      "reversible": false,
      "approver": "Head of Supply Chain + Quality",
      "status": "Recommended: requires approval",
-     "note": "PPAP + customer approval \u2248 11 weeks. Too slow for short events; start early for structural risk.",
+     "note": "PPAP + customer approval \u2248 11 weeks. Cost = \u20b915.0 lakh one-off qualification + \u20b90 for a 10% price premium on what we buy from them during this event. Too slow for short events; start early for structural risk.",
      "fixes_shortage": false,
      "worth_it": false,
      "rank": 8,

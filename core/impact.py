@@ -84,6 +84,7 @@ class Scenario:
     cover_override: dict | None = None                    # part_id -> days of cover (back-tests)
     include_in_transit: bool = True
     mitigation_effect_day: dict | None = None             # part_id -> day (from impact start) supply resumes
+    shortage_factor: dict | None = None                   # part_id -> share of the shortage left (partial fixes)
     use_fg: bool = True
     label: str = ""
 
@@ -188,7 +189,7 @@ def run(sc: Scenario) -> ImpactResult:
             src = "on hand + in transit" if it_units else "on hand"
         eff = (sc.mitigation_effect_day or {}).get(p)
         end = min(delay[p], eff) if eff is not None else delay[p]
-        shortage = max(0.0, end - cover)
+        shortage = max(0.0, end - cover) * float((sc.shortage_factor or {}).get(p, 1.0))
         rows.append({
             "part_id": p, "description": pr["description"], "category": pr["category"],
             "primary_supplier_id": pr["primary_supplier_id"], "single_source": bool(pr["single_source"]),
