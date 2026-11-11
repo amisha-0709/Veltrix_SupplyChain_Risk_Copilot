@@ -30,7 +30,7 @@ def test_ask_numbers_match_engine():
     from core.impact import Scenario, fmt_inr, run
     from core.ask import _scope
     r = ask("Which customers miss their 95% OTIF target if Penang semiconductor output stops for six weeks?")
-    parts, _ = _scope(r["scenario"]["nodes"])
+    parts, _, _ = _scope(r["scenario"]["nodes"])
     t = run(Scenario(parts=parts, nodes=r["scenario"]["nodes"], event_type="supplier_outage", delay_days=42)).totals
     assert fmt_inr(t["revenue_at_risk_inr"]) in r["answer"]
 

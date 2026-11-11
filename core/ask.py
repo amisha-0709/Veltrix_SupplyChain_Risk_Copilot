@@ -22,10 +22,18 @@ import pandas as pd
 from core.graph import build_network
 from core.impact import Scenario, fmt_inr, run
 
-NUM_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
-             "ten": 10, "eleven": 11, "twelve": 12, "fourteen": 14, "fifteen": 15, "twenty": 20, "thirty": 30,
-             "a": 1, "an": 1}
-DUR_RE = re.compile(r"\b(\d+(?:\.\d+)?|" + "|".join(NUM_WORDS) + r")[\s-]*(day|week|month)s?\b", re.I)
+UNITS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9}
+TEENS = {"ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16,
+         "seventeen": 17, "eighteen": 18, "nineteen": 19}
+TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90}
+OTHER = {"a": 1, "an": 1, "a couple of": 2}
+NUM_WORDS = {**UNITS, **TEENS, **TENS, **OTHER}
+_NUM = (r"\d+(?:\.\d+)?|(?:" + "|".join(TENS) + r")(?:[\s-](?:" + "|".join(UNITS) + r"))?|"
+        + "|".join(sorted(list(TEENS) + list(UNITS) + list(OTHER), key=len, reverse=True)))
+DUR_RE = re.compile(r"\b(" + _NUM + r")[\s-]*(day|week|month)s?\b", re.I)
+FORTNIGHT = re.compile(r"\b(a|one|two|\d+)\s+fortnights?\b", re.I)
+# "for <words> days/weeks/months" that we could not read as a number → ask, never guess
+UNREAD_DUR = re.compile(r"\b(?:for|lasting|over|about|around)\s+((?:[a-z]+[\s-]){0,2}?[a-z]+)\s+(?:days?|weeks?|months?)\b", re.I)
 
 WHAT_IF = re.compile(r"\bif\b|\bwhat happens\b|\bsuppose\b|\bwhat would\b|\bstops?\b|\bcloses?\b|\bshut", re.I)
 EXPOSURE = re.compile(r"exposed|exposure|depend|reliant|rely|single[- ]source|concentrat", re.I)
@@ -36,14 +44,34 @@ ROUTE_WORDS = re.compile(r"strait|canal|red sea|suez|malacca|route|lane", re.I)
 CONGESTION_WORDS = re.compile(r"congest|slow|delay", re.I)
 
 
+def _number(raw: str) -> float:
+    raw = raw.lower().replace("-", " ").strip()
+    if raw in NUM_WORDS:
+        return float(NUM_WORDS[raw])
+    parts = raw.split()
+    if len(parts) == 2 and parts[0] in TENS and parts[1] in UNITS:
+        return float(TENS[parts[0]] + UNITS[parts[1]])
+    return float(raw)
+
+
 def _duration_days(q: str) -> float | None:
     m = DUR_RE.search(q)
-    if not m:
+    if m:
+        unit = m.group(2).lower()
+        return _number(m.group(1)) * (7 if unit == "week" else 30 if unit == "month" else 1)
+    f = FORTNIGHT.search(q)
+    if f:
+        k = f.group(1).lower()
+        return 14.0 * (1 if k in ("a", "one") else 2 if k == "two" else float(k))
+    return None
+
+
+def _unread_duration(q: str) -> str | None:
+    """A duration phrase is present but we couldn't read the number (e.g. 'a few weeks', 'several months')."""
+    if _duration_days(q) is not None:
         return None
-    raw = m.group(1).lower()
-    n = float(NUM_WORDS.get(raw, raw))
-    unit = m.group(2).lower()
-    return n * (7 if unit == "week" else 30 if unit == "month" else 1)
+    m = UNREAD_DUR.search(q)
+    return m.group(0) if m else None
 
 
 def _event_type(q: str, nodes: list[str]) -> str:
@@ -56,20 +84,30 @@ def _event_type(q: str, nodes: list[str]) -> str:
     return "port_closure"
 
 
-def _scope(nodes: list[str]) -> tuple[list[str], str]:
-    """Places + commodity → intersect (Penang ∩ Semiconductors); otherwise union."""
+def _scope(nodes: list[str]) -> tuple[list[str], str, str | None]:
+    """Places + commodity → intersect (Penang ∩ Semiconductors); otherwise union.
+
+    If the intersection is empty (e.g. Chakan ∩ Magnets: Chakan is where we build, not where magnets come from),
+    fall back to the commodity alone and say so, rather than reporting that nothing is exposed."""
     places = [n for n in nodes if not n.startswith(("cat:", "country:"))]
     cats = [n for n in nodes if n.startswith("cat:")]
     countries = [n for n in nodes if n.startswith("country:")]
     net = build_network()
-    if places and cats:
-        ps = set().union(*[net.parts_exposed(n) for n in places]) & set().union(*[net.parts_exposed(n) for n in cats])
-        return sorted(ps), "all"
-    if cats and countries:
-        ps = set().union(*[net.parts_exposed(n) for n in cats]) & set().union(*[net.parts_exposed(n) for n in countries])
-        return sorted(ps), "all"
+
+    def exp(ns):
+        return set().union(*[net.parts_exposed(n) for n in ns])
+    for other in (places, countries):
+        if other and cats:
+            ps = exp(other) & exp(cats)
+            if ps:
+                return sorted(ps), "all", None
+            if exp(cats):
+                c = ", ".join(_node_name(n) for n in cats)
+                o = ", ".join(_node_name(n) for n in other)
+                return (sorted(exp(cats)), "cats",
+                        f"No {c} part is supplied from or shipped through {o}, so I used every {c} part wherever it comes from.")
     use = places or cats or countries
-    return sorted(set().union(*[net.parts_exposed(n) for n in use])) if use else [], "any"
+    return (sorted(exp(use)) if use else []), "any", None
 
 
 def _node_name(n: str) -> str:
@@ -95,12 +133,17 @@ def _table(title: str, df: pd.DataFrame, cols: dict) -> dict:
 # ---------------------------------------------------------------------------------------------
 def answer_what_if(q: str, nodes: list[str]) -> dict:
     dur = _duration_days(q)
+    unread = _unread_duration(q)
+    if unread:
+        return {"intent": "clarify", "answer": f"I couldn't read how long \"{unread}\" is, so I won't guess a duration. "
+                "Please give a number, e.g. \"for 40 days\" or \"for six weeks\".", "tables": [], "working": [],
+                "assumptions": []}
     et = _event_type(q, nodes)
-    parts, how = _scope(nodes)
+    parts, how, scope_note = _scope(nodes)
     if not parts:
-        return {"intent": "what_if", "answer": "I couldn't find any part whose supply passes through "
-                + ", ".join(_node_name(n) for n in nodes) + ". Nothing in the network would stop.", "tables": [],
-                "working": [], "assumptions": []}
+        return {"intent": "clarify", "answer": "I couldn't link " + ", ".join(_node_name(n) for n in nodes)
+                + " to any part we buy, so I can't say what would stop. Try naming the supplier's country, port or the "
+                "commodity.", "tables": [], "working": [], "assumptions": []}
     if dur is None:
         sc = Scenario(parts=parts, nodes=nodes, event_type=et, label=q)
         dur_note = "No duration given: used the typical duration for this kind of event from history."
@@ -115,7 +158,9 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
         S = S.sort_values(["stops_from_day", "revenue_at_risk_inr"], ascending=[True, False])
     O = r.otif
     below = O[O["below_target"]] if len(O) else O
-    where = " ∩ ".join(_node_name(n) for n in nodes) if how == "all" else ", ".join(_node_name(n) for n in nodes)
+    where = (" ∩ ".join(_node_name(n) for n in nodes) if how == "all"
+             else ", ".join(_node_name(n) for n in nodes if n.startswith("cat:")) if how == "cats"
+             else ", ".join(_node_name(n) for n in nodes))
 
     if t["no_action_needed"]:
         ans = (f"Nothing stops. {t['parts_affected']} part(s) depend on {where}, and the lowest cover is "
@@ -135,6 +180,21 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
                     + "; ".join(f"{c.customer} for {c.weeks} week(s), worst {c.worst:.0%}" for c in cust.itertuples()) + ".")
         else:
             ans += "No customer falls below 95% OTIF."
+    recovery_note = None
+    if dur is not None:
+        # Briefings and 'Try a signal' add the typical recovery time after supply restarts. Show that reading too,
+        # so the same scenario never shows two unexplained numbers in two places.
+        r2 = run(Scenario(parts=parts, nodes=nodes, event_type=et, duration_days=dur, label=q))
+        d2 = float(r2.parts["effective_delay_days"].max()) if len(r2.parts) else dur
+        if abs(d2 - dur) >= 1:
+            lead = (f"Allowing the typical recovery time after supply restarts, as alert briefings do "
+                    f"({dur:g} d → {d2:g} d): ")
+            recovery_note = lead + ("still nothing stops." if r2.totals["no_action_needed"] else
+                                    f"{fmt_inr(r2.totals['revenue_at_risk_inr'])} revenue at risk, "
+                                    f"{fmt_inr(r2.totals['margin_at_risk_inr'])} margin.")
+            ans += " " + recovery_note
+    if scope_note:
+        ans = scope_note + " " + ans
     tables = []
     if len(S):
         tables.append(_table("Products that stop (first to stop at the top)", S, {
@@ -149,7 +209,8 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
         "part_id": "Part", "description": "Description", "days_of_cover": "Cover (d)",
         "effective_delay_days": "Delay (d)", "shortage_days": "Short (d)"}))
     return {"intent": "what_if", "answer": ans, "tables": tables, "working": r.working,
-            "assumptions": [f"Scope: parts whose primary supplier ships from/through {where}.", dur_note,
+            "assumptions": [f"Scope: parts whose primary supplier ships from/through {where}."]
+            + ([scope_note] if scope_note else []) + [dur_note] + ([recovery_note] if recovery_note else []) + [
                             f"Event class: {et.replace('_', ' ')}.", "Stock: on hand + in transit, 30 Sep 2026.",
                             "Start date: the stock snapshot date; weeks are counted from there."],
             "scenario": {"nodes": nodes, "parts": parts, "event_type": et, "duration_days": dur}}
@@ -157,12 +218,13 @@ def answer_what_if(q: str, nodes: list[str]) -> dict:
 
 def answer_exposure(q: str, nodes: list[str]) -> dict:
     from core.exposure import part_exposure
-    parts, how = _scope(nodes)
+    parts, how, scope_note = _scope(nodes)
     pe = part_exposure()
     d = pe[pe["part_id"].isin(parts)].copy()
     where = " ∩ ".join(_node_name(n) for n in nodes) if how == "all" else ", ".join(_node_name(n) for n in nodes)
     if d.empty:
-        return {"intent": "exposure", "answer": f"No parts depend on {where}.", "tables": [], "working": [], "assumptions": []}
+        return {"intent": "clarify", "answer": f"I couldn't link {where} to any part we buy, so I can't size the exposure.",
+                "tables": [], "working": [], "assumptions": []}
     ss = d[d["single_source"]]
     skus = sorted({s for lst in d["skus"] for s in lst})
     below = ss[ss["cover_below_lead_time"]]
@@ -173,6 +235,8 @@ def answer_exposure(q: str, nodes: list[str]) -> dict:
               + "." if len(below) else "Every single-source part here has cover above its lead time."))
     d["fallback"] = [("qualified " + a) if isinstance(a, str) else ("unqualified " + b) if isinstance(b, str) else "none"
                      for a, b in zip(d["qualified_alternate_supplier_id"], d["unqualified_alternate_supplier_id"])]
+    if scope_note:
+        ans = scope_note + " " + ans
     return {"intent": "exposure", "answer": ans, "working": [], "assumptions": ["Stock: 30 Sep 2026 snapshot."],
             "tables": [_table("Parts", d.sort_values("fragility", ascending=False), {
                 "part_id": "Part", "description": "Description", "supplier_name": "Supplier", "single_source": "Single source",

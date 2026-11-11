@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import secrets
 import sys
 import threading
 from functools import lru_cache
@@ -20,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from fastapi import FastAPI, HTTPException  # noqa: E402
+from fastapi import FastAPI, Header, HTTPException  # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
 from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
@@ -51,13 +53,27 @@ def _alert(alert_id: str) -> dict:
     for a in snap()["alerts"]:
         if a["alert_id"] == alert_id:
             return a
-    sim = _SIMULATED.get(alert_id)
+    sim = _SIM_BY_ID.get(alert_id)
     if sim:
         return sim
     raise HTTPException(404, f"No alert {alert_id}")
 
 
-_SIMULATED: dict[str, dict] = {}
+# Simulated signals ('Try a signal') belong to the browser session that typed them: they never appear in anyone
+# else's inbox, register or counts. The session id is a random token the UI keeps in sessionStorage. Simulated alert
+# ids are random too, so a briefing link still opens in a new tab without the header.
+_SIMULATED: dict[str, dict[str, dict]] = {}     # session -> alert_id -> record
+_SIM_BY_ID: dict[str, dict] = {}
+_SIM_MAX = 500
+_SESSION_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
+
+
+def _session(x_copilot_session: str | None) -> str | None:
+    return x_copilot_session if x_copilot_session and _SESSION_RE.match(x_copilot_session) else None
+
+
+def _sims(session: str | None) -> list[dict]:
+    return list(_SIMULATED.get(session, {}).values()) if session else []
 
 
 @app.get("/api/meta")
@@ -70,9 +86,9 @@ def meta():
 
 
 @app.get("/api/alerts")
-def alerts(inbox: bool | None = None):
+def alerts(inbox: bool | None = None, x_copilot_session: str | None = Header(default=None)):
     rows = [{k: a.get(k) for k in LIST_FIELDS} for a in snap()["alerts"]]
-    rows += [{k: a.get(k) for k in LIST_FIELDS} | {"simulated": True} for a in _SIMULATED.values()]
+    rows += [{k: a.get(k) for k in LIST_FIELDS} | {"simulated": True} for a in _sims(_session(x_copilot_session))]
     if inbox is not None:
         rows = [r for r in rows if r["inbox"] == inbox]
     return rows
@@ -108,14 +124,14 @@ def briefing_text(alert_id: str):
 
 
 @app.get("/api/register")
-def register():
+def register(x_copilot_session: str | None = Header(default=None)):
     """Risk register (brief 'should have'): open risks scored L × I, with owner and status."""
     dec = _read_decisions()
     last = {}
     for d in dec:
         last[d["alert_id"]] = d
     rows = []
-    for a in list(snap()["alerts"]) + list(_SIMULATED.values()):
+    for a in list(snap()["alerts"]) + _sims(_session(x_copilot_session)):
         d = last.get(a["alert_id"])
         rows.append({k: a.get(k) for k in ("alert_id", "title", "first_seen", "last_seen", "kind", "likelihood", "impact",
                                             "priority", "owner", "response", "revenue_at_risk_fmt", "inbox")}
@@ -169,7 +185,7 @@ class AskIn(BaseModel):
 
 
 @app.post("/api/ask")
-def ask_endpoint(q: AskIn):
+def ask_endpoint(q: AskIn, x_copilot_session: str | None = Header(default=None)):
     """Conversational layer: questions answered by the impact engine, with the working shown."""
     from core.ask import ask
     from core.snapshot import clean
@@ -179,7 +195,7 @@ def ask_endpoint(q: AskIn):
             return _alert(aid)
         except HTTPException:
             return None
-    return clean(ask(q.question, alerts=alerts(), get_alert=get))
+    return clean(ask(q.question, alerts=alerts(x_copilot_session=x_copilot_session), get_alert=get))
 
 
 class SignalIn(BaseModel):
@@ -190,7 +206,7 @@ class SignalIn(BaseModel):
 
 
 @app.post("/api/simulate")
-def simulate(sig: SignalIn):
+def simulate(sig: SignalIn, x_copilot_session: str | None = Header(default=None)):
     """Run the whole co-pilot on one signal. Returns what it would do: ignore, review, watch or alert."""
     import pandas as pd
 
@@ -199,7 +215,8 @@ def simulate(sig: SignalIn):
     from core.snapshot import alert_record, clean
     from core.triage import triage_text
     th = snap()["meta"]["threshold"]
-    t = triage_text(sig.headline, sig.snippet, sig.source, pd.Timestamp.now(), signal_id=f"SIM-{len(_SIMULATED) + 1:03d}")
+    session = _session(x_copilot_session)
+    t = triage_text(sig.headline, sig.snippet, sig.source, pd.Timestamp.now(), signal_id=f"SIM-{secrets.token_hex(4)}")
     if sig.duration_days is not None:
         t["duration_days"] = sig.duration_days
     base = {"triage": clean({k: t[k] for k in ("text", "links", "link_strength", "cues", "cue_score", "score",
@@ -220,7 +237,14 @@ def simulate(sig: SignalIn):
     rec["brief_html"] = render_html(rec["brief"], standalone=False)
     rec["brief_text"] = render_text(rec["brief"])
     rec = clean(rec)
-    _SIMULATED[rec["alert_id"]] = rec
+    _SIM_BY_ID[rec["alert_id"]] = rec
+    if session:                                    # listed only for the session that ran it
+        _SIMULATED.setdefault(session, {})[rec["alert_id"]] = rec
+    while len(_SIM_BY_ID) > _SIM_MAX:              # bounded memory on a public demo
+        old = next(iter(_SIM_BY_ID))
+        _SIM_BY_ID.pop(old)
+        for v in _SIMULATED.values():
+            v.pop(old, None)
     return {**base, "decision": "inbox" if rec["inbox"] else "watch", "alert": rec}
 
 

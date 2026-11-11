@@ -2,7 +2,17 @@
 "use strict";
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const api = async (p, opt) => { const r = await fetch(p, opt); if (!r.ok) throw new Error(`${r.status} ${await r.text()}`); return r.json(); };
+/* Per-tab session token: signals you try are visible only to you (never in other people's inbox). */
+const SESSION = (() => {
+  let s = null; try { s = sessionStorage.getItem("copilot-session"); } catch (e) {}
+  if (!s) { s = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`).replace(/[^A-Za-z0-9-]/g, "");
+    try { sessionStorage.setItem("copilot-session", s); } catch (e) {} }
+  return s;
+})();
+const api = async (p, opt = {}) => {
+  const r = await fetch(p, { ...opt, headers: { ...(opt.headers || {}), "X-Copilot-Session": SESSION } });
+  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`); return r.json();
+};
 const cache = {};
 const get = (p) => (cache[p] ??= api(p));
 const inr = (v) => { if (v == null) return "—"; const a = Math.abs(v); if (a >= 1e7) return `₹${(v / 1e7).toFixed(2)} cr`; if (a >= 1e5) return `₹${(v / 1e5).toFixed(1)} lakh`; return `₹${Math.round(v).toLocaleString("en-IN")}`; };
@@ -200,7 +210,7 @@ const EXAMPLES = [
 async function viewSimulate() {
   $("#app").innerHTML = `<h1>Try a signal</h1>
     <p class="sub">Paste a headline and the co-pilot runs the full pipeline live: triage → link to the network → impact on today's stock → ranked options → briefing.
-    Typed signals are not stored beyond this session.</p>
+    Signals you try here are visible only to you, in this browser tab: they never reach anyone else's inbox. Nothing is ordered or sent.</p>
     <div class="examples">${EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e[0])}</button>`).join("")}</div>
     <div class="card"><form class="stack" id="sim">
       <label>Headline<input name="headline" required minlength="5" maxlength="300"></label>
