@@ -100,6 +100,27 @@ def make_brief(a: dict) -> dict:
              "on_time": bool(r.on_time), "approver": r.approver}
             for r in opts.itertuples() if r.kind != "none" and (r.part_id, r.option) not in chosen][:4]
 
+    # Short parts the plan does not act on: say why, so no exposed part is silently dropped.
+    acted = {x["part"] for x in rec if x["part"]}
+    used = set(db["bom"]["part_id"])
+    binding = set(stopped["binding_part"]) if len(stopped) else set()
+    no_action = []
+    for r in short.itertuples():
+        if r.part_id in acted:
+            continue
+        alt = (f"qualified alternate {sup.get(r.qualified_alt, r.qualified_alt)}" if isinstance(r.qualified_alt, str) else
+               f"qualifying the unqualified alternate {sup.get(r.unqualified_alt, r.unqualified_alt)}" if isinstance(r.unqualified_alt, str) else None)
+        if r.part_id not in used:
+            why = ("No current product uses this part in the bill of materials, so the shortage stops no sales and no spend "
+                   "is recommended now." + (f" If it is needed later (spares, a new product), the fallback is {alt.rstrip('.')}." if alt else ""))
+        elif r.part_id not in binding:
+            why = ("Another part runs out first for the same products, so fixing this part alone saves nothing; "
+                   "it is covered once the binding part is fixed.")
+        else:
+            why = ("Every option for this part costs more than the margin it would save in this event"
+                   + (f"; the longer-term fallback is {alt} (see the structural moves in the business case)." if alt else "."))
+        no_action.append({"part": f"{r.part_id} · {r.description}", "shortage_days": float(r.shortage_days), "why": why})
+
     sigs = sorted(a["event"].signals, key=lambda s: s["published"])
     sources = [{"date": pd.Timestamp(s["published"]).strftime("%d %b %Y"), "source": s["source"],
                 "text": s["text"].split(". ")[0], "id": s["signal_id"]} for s in sigs]
@@ -179,7 +200,7 @@ def make_brief(a: dict) -> dict:
                                                   "penalty_inr", "units_short", "skus_stopped", "parts_short",
                                                   "parts_affected", "max_shortage_days", "min_cover_days")},
         "exposure": exposure, "skus": skus, "customers": cust,
-        "recommended": rec, "alternatives": alts, "plan_value": a["plan_value"], "residual": residual,
+        "recommended": rec, "alternatives": alts, "no_action": no_action, "plan_value": a["plan_value"], "residual": residual,
         "inbound": _inbound_summary(a.get("inbound") or [], bool(t["no_action_needed"])),
         "sources": sources_dedup, "n_signals": a["n_signals"], "n_sources": len(a["sources"]),
         "caveats": [c for c in caveats if c], "working": a["working"],
@@ -247,6 +268,14 @@ def _residual_html(b: dict, e) -> str:
     return f'<p class="meta"><b>Left after this plan:</b> {e(residual_sentence(r))}</p>' if r else ""
 
 
+def _no_action_html(b: dict, e) -> str:
+    rows = b.get("no_action") or []
+    if not rows:
+        return ""
+    return ("<h2>Short parts with no action, and why</h2><ul>"
+            + "".join(f"<li><b>{e(x['part'])}</b> (short {x['shortage_days']:.1f} d): {e(x['why'])}</li>" for x in rows) + "</ul>")
+
+
 def render_html(b: dict, standalone: bool = True) -> str:
     e = H.escape
     n = b["numbers"]
@@ -291,7 +320,7 @@ Impact {b['impact']}/5: {e(b['impact_reason'])}. Confidence {b['confidence']:.0%
 {_inbound_html(b, e)}<div class="two"><div><h2>Products</h2><ul>{skus}</ul></div><div><h2>Customers</h2><ul>{cust}</ul></div></div>
 <h2>Recommended action</h2><table><thead><tr><th>Option</th><th class=num>Cost</th><th class=num>Effect</th><th class=num>Net value</th>
 <th class=num>ROI</th><th>Approver</th></tr></thead><tbody>{rec}</tbody></table>
-{_residual_html(b, e)}<p class="note">{e(plan_line)} Ranked by playbook §5 net value; on-time options first. Shown for approval, not approved.</p>
+{_no_action_html(b, e)}{_residual_html(b, e)}<p class="note">{e(plan_line)} Ranked by playbook §5 net value; on-time options first. Shown for approval, not approved.</p>
 {f'<h2>Alternatives considered</h2><ul>{alts}</ul>' if alts else ''}
 <h2>Sources ({b['n_signals']} signals, {b['n_sources']} sources)</h2><ul>{srcs}{f'<li>… and {more} more</li>' if more > 0 else ''}</ul>
 <h2>Assumptions</h2><ul>{''.join(f'<li>{e(c)}</li>' for c in b['caveats'])}</ul>
@@ -322,6 +351,8 @@ def render_text(b: dict) -> str:
               for x in b["recommended"]]
     if b.get("inbound"):
         lines += ["", "Inbound shipments: " + b["inbound"]["line"]]
+    if b.get("no_action"):
+        lines += ["", "Short parts with no action:"] + [f"  - {x['part']} (short {x['shortage_days']:.1f} d): {x['why']}" for x in b["no_action"]]
     if b.get("residual"):
         lines += ["", "Left after this plan: " + residual_sentence(b["residual"])]
     if b["customers"]:

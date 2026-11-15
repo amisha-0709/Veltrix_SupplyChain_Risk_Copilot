@@ -15,9 +15,10 @@ const PERSONAS = [
 const PERSONA_ASK = {
   category: ["What happens if Penang port shuts for 2 weeks?", "Which parts have no alternate supplier?", "Show me the options for AL-019"],
   hosc: ["Which alerts need a decision today?", "Which supplier should we qualify first?", "Compare a 30-day Kaohsiung closure with a 30-day Shanghai closure"],
-  coo: ["Which customers miss their 95% OTIF target if Penang semiconductor output stops for six weeks?", "What is the payback period of this co-pilot?", "What did the Red Sea crisis cost us?"],
+  coo: ["Which customers miss their 95% OTIF target if Penang semiconductor output stops for six weeks?", "Which alerts need a decision this week?", "What did the Red Sea crisis cost us?"],
   sales: ["Is Ojas Motors exposed to anything right now?", "What's the impact of a 10 day Suez closure on Ojas Motors specifically?", "Which customers are hit if Shanghai port closes for 3 weeks?"],
 };
+const ALL = "__all";
 const pget = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
 const pset = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 
@@ -81,14 +82,15 @@ function wireAsk(key) {
 /* ---------- home: who are you? ---------- */
 async function viewHome() {
   const last = pget("persona", "");
-  const [meta, bc] = await Promise.all([get("/api/meta").catch(() => null), get("/api/business-case").catch(() => null)]);
-  const bt = meta?.backtest, roi = bc?.scenarios?.[0]?.roi;
+  const [meta, rp] = await Promise.all([get("/api/meta").catch(() => null), get("/api/replays").catch(() => null)]);
+  const bt = meta?.backtest, h = meta?.headline, rs = rp?.summary;
   const proof = bt ? `<div class="proof" aria-label="Back-test results">
       <div><b>${(bt.signals.test.recall * 100).toFixed(0)}%</b><span>of real risk signals caught on held-out months (target 80%)</span></div>
       <div><b>${Math.round(bt.alerts.test.precision * 100)}%</b><span>of alerts were real risks, so no spam (target 60%)</span></div>
       <div><b>${bt.lead.test.median_lead_days.toFixed(1)} days</b><span>warning before impact; the team noticed ${Math.abs(bt.lead_all.median_team_lead_days)} day after</span></div>
       <div><b>&lt; 1 second</b><span>from signal to ₹ impact and ranked options (was 1–2 days by hand)</span></div>
-      ${roi ? `<div><b>${roi.toFixed(1)}×</b><span>return on the co-pilot's running cost, replayed over two years</span></div>` : ""}</div>` : "";
+      ${h ? `<div><b>₹${Math.round(h.revenue_lost_inr_cr + h.mitigation_spend_inr_cr)} cr</b><span>lost in two years: ₹${h.revenue_lost_inr_cr.toFixed(1)} cr of revenue to 18 disruptions plus ₹${h.mitigation_spend_inr_cr.toFixed(1)} cr spent on fixes (₹${h.mitigation_spend_no_shortage_inr_cr.toFixed(1)} cr of it wasted)</span></div>` : ""}
+      ${rs ? `<div><b>₹${rs.revenue_protected_expected_cr} cr</b><span>of that revenue the co-pilot could have protected, and ₹${rs.avoided_waste_cr} cr of the wasted spend it would have skipped</span></div>` : ""}</div>` : "";
   $("#app").innerHTML = `<div class="hero"><p class="kicker">A resilience co-pilot for Veltrix Components</p>
     <h1>From headline to decision <em>in under a second</em>.</h1>
     <p class="sub">The co-pilot reads outside news and warnings, traces them through Veltrix's suppliers, parts, products and customers,
@@ -109,13 +111,16 @@ async function viewCategory() {
   const p = await personaData();
   const counts = {}; p.alerts.forEach((a) => (counts[a.category] = (counts[a.category] || 0) + (a.inbox ? 10 : 1)));
   let cat = pget("persona-cat", "");
-  if (!p.categories.includes(cat)) cat = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || p.categories[0];
-  const sel = `<label class="pick">My category<select id="cat">${p.categories.map((c) => `<option${c === cat ? " selected" : ""}>${esc(c)}</option>`).join("")}</select></label>`;
-  const mine = p.alerts.filter((a) => a.category === cat);
+  if (cat !== ALL && !p.categories.includes(cat)) cat = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || p.categories[0];
+  const all = cat === ALL;
+  const sel = `<label class="pick">My category<select id="cat"><option value="${ALL}"${all ? " selected" : ""}>All categories</option>
+    ${p.categories.map((c) => `<option${c === cat ? " selected" : ""}>${esc(c)}</option>`).join("")}</select></label>`;
+  const mine = all ? p.alerts : p.alerts.filter((a) => a.category === cat);
+  const catName = all ? "all categories" : cat;
   const hot = mine.filter((a) => a.inbox), watch = mine.filter((a) => !a.inbox);
-  const parts = p.parts.filter((x) => x.category === cat).sort((a, b) => (a.days_of_cover - a.lead_time_days) - (b.days_of_cover - b.lead_time_days));
+  const parts = p.parts.filter((x) => all || x.category === cat).sort((a, b) => (a.days_of_cover - a.lead_time_days) - (b.days_of_cover - b.lead_time_days));
   const alertCard = (a) => `<div class="qcard">
-    <div class="qtop">${pill(a.priority)} <b>${esc(a.title)}</b> ${statusTag(a)}</div>
+    <div class="qtop">${pill(a.priority)} <b>${esc(a.title)}</b> ${statusTag(a)}${all ? ` <span class="tag">${esc(a.category)}</span>` : ""}</div>
     <p class="qline"><b>${esc(a.revenue_at_risk_fmt || "—")}</b> revenue at risk · ${a.customers.length} customer(s) hit · ${briefLink(a)} · <a href="#/alert/${encodeURIComponent(a.alert_id)}">Full detail</a></p>
     ${a.options.length ? `<table><thead><tr><th>Recommended option</th><th class="num">Cost</th><th class="num">Net value</th><th>Takes effect</th><th>Who approves</th><th></th></tr></thead><tbody>
       ${a.options.map((o, i) => `<tr><td>${niceOpt(o)}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td>
@@ -123,14 +128,14 @@ async function viewCategory() {
         <td><button class="btn small" data-prop="${esc(a.alert_id)}" data-oi="${i}">Propose</button></td></tr>`).join("")}</tbody></table>`
       : `<p class="muted">No action needed: stock lasts longer than the expected delay.</p>`}</div>`;
   $("#app").innerHTML = personaHead("category", sel) + `
-    <section class="block"><h2>Alerts for ${esc(cat)} <span class="muted">(${hot.length} need action${watch.length ? `, ${watch.length} on watch` : ""})</span></h2>
-      ${hot.length ? hot.map(alertCard).join("") : `<p class="muted">Nothing needs action in ${esc(cat)} right now.</p>`}
+    <section class="block"><h2>Alerts for ${esc(catName)} <span class="muted">(${hot.length} need action${watch.length ? `, ${watch.length} on watch` : ""})</span></h2>
+      ${hot.length ? hot.map(alertCard).join("") : `<p class="muted">Nothing needs action in ${esc(catName)} right now.</p>`}
       ${watch.length ? `<details><summary>${watch.length} lower-priority item(s) on watch</summary>${watch.map((a) =>
         `<p class="qline">${pill(a.priority)} ${esc(a.title)} · ${esc(a.revenue_at_risk_fmt || "—")} · <a href="#/alert/${encodeURIComponent(a.alert_id)}">detail</a></p>`).join("")}</details>` : ""}</section>
     <section class="block"><h2>My parts: days of stock vs supplier lead time</h2>
       <p class="muted" style="margin-top:0">A part whose stock runs out before a new order could arrive is exposed if its supplier stops.</p>
-      <div style="overflow-x:auto"><table><thead><tr><th>Part</th><th>Supplier</th><th class="num">Days of stock</th><th class="num">Lead time (days)</th><th>Backup supplier</th><th></th></tr></thead><tbody>
-      ${parts.map((x) => `<tr><td><b>${esc(x.part_id)}</b> ${esc(x.description)}${x.single_source ? ' <span class="tag">single source</span>' : ""}</td>
+      <div style="overflow-x:auto"><table><thead><tr><th>Part</th>${all ? "<th>Category</th>" : ""}<th>Supplier</th><th class="num">Days of stock</th><th class="num">Lead time (days)</th><th>Backup supplier</th><th></th></tr></thead><tbody>
+      ${parts.map((x) => `<tr><td><b>${esc(x.part_id)}</b> ${esc(x.description)}${x.single_source ? ' <span class="tag">single source</span>' : ""}</td>${all ? `<td>${esc(x.category)}</td>` : ""}
         <td>${esc(x.supplier_name)} <span class="muted">(${esc(x.country)})</span></td><td class="num">${x.days_of_cover}</td><td class="num">${x.lead_time_days}</td>
         <td>${x.qualified_alternate_supplier_id ? `ready (${esc(x.qualified_alternate_supplier_id)})` : x.unqualified_alternate_supplier_id ? `needs qualifying (${esc(x.unqualified_alternate_supplier_id)})` : '<span style="color:var(--crit)">none</span>'}</td>
         <td>${x.cover_below_lead_time ? '<span class="status s-warn">runs out first</span>' : '<span class="status s-good">covered</span>'}</td></tr>`).join("")}</tbody></table></div></section>
@@ -209,43 +214,62 @@ async function viewHosc() {
 
 /* ---------- COO ---------- */
 async function viewCoo() {
-  const [p, bc] = await Promise.all([personaData(), get("/api/business-case").catch(() => null)]);
-  const open = p.alerts.filter((a) => a.inbox && openStatus(a));
-  const hot = p.alerts.filter((a) => a.inbox);
-  const custs = new Set(); hot.forEach((a) => a.customers.forEach((c) => c.weeks_below > 0 && custs.add(c.customer)));
-  const mine = p.alerts.filter((a) => a.last_decision?.decision === "escalated" || (a.inbox && openStatus(a) && a.options.some((o) => /COO|CEO/.test(o.approver || ""))));
-  const base = bc?.scenarios?.[0];
+  const p = await personaData();
+  const hot = p.alerts.filter((a) => a.inbox).sort((x, y) => (y.revenue_at_risk || 0) - (x.revenue_at_risk || 0));
+  const open = hot.filter(openStatus);
+  const isCoo = (o) => /COO|CEO/.test(o.approver || "");
+  const mine = p.alerts.filter((a) => a.last_decision?.decision === "escalated" || (a.inbox && openStatus(a) && a.options.some(isCoo)));
+  const cooOpts = (a) => a.last_decision?.decision === "escalated" ? a.options : a.options.filter(isCoo);
+  const spend = mine.reduce((s, a) => s + cooOpts(a).reduce((t, o) => t + (o.cost_inr || 0), 0), 0);
+  const rev = hot.reduce((s, a) => s + (a.revenue_at_risk || 0), 0);
+  const cust = {};
+  hot.forEach((a) => a.customers.forEach((c) => {
+    if (!(c.weeks_below > 0)) return;
+    const k = (cust[c.customer] ??= { customer: c.customer, worst: 1, from: null, risks: [] });
+    if (c.worst_otif != null) k.worst = Math.min(k.worst, c.worst_otif);
+    if (c.first_week_below && (!k.from || c.first_week_below < k.from)) k.from = c.first_week_below;
+    k.risks.push(a.title);
+  }));
+  const custs = Object.values(cust).sort((x, y) => x.worst - y.worst);
+  const rec = (a) => esc(nameIds((a.ask || "").replace(/^Decide:\s*/, "")));
   $("#app").innerHTML = personaHead("coo") + `
-    <div class="tiles"><div class="tile big"><b>${inr(hot.reduce((s, a) => s + (a.revenue_at_risk || 0), 0))}</b><span>revenue at risk on ${hot.length} high-priority risks</span></div>
-      <div class="tile big"><b>${custs.size} of ${p.customers.length}</b><span>customers would fall below 95% on-time delivery</span></div>
-      <div class="tile big"><b>${mine.length}</b><span>decision(s) waiting on you</span></div></div>
-    <section class="block"><h2>Top risks</h2>${hot.slice(0, 3).map((a) => `<div class="qcard">
+    <p class="sub"><b>${inr(rev)}</b> of revenue is at risk across ${hot.length} high-priority risk${hot.length === 1 ? "" : "s"} (${open.length} still undecided); ${custs.length} of ${p.customers.length}
+      customers would fall below 95% on-time delivery. ${mine.length ? `<b>${mine.length}</b> decision${mine.length === 1 ? "" : "s"} worth ${inr(spend)} need${mine.length === 1 ? "s" : ""} your approval.` : "Nothing needs your approval."}</p>
+    <div class="tiles"><div class="tile big"><b>${inr(rev)}</b><span>revenue at risk on ${hot.length} high-priority risk(s)</span></div>
+      <div class="tile big"><b>${custs.length} of ${p.customers.length}</b><span>customers below 95% on-time delivery</span></div>
+      <div class="tile big"><b>${mine.length}</b><span>decision(s) waiting on you${mine.length ? ` · ${inr(spend)} of spend` : ""}</span></div></div>
+    <section class="block"><h2>Needs your <em>approval</em></h2>${mine.length ? mine.map((a) => `<div class="qcard">
       <div class="qtop">${pill(a.priority)} <b>${esc(a.title)}</b> ${statusTag(a)}</div>
-      <p class="qline"><b>${esc(a.revenue_at_risk_fmt)}</b> at risk · ${a.customers.length} customer(s): ${a.customers.slice(0, 4).map((c) => esc(c.customer)).join(", ")}${a.customers.length > 4 ? ` +${a.customers.length - 4} more` : ""}</p>
-      <p class="qline">${esc(nameIds((a.ask || "").replace(/^Decide:\s*/, "Recommended: ")))}</p><p class="qline">${briefLink(a, "Read the one-page briefing")}</p></div>`).join("")}
-      ${hot.length > 3 ? `<p class="muted">${hot.length - 3} more in the <a href="#/p/hosc">Head of Supply Chain queue</a>.</p>` : ""}</section>
-    <section class="block"><h2>Needs your approval</h2>${mine.length ? mine.map((a) => `<div class="qcard">
-      <div class="qtop">${pill(a.priority)} <b>${esc(a.title)}</b> ${statusTag(a)}</div>
-      <p class="qline">${esc(a.revenue_at_risk_fmt)} at risk · ${briefLink(a)}</p>
+      <p class="qline"><b>${esc(a.revenue_at_risk_fmt)}</b> at risk · ${a.customers.length} customer(s) · ${briefLink(a)}</p>
+      ${cooOpts(a).length ? `<table><thead><tr><th>Option for you to approve</th><th class="num">Cost</th><th class="num">Net value</th><th>Approver</th></tr></thead><tbody>
+        ${cooOpts(a).map((o) => `<tr><td>${niceOpt(o)}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td><td>${esc(o.approver)}</td></tr>`).join("")}</tbody></table>` : ""}
       <div class="btns"><button class="btn good" data-c="approved" data-a="${esc(a.alert_id)}">Approve</button>
       <button class="btn secondary" data-c="rejected" data-a="${esc(a.alert_id)}">Reject</button></div></div>`).join("")
       : `<p class="muted">Nothing needs you right now: every open proposal is within the Head of Supply Chain's approval limit.</p>`}</section>
-    ${base ? `<section class="block"><h2>Is the co-pilot worth it?</h2><p>Replayed over the last two years it would net <b>${inr(base.net_benefit_inr)} a year</b>
-      for <b>${inr(base.copilot_cost_inr)}</b> running cost, a <b>${base.roi.toFixed(1)}× return</b>, paying back in under a month.
-      <a href="reports/coo_onepager.html" target="_blank" rel="noopener">One-page pilot proposal</a> · <a href="#/business">Full business case</a></p></section>` : ""}` + askBlock("coo");
+    <section class="block"><h2>What is at risk <em>this month</em></h2>
+      ${hot.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Priority</th><th>Risk</th><th class="num">At risk</th><th>Customers hit</th><th>Recommended</th><th>Status</th></tr></thead><tbody>
+      ${hot.slice(0, 6).map((a) => `<tr class="click" data-go="${esc(a.alert_id)}"><td>${pill(a.priority)}</td><td><b>${esc(a.title)}</b></td>
+        <td class="num">${esc(a.revenue_at_risk_fmt || "—")}</td><td>${a.customers.slice(0, 3).map((c) => esc(c.customer)).join(", ")}${a.customers.length > 3 ? ` +${a.customers.length - 3}` : ""}</td>
+        <td>${rec(a)}</td><td>${statusTag(a)}</td></tr>`).join("")}</tbody></table></div>
+      ${hot.length > 6 ? `<p class="muted">${hot.length - 6} more in the <a href="#/register">risk register</a>.</p>` : ""}` : `<p class="muted">No high-priority risk is open.</p>`}</section>
+    ${custs.length ? `<section class="block"><h2>Customers below <em>95%</em> on-time delivery</h2><div style="overflow-x:auto"><table><thead><tr><th>Customer</th><th class="num">Worst week</th><th>From week of</th><th>Because of</th></tr></thead><tbody>
+      ${custs.map((c) => `<tr><td><b>${esc(c.customer)}</b></td><td class="num">${Math.round(c.worst * 100)}%</td><td>${c.from ? date(c.from) : "—"}</td><td>${[...new Set(c.risks)].map(esc).join("; ")}</td></tr>`).join("")}</tbody></table></div></section>` : ""}` + askBlock("coo");
   document.querySelectorAll("[data-c]").forEach((b) => (b.onclick = async () => {
     const a = p.alerts.find((x) => x.alert_id === b.dataset.a);
-    await decide(a.alert_id, b.dataset.c, "COO", a.options.map(optLabel).join("; ") || "No action"); viewCoo();
+    await decide(a.alert_id, b.dataset.c, "COO", cooOpts(a).map(optLabel).join("; ") || "No action"); viewCoo();
   }));
+  document.querySelectorAll("[data-go]").forEach((r) => (r.onclick = () => (location.hash = `#/alert/${encodeURIComponent(r.dataset.go)}`)));
   wireAsk("coo");
 }
 
 /* ---------- sales / key-account manager ---------- */
 async function viewSales() {
   const p = await personaData();
-  let cust = pget("persona-cust", "");
-  if (!p.customers.includes(cust)) cust = p.customers[0];
-  const sel = `<label class="pick">Customer<select id="cust">${p.customers.map((c) => `<option${c === cust ? " selected" : ""}>${esc(c)}</option>`).join("")}</select></label>`;
+  let cust = pget("persona-cust", ALL);
+  if (cust !== ALL && !p.customers.includes(cust)) cust = ALL;
+  const sel = `<label class="pick">Customer<select id="cust"><option value="${ALL}"${cust === ALL ? " selected" : ""}>All customers</option>
+    ${p.customers.map((c) => `<option${c === cust ? " selected" : ""}>${esc(c)}</option>`).join("")}</select></label>`;
+  if (cust === ALL) return viewSalesAll(p, sel);
   const hits = p.alerts.filter((a) => a.inbox).flatMap((a) => a.customers.filter((c) => c.customer === cust).map((c) => ({ a, c })));
   const rows = hits.flatMap(({ a, c }) => c.products.map((x) => ({ a, c, x })));
   const worst = hits.reduce((m, h) => (h.c.worst_otif != null && (m == null || h.c.worst_otif < m) ? h.c.worst_otif : m), null);
@@ -277,6 +301,38 @@ We will keep you updated as the situation develops.` : "";
       <p class="muted">A draft for you to edit. The co-pilot never contacts customers or suppliers.</p></section>` : ""}` + askBlock("sales");
   $("#cust").onchange = (e) => { pset("persona-cust", e.target.value); viewSales(); };
   const c = $("#copyd"); if (c) c.onclick = async () => { try { await navigator.clipboard.writeText($("#draft").value); toast("Draft copied"); } catch (e) { toast("Copy blocked by the browser"); } };
+  wireAsk("sales");
+}
+
+/* All customers: who is hit, by what, which deliveries, and who to act on first (earliest week below target, then revenue). */
+function viewSalesAll(p, sel) {
+  const hotA = p.alerts.filter((a) => a.inbox);
+  const rows = p.customers.map((c) => {
+    const hits = hotA.flatMap((a) => a.customers.filter((x) => x.customer === c).map((x) => ({ a, x })));
+    const prods = [...new Set(hits.flatMap((h) => h.x.products.map((pr) => pr.sku_name || pr.sku_id)))];
+    const firsts = hits.map((h) => h.x.first_week_below).filter(Boolean).sort();
+    const worst = hits.reduce((m, h) => (h.x.worst_otif != null && (m == null || h.x.worst_otif < m) ? h.x.worst_otif : m), null);
+    const top = hits.reduce((m, h) => Math.max(m, h.x.revenue_at_risk_inr || 0), 0);
+    return { c, hits, prods, first: firsts[0] || null, worst, top };
+  }).filter((r) => r.hits.length)
+    .sort((x, y) => (x.first || "9999") < (y.first || "9999") ? -1 : (x.first || "9999") > (y.first || "9999") ? 1 : y.top - x.top);
+  const clear = p.customers.length - rows.length;
+  $("#app").innerHTML = personaHead("sales", sel) + `
+    <div class="tiles"><div class="tile big"><b>${rows.length} of ${p.customers.length}</b><span>customers with deliveries at risk</span></div>
+      <div class="tile big"><b>${new Set(rows.flatMap((r) => r.prods)).size}</b><span>products at risk across them</span></div>
+      <div class="tile big"><b>${rows[0]?.first ? date(rows[0].first) : "—"}</b><span>earliest week a customer drops below 95%</span></div></div>
+    <section class="block"><h2>All customers: <em>who to act on first</em></h2>
+      ${rows.length ? `<div style="overflow-x:auto"><table><thead><tr><th class="num">Order</th><th>Customer</th><th class="num">Revenue at risk</th><th>Because of</th>
+        <th>Deliveries at risk</th><th>Below 95% from</th><th class="num">Worst week</th></tr></thead><tbody>
+      ${rows.map((r, i) => `<tr class="click" data-cust="${esc(r.c)}"><td class="num">${i + 1}</td><td><b>${esc(r.c)}</b></td><td class="num">${inr(r.top)}</td>
+        <td>${[...new Set(r.hits.map((h) => h.a.title))].map(esc).join("; ")}</td>
+        <td>${r.prods.slice(0, 4).map(esc).join(", ")}${r.prods.length > 4 ? ` +${r.prods.length - 4} more` : ""}</td>
+        <td>${r.first ? date(r.first) : "stays above"}</td><td class="num">${r.worst == null ? "—" : Math.round(r.worst * 100) + "%"}</td></tr>`).join("")}</tbody></table></div>
+      <p class="muted">Ordered by the first week a customer's on-time delivery drops below 95%, then by revenue at risk (the largest single risk, not a sum).
+      Open a customer for the product list and a draft note.${clear ? ` ${clear} customer(s) have no open risk.` : ""}</p>`
+      : `<p class="muted">No open risk touches any customer's deliveries.</p>`}</section>` + askBlock("sales");
+  $("#cust").onchange = (e) => { pset("persona-cust", e.target.value); viewSales(); };
+  document.querySelectorAll("[data-cust]").forEach((r) => (r.onclick = () => { pset("persona-cust", r.dataset.cust); viewSales(); window.scrollTo(0, 0); }));
   wireAsk("sales");
 }
 

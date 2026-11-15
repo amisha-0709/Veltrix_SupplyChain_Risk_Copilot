@@ -37,7 +37,7 @@ async function viewInbox(tab = "inbox") {
   const bt = meta.backtest;
   const reviewRows = review.map((r) => `<tr><td>${date(r.published)}</td><td>${esc(r.source)}</td><td>${esc(r.text)}${r.simulated ? ' <span class="tag">simulated</span>' : ""}</td>
       <td class="muted">${esc(r.reason || "")}</td></tr>`).join("");
-  const r0 = role(), myCat = r0 === "category" ? (pget("persona-cat", "") || "") : "";
+  const r0 = role(), myCat = r0 === "category" && pget("persona-cat", "") !== "__all" ? (pget("persona-cat", "") || "") : "";
   const isMine = (a) => !!myCat && a.owner.endsWith(myCat);
   const list0 = tab === "inbox" ? inbox : watch;
   const list = r0 === "coo" ? list0.slice().sort((x, y) => (y.revenue_at_risk || 0) - (x.revenue_at_risk || 0))
@@ -123,6 +123,7 @@ async function viewAlert(id, tab = "options") {
         : `<div class="result" style="border-color:var(--good)"><b>No action recommended.</b><p>${esc(noAct ? noAct.option : "Stock lasts longer than the expected delay.")}</p></div>`}
       ${rest.length ? `<details><summary>${rest.length} other option${rest.length === 1 ? "" : "s"} ranked lower (cost more than they save, or land too late)</summary>
         <table>${optHead}<tbody>${rest.map((o, i) => optRow(o, rec.length + i, false)).join("")}</tbody></table></details>` : ""}
+      ${(a.brief?.no_action || []).length ? `<h3 style="margin-top:16px">Short parts with no action, and why</h3><ul>${a.brief.no_action.map((x) => `<li><b>${esc(x.part)}</b> (short ${x.shortage_days.toFixed(1)} d): ${esc(nameIds(x.why))}</li>`).join("")}</ul>` : ""}
       <p class="muted">Net value = margin avoided × P(works in time) − cost − penalties anyway (playbook §5). Options are shown for approval, never as approved.</p>`,
     working: `<ol class="steps">${(a.working || []).map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol>
       <h3 style="margin-top:14px">Parts</h3><table><thead><tr><th>Part</th><th>Description</th><th>Sourcing</th><th class="num">Cover (d)</th><th class="num">Delay (d)</th>
@@ -242,7 +243,7 @@ const EXAMPLES = [
 
 async function viewSimulate() {
   $("#app").innerHTML = `${hed("Ask · shared", "Check a <em>headline</em>.")}<nav class="seg" aria-label="Ask mode"><a href="#/ask" class="">Ask a question</a><a href="#/simulate" class="on">Check a headline</a></nav>
-    <p class="sub">Paste a headline and the co-pilot runs the full pipeline live: triage → link to the network → impact on today's stock → ranked options → briefing.
+    <p class="sub">For a news item, not a question (for questions use <a href="#/ask">Ask a question</a>). Paste a headline and the co-pilot runs the full pipeline live: triage → link to the network → impact on today's stock → ranked options → briefing.
     Signals you try here are visible only to you, in this browser tab: they never reach anyone else's inbox. Nothing is ordered or sent.</p>
     <div class="examples">${EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e[0])}</button>`).join("")}</div>
     <div class="card"><form class="stack" id="sim">
@@ -308,12 +309,7 @@ async function viewBacktest() {
     <div class="card"><h3>Test-period misses (${b.misses.length}) and false alarms (${b.false_alarms.length})</h3>
       <table><tbody>${b.misses.map((m) => `<tr><td>miss</td><td>${esc(m.linked_disruption_id)}</td><td>${esc(m.text)}</td><td class="num">score ${m.score}</td></tr>`).join("")}
       ${b.false_alarms.map((m) => `<tr><td>false alarm</td><td></td><td>${esc(m.text)}</td><td class="num">score ${m.score}</td></tr>`).join("")}</tbody></table>
-      <p class="muted">Full exhibits: <a href="reports/stage1.html" target="_blank" rel="noopener">Stage 1</a> ·
-      <a href="reports/m2.html" target="_blank" rel="noopener">Impact engine</a> · <a href="reports/m3.html" target="_blank" rel="noopener">Signal back-test</a> ·
-      <a href="reports/acceptance.html" target="_blank" rel="noopener">Acceptance tests T1–T10</a> · <a href="#/replay/D05">D05 replay (T10)</a> ·
-      <b><a href="reports/must_haves.html" target="_blank" rel="noopener">Must-have evidence</a></b> ·
-      Persona tests: <a href="reports/persona_test.html" target="_blank" rel="noopener">round 1</a>, <a href="reports/persona_test_round2.html" target="_blank" rel="noopener">round 2</a>,
-      <a href="reports/persona_test_round3.html" target="_blank" rel="noopener">round 3 (AI chat)</a></p></div>
+      <p class="muted">The acceptance tests T1–T10 can be run live from <a href="#/simulate">Check a headline</a>, <a href="#/ask">Ask</a> and <a href="#/replay/D05">Replay D05</a>.</p></div>
     <h2>Beyond the data pack: <em>harder</em> news</h2>
     <p class="sub">Rules were changed on train data only, then each test set was scored once. Real news: 416 archived headlines from 2023–24
       (Red Sea, Taiwan quake, Baltimore bridge, gallium controls and three quiet periods), tuned on 2023 and scored on 2024.</p>
@@ -339,24 +335,41 @@ const ASK_EXAMPLES = [
 const chat = [];
 const tableHtml = (t) => `<h3 style="margin-top:12px">${esc(t.title)}</h3><div style="overflow-x:auto"><table><thead><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
   <tbody>${t.rows.map((r) => `<tr>${r.map((v) => `<td>${esc(v === true ? "yes" : v === false ? "no" : v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+/* "what_if(places=Kaohsiung, Taiwan; event_type=port_closure; include_options=True)" -> "What if: Kaohsiung, Taiwan · port closure" */
+const QNAMES = { what_if: "What if", which_customers: "Customers hit", exposure: "Exposure", inbox: "Open alerts", compare: "Compare", options: "Options",
+  dual_sourcing: "Dual-sourcing moves", business_case: "Business case", history: "Disruption history" };
+const readable = (t) => String(t).replace(/^(\w+)\((.*)\)$/, (m, fn, args) => {
+  const parts = args.split(/;\s*/).filter((x) => x && !/^include_options=/.test(x)).map((x) => {
+    const [k, v] = x.split("="); if (v == null) return x;
+    return (k === "duration_days" ? `${v} days` : v.replace(/_/g, " "));
+  });
+  return `${QNAMES[fn] || fn.replace(/_/g, " ")}${parts.length ? ": " + parts.join(" · ") : ""}`;
+});
 const engineBadge = (r) => r.engine === "claude"
-  ? (r.tool_calls ? `<p class="muted" style="margin-top:0">Veltrix Co-Pilot read your question as: <span class="mono">${(r.interpretation || []).map(esc).join(" + ")}</span>.
-      The answer below is the engine's own text · ${r.seconds}s.</p>`
+  ? (r.tool_calls ? `<p class="kicker" style="margin:0 0 8px">Understood as · ${(r.interpretation || []).map((t) => esc(readable(t))).join(" + ")}</p>`
       : `<p class="muted" style="margin-top:0">Veltrix Co-Pilot: no engine query fits this question.</p>`)
   : r.engine === "rules" ? `<p class="muted" style="margin-top:0">Rule-based answer${r.engine_note ? ": " + esc(r.engine_note) : ""}</p>` : "";
+/* first sentence as the verdict, the rest as the explanation */
+const verdict = (t) => { const s = String(t || ""); const i = s.search(/[.!?](\s|$)/);
+  const head = i > 0 ? s.slice(0, i + 1) : s, rest = i > 0 ? s.slice(i + 1).trim() : "";
+  return `<p style="font:700 26px/1.1 var(--sans);letter-spacing:-.03em;margin:4px 0 8px">${esc(head)}</p>${rest ? `<p style="white-space:pre-line;margin-top:0">${esc(rest)}</p>` : ""}`; };
 function renderChat() {
   $("#log").innerHTML = chat.map((m) => m.role === "user"
-    ? `<div class="result ignored"><p class="kicker" style="margin:0">You asked</p><p style="font:400 22px/1.25 var(--serif);margin:4px 0">${esc(m.text)}</p></div>`
-    : `<div class="card">${engineBadge(m.r)}<p style="white-space:pre-line;margin-top:0">${esc(m.r.answer)}</p>
+    ? `<div class="result ignored"><p class="kicker" style="margin:0">You asked</p><p style="font-size:18px;margin:4px 0">${esc(m.text)}</p></div>`
+    : m.role === "hint" ? `<div class="result needs_review"><b>That reads like a news headline.</b><p>Ask answers questions about scenarios and your data
+        (“What if Kaohsiung closes for ten days?”). To see what a news item means for Veltrix, as an alert with impact, options and a briefing,
+        run it through Check a headline.</p><div class="btns"><button class="btn small" data-hl="${esc(m.text)}">Check it as a headline</button></div></div>`
+    : `<div class="card">${engineBadge(m.r)}${verdict(m.r.answer)}
         ${(m.r.tables || []).map(tableHtml).join("")}
         ${m.r.working?.length ? `<details><summary class="muted">${m.r.engine === "claude" ? "Working: Veltrix Co-Pilot's reading and the engine's steps" : "Working (playbook §3)"}</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
         ${m.r.assumptions?.length ? `<details><summary class="muted">Assumptions</summary><ul>${m.r.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></details>` : ""}</div>`).join("");
+  document.querySelectorAll("[data-hl]").forEach((b) => (b.onclick = () => goPending({ kind: "h", text: b.dataset.hl })));
 }
 async function viewAsk() {
   $("#app").innerHTML = `${hed("Ask · shared", "Ask the <em>co-pilot</em>.")}<nav class="seg" aria-label="Ask mode"><a href="#/ask" class="on">Ask a question</a><a href="#/simulate" class="">Check a headline</a></nav>
-    <p class="sub">Veltrix Co-Pilot reads your question (typos, Hinglish and comparisons are fine) and turns it into a query for the impact engine that
-    quantifies alerts. The answer is the engine's own text, so every number is reproducible, and you can see how Veltrix Co-Pilot read the question.
-    It recommends; people decide. If its AI reader is unavailable, a rule-based parser reads the question instead.
+    <p class="sub"><b>Ask</b> is for questions about scenarios and your own data: “What if Kaohsiung closes for ten days?”, “Which customers miss 95% OTIF if…?”.
+    You get a direct answer with the working. <b>Check a headline</b> is for a news item: it runs as if the news just arrived and gives a full alert
+    (triage, linked parts and customers, ₹ impact, ranked options, briefing). Typos, Hinglish and comparisons are fine; every number comes from the impact engine.
     <span id="eng" class="muted"></span></p>
     <div class="examples">${ASK_EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e)}</button>`).join("")}</div>
     <div id="log"></div>
@@ -365,7 +378,9 @@ async function viewAsk() {
   renderChat();
   api("/api/chat-engine").then((e) => { const el = $("#eng"); if (el) el.textContent = e.engine === "claude" ? `Now answering: Veltrix Co-Pilot AI reader.` : "Now answering: rule-based parser (no API key set)."; }).catch(() => {});
   const send = async (q) => {
-    chat.push({ role: "user", text: q }); chat.push({ role: "bot", r: { answer: "Reading your question…" } }); renderChat(); chat.pop();
+    chat.push({ role: "user", text: q });
+    if (!looksLikeQuestion(q)) chat.push({ role: "hint", text: q });
+    chat.push({ role: "bot", r: { answer: "Reading your question…" } }); renderChat(); chat.pop();
     try { const r = await api("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q }) });
       chat.push({ role: "bot", r }); } catch (e) { chat.push({ role: "bot", r: { answer: "Error: " + e.message.slice(0, 200) } }); }
     renderChat(); $("#askf").scrollIntoView({ behavior: "smooth", block: "end" });
@@ -376,6 +391,15 @@ async function viewAsk() {
 }
 
 /* ---------------- replay (T10) ---------------- */
+function replayVerdict(r) {
+  const est = r.seen.delay_estimate_days, act = r.actual_delay_days, lost = r.actual_revenue_lost_inr;
+  if (!r.detected) return `No public warning, so no early alert; on day one it would have quantified the impact and ranked options.`;
+  if (!r.recommended.length && lost > 0 && est != null && est < act)
+    return `It alerted ${r.copilot_lead_days} days early, but expected supply to be cut for ${est} days; it was actually ${act}. Stock looked enough, so it advised monitoring, and the ${inr(lost)} loss would still have happened. A miss on duration, not on detection.`;
+  if (!r.recommended.length && lost > 0) return `It alerted ${r.copilot_lead_days} days early but no option paid back on what it knew that day, so the ${inr(lost)} loss would still have happened.`;
+  if (!r.recommended.length) return `It alerted ${r.copilot_lead_days} days early and correctly said stock was enough: no action, no spend${r.avoided_waste_inr > 0 ? `, and ${inr(r.avoided_waste_inr)} of the team's spend skipped` : ""}.`;
+  return `It alerted ${r.copilot_lead_days} days early; its plan would have protected about ${inr(Math.max(0, r.vs_actual_protected_expected_inr))} of the ${inr(lost)} lost, for ${inr(r.plan_cost_inr)}.`;
+}
 async function viewReplay(did = "D04") {
   const [list, r] = await Promise.all([get("/api/replays"), api(`/api/replays/${encodeURIComponent(did)}`)]);
   const s = list.summary;
@@ -400,17 +424,18 @@ async function viewReplay(did = "D04") {
         <tr><td><b>Co-pilot first alert</b></td><td><b>${r.detected ? date(r.copilot_alert_date) + ` (${r.copilot_lead_days} d before impact)` : "not detected"}</b></td></tr>
         <tr><td>Team first alert</td><td>${date(r.team_alert_date)}</td></tr>
         <tr><td>Team first decision</td><td>day +${r.team_decision_day} after impact</td></tr>
-        <tr><td>Co-pilot's delay estimate vs actual</td><td>${r.seen.delay_estimate_days ?? "—"} d vs ${r.actual_delay_days} d</td></tr>
-        <tr><td>Revenue at risk it would have shown</td><td>${inr(r.seen.revenue_at_risk_inr)} (${r.seen.skus_stopped} SKUs)</td></tr>
+        <tr><td>How long supply would be cut off: co-pilot's estimate on the day / what actually happened</td><td>${r.seen.delay_estimate_days ?? "—"} days / ${r.actual_delay_days} days</td></tr>
+        <tr><td>Revenue at risk it would have shown on the day</td><td>${inr(r.seen.revenue_at_risk_inr)} (${r.seen.skus_stopped} products)</td></tr>
       </tbody></table>
       <h3 style="margin-top:14px">It would have recommended</h3><ul>${rec}</ul>
-      <h3>Outcome</h3><table><tbody>
-        <tr><td>Actually lost</td><td class="num">${inr(r.actual_revenue_lost_inr)}</td></tr>
-        <tr><td>Lost with the co-pilot's plan (if it works)</td><td class="num">${inr(r.with_plan_lost_inr)}</td></tr>
-        <tr><td><b>Expected revenue protected</b> (× P works ${r.plan_p_works})</td><td class="num"><b>${inr(r.vs_actual_protected_expected_inr)}</b></td></tr>
-        <tr><td>Plan cost</td><td class="num">${inr(r.plan_cost_inr)}</td></tr>
-        <tr><td>Margin protected / penalties avoided</td><td class="num">${inr(r.margin_protected_inr)} / ${inr(r.penalties_avoided_inr)}</td></tr>
-        <tr><td>Wasted spend it would have skipped</td><td class="num">${inr(r.avoided_waste_inr)} of ${inr(r.team_wasted_inr)}</td></tr>
+      <div class="result ${r.vs_actual_protected_expected_inr > 0 ? "inbox" : ""}"><b>${esc(replayVerdict(r))}</b></div>
+      <h3>Outcome in rupees</h3><table><tbody>
+        <tr><td>Revenue Veltrix actually lost</td><td class="num">${inr(r.actual_revenue_lost_inr)}</td></tr>
+        <tr><td>Revenue still lost if the co-pilot's plan had been followed${r.recommended.length ? "" : " (it advised no action, so the loss is unchanged)"}</td><td class="num">${inr(r.with_plan_lost_inr)}</td></tr>
+        <tr><td><b>Revenue the co-pilot would have protected</b>${r.recommended.length ? ` (expected: × ${Math.round(r.plan_p_works * 100)}% chance the plan works)` : ""}</td><td class="num"><b>${inr(Math.max(0, r.vs_actual_protected_expected_inr))}</b></td></tr>
+        <tr><td>Cost of its plan</td><td class="num">${inr(r.plan_cost_inr)}</td></tr>
+        <tr><td>Profit (margin) protected / late-delivery penalties avoided</td><td class="num">${inr(r.margin_protected_inr)} / ${inr(r.penalties_avoided_inr)}</td></tr>
+        <tr><td>Team's spend on parts that turned out to have enough stock / of it, what the co-pilot would have skipped</td><td class="num">${inr(r.team_wasted_inr)} / ${inr(r.avoided_waste_inr)}</td></tr>
       </tbody></table>
       ${st ? `<div class="result" style="margin-top:12px"><b>Structural fix the exposure map flags</b><p>${st.parts.map(esc).join("; ")}: about ${inr(st.cost_inr)}.
         Had this been done before the event, a switch would land ~19 days after impact: <b>${inr(st.revenue_protected_inr)}</b> of revenue protected.</p></div>` : ""}
@@ -423,7 +448,8 @@ async function viewReplay(did = "D04") {
 
 /* ---------------- business case (M6) ---------------- */
 async function viewBusiness() {
-  const m = await get("/api/business-case");
+  const [m, rp] = await Promise.all([get("/api/business-case"), get("/api/replays")]);
+  const rs = rp.summary;
   const b = m.base, ss = m.structural_summary, base = m.scenarios[0];
   const x = (v) => v == null ? "—" : `${v.toFixed(1)}×`;
   const pc = (v) => v == null ? "—" : `${Math.round(v * 100)}%`;
@@ -435,6 +461,15 @@ async function viewBusiness() {
       <div class="tile"><b>${inr(m.annual_cost_inr)}</b><span>co-pilot running cost per year, including people</span></div>
       <div class="tile"><b>${x(base.roi)}</b><span>ROI; ${x(Math.min(...m.scenarios.map((r) => r.roi)))} in the harshest sensitivity</span></div>
       <div class="tile"><b>₹${ss.net_annual_value_cr.toFixed(1)} cr/yr</b><span>extra from ${ss.parts_with_positive_move} structural moves (not in the ROI)</span></div></div>
+    <div class="card"><h3>From revenue protected to net benefit (two years, all 18 disruptions)</h3><table><tbody>
+      <tr><td>Revenue lost to the 18 disruptions</td><td class="num">₹${rs.actual_revenue_lost_cr} cr</td></tr>
+      <tr><td>Revenue the co-pilot's plans would have protected (expected, × chance each plan works)</td><td class="num">₹${rs.revenue_protected_expected_cr} cr</td></tr>
+      <tr><td>…of which is profit: the margin on those sales</td><td class="num">₹${rs.margin_protected_cr} cr</td></tr>
+      <tr><td>+ late-delivery penalties avoided</td><td class="num">₹${rs.penalties_avoided_cr} cr</td></tr>
+      <tr><td>+ wasted spend skipped (stock was enough)</td><td class="num">₹${rs.avoided_waste_cr} cr</td></tr>
+      <tr><td>− cost of the actions it recommends</td><td class="num">−₹${rs.plan_cost_cr} cr</td></tr>
+      <tr><td><b>Net benefit over two years</b> (÷ 2 = ${inr(b.net)} a year)</td><td class="num"><b>₹${(rs.margin_protected_cr + rs.penalties_avoided_cr + rs.avoided_waste_cr - rs.plan_cost_cr).toFixed(2)} cr</b></td></tr></tbody></table>
+      <p class="muted">Revenue protected is sales kept; a business case credits only the profit on those sales, because the cost of making them is spent either way.</p></div>
     <div class="row"><div class="card"><h3>Benefit per year</h3><table><tbody>
       <tr><td>Margin protected</td><td class="num">${inr(b.margin_protected)}</td></tr>
       <tr><td>Penalties avoided</td><td class="num">${inr(b.penalties_avoided)}</td></tr>
@@ -451,8 +486,7 @@ async function viewBusiness() {
     <div class="card"><h3>False alarms: each guard switched off</h3><table><thead><tr><th>Guard removed</th><th class="num">False signals (test)</th><th class="num">False alerts (test)</th><th class="num">Precision (test)</th></tr></thead>
       <tbody>${m.ablations.map((r) => `<tr><td>${esc(r["guard removed"])}</td><td class="num">${r.false_alarm_signals_test}</td><td class="num">${r.false_alerts_test}</td><td class="num">${pc(r.precision_test)}</td></tr>`).join("")}</tbody></table>
       <p class="muted">Load as built: ${m.load.alerts_per_week} alerts a week and ${m.load.inbox_per_month} inbox alerts a month, from ${m.load.signals_per_week} signals a week read.</p></div>
-    <p class="muted">Full exhibits: <a href="reports/m6.html" target="_blank" rel="noopener">M6 report</a> ·
-      <a href="reports/coo_onepager.html" target="_blank" rel="noopener">COO one-pager</a> (prints on one A4 page)</p>`;
+`;
 }
 
 /* ---------------- live news feed ---------------- */
