@@ -22,33 +22,33 @@ import pandas as pd
 from core.etl import load
 
 # --- Hand-curated aliases (the network sheets only hold canonical names) ----------
-# Port -> names a news item might use for it (city, region, alt port names).
+# Port -> names a news item might use for it (city, region, alt port names, main terminals and operators).
 PORT_ALIASES: dict[str, list[str]] = {
     "Kaohsiung": ["kaohsiung", "southern taiwan", "south taiwan"],
     "Keelung": ["keelung", "northern taiwan", "north taiwan", "taipei", "hsinchu"],
-    "Yantian (Shenzhen)": ["yantian", "shenzhen", "guangdong", "pearl river delta"],
-    "Ningbo": ["ningbo", "zhejiang"],
-    "Shanghai": ["shanghai"],
-    "Yokohama": ["yokohama", "tokyo", "kanagawa"],
-    "Busan": ["busan", "pusan"],
-    "Penang": ["penang"],
-    "Port Klang": ["port klang", "klang", "selangor", "kuala lumpur"],
-    "Hai Phong": ["hai phong", "haiphong", "northern vietnam", "north vietnam", "hanoi"],
+    "Yantian (Shenzhen)": ["yantian", "shenzhen", "guangdong", "pearl river delta", "shekou", "chiwan", "dachan bay"],
+    "Ningbo": ["ningbo", "zhejiang", "zhoushan", "beilun", "meishan"],
+    "Shanghai": ["shanghai", "yangshan", "waigaoqiao"],
+    "Yokohama": ["yokohama", "tokyo", "kanagawa", "honmoku", "minami-honmoku"],
+    "Busan": ["busan", "pusan", "busan new port"],
+    "Penang": ["penang", "butterworth", "north butterworth container terminal", "nbct"],
+    "Port Klang": ["port klang", "klang", "selangor", "kuala lumpur", "westports", "northport"],
+    "Hai Phong": ["hai phong", "haiphong", "northern vietnam", "north vietnam", "hanoi", "lach huyen"],
     "Laem Chabang": ["laem chabang", "bangkok"],
-    "Hamburg": ["hamburg"],
-    "Rotterdam": ["rotterdam"],
+    "Hamburg": ["hamburg", "burchardkai", "altenwerder", "eurogate hamburg"],
+    "Rotterdam": ["rotterdam", "maasvlakte"],
     "Domestic — Pune": ["pune", "chakan", "maharashtra"],
     "Domestic — Chennai": ["chennai", "sriperumbudur", "tamil nadu"],
     "Domestic — Bengaluru/Hosur": ["bengaluru", "bangalore", "hosur", "karnataka"],
 }
 # Indian destination ports.
 DEST_ALIASES: dict[str, list[str]] = {
-    "Nhava Sheva (JNPT)": ["nhava sheva", "jnpt", "jawaharlal nehru port", "mumbai"],
+    "Nhava Sheva (JNPT)": ["nhava sheva", "jnpt", "jnpa", "jawaharlal nehru port", "mumbai", "nsict", "bmct"],
     "Chennai Port": ["chennai port", "chennai", "ennore"],
 }
 CHOKE_ALIASES: dict[str, list[str]] = {
     "Strait of Malacca": ["malacca", "strait of malacca", "singapore strait"],
-    "Red Sea / Suez Canal": ["red sea", "suez", "bab el-mandeb", "bab-el-mandeb", "houthi", "gulf of aden"],
+    "Red Sea / Suez Canal": ["red sea", "suez", "bab el-mandeb", "bab-el-mandeb", "bab al-mandab", "houthi", "houthis", "gulf of aden"],
 }
 COUNTRY_ALIASES: dict[str, list[str]] = {
     "China": ["china", "chinese", "beijing", "prc"],
@@ -77,6 +77,33 @@ CATEGORY_ALIASES: dict[str, list[str]] = {
     "Copper & harness": ["harness", "busbar", "wiring harness"],
     "Plastics": ["polymer", "resin", "plastic", "pa66", "abs "],
 }
+# Hindi (Devanagari) names for the same places and commodities, so Hindi news links like English news.
+# A translation of the lists above, not of any headline. Common spelling variants included.
+HINDI_ALIASES: dict[str, list[str]] = {
+    "port:Kaohsiung": ["काओशुंग", "काऊशुंग", "काओह्सिउंग", "दक्षिणी ताइवान"],
+    "port:Keelung": ["कीलुंग", "उत्तरी ताइवान", "ताइपे", "सिंचू"],
+    "port:Yantian (Shenzhen)": ["यांतियान", "शेन्ज़ेन", "शेनझेन", "शेंझेन", "शेनजेन", "ग्वांगडोंग", "गुआंगडोंग"],
+    "port:Ningbo": ["निंगबो"], "port:Shanghai": ["शंघाई"],
+    "port:Yokohama": ["योकोहामा", "टोक्यो"], "port:Busan": ["बुसान"], "port:Penang": ["पेनांग"],
+    "port:Port Klang": ["पोर्ट क्लांग", "क्लांग"], "port:Hai Phong": ["हाइफोंग", "हाई फोंग", "हनोई", "उत्तरी वियतनाम"],
+    "port:Laem Chabang": ["लेम चाबांग", "बैंकॉक"], "port:Hamburg": ["हैम्बर्ग"], "port:Rotterdam": ["रॉटरडैम"],
+    "port:Domestic — Pune": ["पुणे", "चाकण", "महाराष्ट्र"],
+    "port:Domestic — Chennai": ["तमिलनाडु", "तमिल नाडु"],
+    "port:Domestic — Bengaluru/Hosur": ["बेंगलुरु", "बेंगलूरु", "होसुर", "कर्नाटक"],
+    "dest:Nhava Sheva (JNPT)": ["न्हावा शेवा", "जेएनपीटी", "मुंबई"], "dest:Chennai Port": ["चेन्नई"],
+    "choke:Strait of Malacca": ["मलक्का"], "choke:Red Sea / Suez Canal": ["लाल सागर", "स्वेज", "हूती"],
+    "country:China": ["चीन", "चीनी"], "country:India": ["भारत", "भारतीय"], "country:Taiwan": ["ताइवान"],
+    "country:Malaysia": ["मलेशिया"], "country:Japan": ["जापान", "जापानी"], "country:Germany": ["जर्मनी"],
+    "country:South Korea": ["दक्षिण कोरिया", "कोरिया", "कोरियाई"], "country:Vietnam": ["वियतनाम"],
+    "country:Thailand": ["थाईलैंड"],
+    "cat:Semiconductors": ["सेमीकंडक्टर", "चिप", "चिपमेकर", "मॉसफेट"], "cat:Passives": ["कैपेसिटर", "पैसिव"],
+    "cat:PCBs": ["पीसीबी", "सर्किट बोर्ड"], "cat:Connectors": ["कनेक्टर"],
+    "cat:Magnets": ["मैग्नेट", "चुंबक", "दुर्लभ पृथ्वी", "रेयर अर्थ"],
+    "cat:Li-ion cells": ["बैटरी निर्माता", "बैटरी सेल", "सेल संयंत्र", "सेल निर्माता", "बेलनाकार सेल", "लिथियम"],
+    "cat:Displays": ["डिस्प्ले"], "cat:Castings": ["कास्टिंग"], "cat:Copper & harness": ["हार्नेस"],
+    "region:India road freight": ["ट्रक चालक", "ट्रक चालकों", "ट्रांसपोर्टर"],
+}
+
 # Weather-alert locations that are not ports -> port nodes they affect.
 LOCATION_TO_PORTS: dict[str, list[str]] = {
     "Mumbai / JNPT": ["dest:Nhava Sheva (JNPT)"],
@@ -92,7 +119,7 @@ LOCATION_TO_PORTS: dict[str, list[str]] = {
 REGION_ALIASES: dict[str, tuple[list[str], list[str]]] = {
     "region:Indian ports": (["indian ports", "major ports", "bills of entry", "customs portal", "icegate",
                              "indian customs"], ["dest:Nhava Sheva (JNPT)", "dest:Chennai Port"]),
-    "region:India road freight": (["transporters", "truckers", "goods trucks", "trucking"],
+    "region:India road freight": (["transporters", "truckers", "trucker", "goods trucks", "trucking"],
                                   ["port:Domestic — Pune", "port:Domestic — Chennai",
                                    "port:Domestic — Bengaluru/Hosur"]),
     "region:Asia–India sea lanes": (["asia–india", "asia-india", "india-bound", "asia–india trade lane"],
@@ -246,6 +273,8 @@ def build_network() -> Network:
         entries += [(a, f"country:{c}") for a in al]
     for c, al in CATEGORY_ALIASES.items():
         entries += [(a, f"cat:{c}") for a in al]
+    for node, al in HINDI_ALIASES.items():
+        entries += [(a, node) for a in al]
     for r in sup.itertuples():
         name = _norm(r.supplier_name)
         entries.append((name, f"sup:{r.supplier_id}"))
@@ -258,7 +287,8 @@ def build_network() -> Network:
     gaz = []
     for alias, node in entries:
         a = alias.strip()
-        pat = re.compile(r"(?<![a-z0-9])" + re.escape(a) + r"(?![a-z0-9])")
+        # Word edges for Latin and Devanagari alike (so a Hindi alias never matches inside a longer Hindi word).
+        pat = re.compile(r"(?<![a-z0-9ऀ-ॿ])" + re.escape(a) + r"(?![a-z0-9ऀ-ॿ])")
         gaz.append((pat, a, node))
     return Network(G=G, gazetteer=gaz)
 

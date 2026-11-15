@@ -36,7 +36,7 @@ def run_backtest(use_llm: bool = True) -> dict:
     rule = choose(V) if cov["unique_extracted"] else "rules"
     T = apply_rule(T, th, rule)
     events, review = build_events(T, th)
-    in_alert = {s["signal_id"]: e.event_id for e in events for s in e.signals}
+    in_alert = {s["signal_id"]: e.event_id for e in events for s in e.signals + e.updates}   # updates count as surfaced
     T["alerted"] = T["signal_id"].isin(in_alert)
     T["alert_id"] = T["signal_id"].map(in_alert)
 

@@ -32,26 +32,37 @@ CUES: list[tuple[str, float, str]] = [
     (r"extremely heavy|very heavy", 2, "weather"), (r"\bflood(s|ing|ed)?\b", 3, "weather"),
     (r"intensif(ies|y|ying)|strengthens|likely to become", 2, "weather"),
     (r"tropical storm", 1, "weather"), (r"heavy rain", 1, "weather"), (r"heatwave", 1, "weather"),
+    (r"(?:typhoon|cyclone|tropical storm|storm)\b[^.]{0,40}\b(?:heading (?:for|towards?|to)|to land|to hit|nears|nearing|"
+     r"approach\w*|might hit|may hit|hits|batters|lashes)\b|\bbrac(?:e|es|ing) for (?:\w+\s+)?(?:typhoon|cyclone|storm)", 2, "weather"),
     (r"severe heatwave|heatwave warning", 2, "weather"),
     (r"earthquake|quake|tremor|tsunami", 3, "seismic"),
     # --- ports, lanes, logistics
     (r"(suspend|halt|pause|close|shut)s?\b|suspended|halted|paused|closed|closure", 3, "stoppage"),
     (r"suspend (operations|cargo|transits|production)|may suspend", 1, "stoppage"),
-    (r"divert(s|ed)?|reroute|cape of good hope|avoid(s|ing)? the", 3, "route"),
+    (r"divert(s|ed)?|rerout(e|es|ed|ing)|cape of good hope|avoid(s|ing)? the", 3, "route"),
     (r"attacks? on", 2, "route"), (r"escalat", 1, "route"),
+    # Attacks on shipping as real news words them (always tied to a ship, so attacks on land don't count).
+    (r"\b(?:shipping|ship|vessel|tanker|cargo ship|container ship|merchant|red sea)\s+attacks?\b|"
+     r"\battacks?\s+on\s+(?:\w+\s+){0,2}(?:ships?|vessels?|tankers?|shipping)\b|"
+     r"\b(?:houthis?|rebels?|pirates?|militants?)\b[^.]{0,30}\b(?:attack|strike|target|hijack|seize)\w*\b[^.]{0,25}\b(?:ships?|vessels?|tankers?|shipping|carriers?)\b|"
+     r"\b(?:missiles?|drones?)\b[^.]{0,20}\b(?:strikes?|hits?)\b[^.]{0,20}\b(?:ships?|vessels?|tankers?)\b|"
+     r"\bhit by (?:\w+\s+)?(?:missiles?|drones?)|\bhijack\w*", 3, "route"),
     (r"congestion (builds|worsens|rises)|congestion surcharge|backlog", 2, "congestion"),
     (r"waiting times?\b[^.]{0,30}\b(rise|rises|rising|climb|up)", 2, "congestion"),
     (r"waiting times?\b[^.]{0,40}\b\d+(?:\.\d+)?\s*days", 1, "congestion"),  # stated wait in days (persona test)
-    (r"rolled bookings|blank sailings", 2, "congestion"),
+    (r"rolled bookings|blank sailings|\bclog(?:s|ged|ging)?\b", 2, "congestion"),
     (r"surcharges?|longer lead times", 1, "congestion"),
     (r"volumes surge|yard utilisation|utilization above", 1, "congestion"),
     (r"container shortage|equipment shortage", 3, "congestion"),
     (r"(rates|prices) (jump|jumps|double|soar|spike|surge)|more than double", 2, "congestion"),
     (r"\b(slows|slowed|delays|delayed)\b", 1, "congestion"),
-    (r"schedule disruption|disruption", 2, "congestion"),
+    (r"schedule disruption|disruption|\bdisrupted\b", 2, "congestion"),
+    (r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)-day (?:vessel )?waiting", 1, "congestion"),
+    (r"(?:congestion|waiting times?)[^.]{0,25}\bbadh", 2, "congestion"),          # Hinglish: rising
     (r"outages?\b|systems? failure|it outage", 3, "systems"),
     # --- labour
-    (r"\bstrike\b", 2, "labour"), (r"votes to strike|strike (begins|to go ahead)|nationwide strike", 2, "labour"),
+    (r"\bstrike\b", 2, "labour"),
+    (r"votes to strike|votes? (?:in favour of|for) (?:a )?strike|strike vote|strike (begins|to go ahead)|nationwide strike", 2, "labour"),
     (r"walkout|lockout", 2, "labour"),
     # --- trade policy
     (r"export licen[cs]|licen[cs]ing (rules|requirements)|licence delays", 3, "trade"),
@@ -62,15 +73,17 @@ CUES: list[tuple[str, float, str]] = [
     (r"ransomware|cyber[- ]?attack|hack(ed)?\b", 3, "incident"),
     (r"(extends|extended) shutdown|shutdown", 2, "incident"),
     (r"insolven|bankrupt|restructuring|administration|receivership", 3, "health"),
-    (r"delays? (supplier )?payments|unpaid wages|credit insurer|cuts cover|mounting debts", 3, "health"),
+    (r"delays? (supplier )?payments|unpaid wages|credit insurer|cuts cover|mounting debts|slow to pay|"
+     r"payments? (?:rok|stopped|halted|withheld)", 3, "health"),
     (r"protest", 1, "health"), (r"layoffs?", 2, "health"),
-    (r"tightening supply|allocation", 2, "supply"),
-    (r"lead times?\b[^.]{0,40}\b(lengthen|stretch|extend)", 2, "supply"),
+    (r"tightening supply|allocation|\bsupply\b[^.]{0,30}\b(?:tight|tighter|tightening)\b", 2, "supply"),
+    (r"lead times?\b[^.]{0,40}\b(lengthen|stretch|extend|exceed|run past)", 2, "supply"),
+    (r"\bstop(?:s|ped)? production|production lines? (?:stop|halt)", 3, "stoppage"),
     (r"load-shedding|power cuts?|blackout|power outage", 3, "power"),
     (r"output (cut|reduced)|production (cut|reduced)|reduced to one shift|halt some lines", 2, "supply"),
     # --- dampeners: forecasts that miss, denials, routine and good news
     (r"likely to weaken|weakens|to dissipate", -4, "damp"),
-    (r"pass(es)? (east|west|north|south) of|away from", -4, "damp"),
+    (r"pass(es)? (east|west|north|south) of|(?:pass\w*|track\w*|mov\w*|veer\w*|turn\w*|head\w*) away from", -4, "damp"),
     (r"\b(steady|stable|improves|improving|eases|easing|clears|cleared)\b", -4, "damp"),
     (r"on schedule|record (monthly )?throughput|without strike|conclude", -4, "damp"),
     (r"denied|denies|rumou?rs?", -4, "damp"),
@@ -80,6 +93,30 @@ CUES: list[tuple[str, float, str]] = [
     (r"naval exercises?|military drills?|exercise zone", -3, "damp"),
     (r"phishing|security researchers", -3, "damp"),
     (r"forecast for parts of|watch issued", -1, "damp"),
+    # Reassurance and negation: the item itself says nothing is disrupted.
+    (r"\bno (?:major |significant |big )?disruption|disruption[^.]{0,25}\b(?:not|nahi) (?:expected|anticipated)|"
+     r"\bkoi (?:bada |badi |major )?disruption", -4, "damp"),
+    (r"\bno strike(?: action)?\b|strike (?:called off|averted)", -4, "damp"),
+    (r"continues? normally|operations (?:normal|unaffected)", -4, "damp"),
+    (r"\bif (?:talks|negotiations) fail", -1.5, "damp"),
+    # Routine items that only look like disruptions.
+    (r"(?:maintenance|scheduled|planned|repair works?)\b[^.]{0,40}\bpower cuts?|power cuts?\b[^.]{0,60}\b(?:full list|list of "
+     r"(?:affected )?areas)|\bto (?:face|experience) power cuts? (?:in|on)\b", -4, "damp"),
+    (r"\b(?:remains?|stay|stays) open\b|remain operational|\boutlets?\b", -4, "damp"),
+    (r"locali[sz]ation|relocat\w*|consolidat\w*", -3, "damp"),
+    (r"\bgallium|germanium|graphite\b", -3, "damp"),          # raw materials Veltrix does not buy (see graph.py)
+    # --- Hindi (Devanagari): the same cues, translated
+    (r"हड़ताल|हडताल", 2, "labour"), (r"हड़ताल के पक्ष में वोट|हड़ताल शुरू", 2, "labour"),
+    (r"बाढ़|बाढ", 3, "weather"), (r"तूफान|तूफ़ान|चक्रवात|टाइफून", 2, "weather"), (r"भारी बारिश", 1, "weather"),
+    (r"भूकंप", 3, "seismic"), (r"(?<![ऀ-ॿ])आग(?![ऀ-ॿ])|विस्फोट", 3, "incident"),
+    (r"साइबर हमल|रैंसमवेयर", 3, "incident"), (r"शटडाउन", 2, "incident"),
+    (r"दिवालि|दिवाला|दिवालियापन", 3, "health"), (r"भुगतान में देरी|कवर घटा|बढ़ते कर्ज", 3, "health"),
+    (r"एंटी-डंपिंग|एंटी डंपिंग", 3, "duty"), (r"निर्यात लाइसेंस", 3, "trade"), (r"निर्यात (?:नियंत्रण|प्रतिबंध)", 2, "trade"),
+    (r"कंजेशन|भीड़भाड़", 1, "congestion"), (r"सरचार्ज", 1, "congestion"), (r"देरी", 1, "congestion"),
+    (r"व्यवधान", 2, "congestion"), (r"उत्पादन में कटौती|उत्पादन (?:रोक|बंद)", 2, "supply"),
+    (r"निलंबित|बंद कर|बंद रह", 3, "stoppage"), (r"बिजली कटौती|ब्लैकआउट", 3, "power"), (r"(?<![ऀ-ॿ])लू(?![ऀ-ॿ])|हीटवेव", 1, "weather"),
+    (r"(?:व्यवधान|बाधा)[^।.]{0,20}नहीं|हड़ताल नहीं|सामान्य रूप से जारी", -4, "damp"),
+    (r"(?:पूर्व|पश्चिम|उत्तर|दक्षिण) से (?:होकर )?गुजर", -4, "damp"),
 ]
 CUES_C = [(re.compile(p, re.I), w, t) for p, w, t in CUES]
 
@@ -138,6 +175,39 @@ def normalise(headline: str, snippet: str = "") -> str:
     return f"{h}. {s}".strip(" .") if s else h
 
 
+# Spelling repair for the words that matter: place names and disruption cues. Only the two commonest typing slips
+# are repaired (two neighbouring letters swapped, or one letter dropped), only in words of 5+ letters that are not
+# already known, and only when exactly one known word fits. Everything else is left as written.
+CUE_WORDS = ("typhoon cyclone hurricane flood floods flooding flooded intensifies intensify strengthens heatwave "
+             "warning earthquake tremor tsunami suspend suspends suspended halted paused closure closed divert "
+             "diverted diverts reroute congestion surcharge surcharges backlog shortage disruption disrupted outage "
+             "outages strike strikes walkout lockout licensing licence license export controls dumping insolvency "
+             "insolvent bankrupt bankruptcy restructuring shutdown ransomware explosion allocation tightening "
+             "payments delays delayed slows").split()
+_FIX: dict[str, str] | None = None
+
+
+def _fixes() -> dict[str, str]:
+    global _FIX
+    if _FIX is None:
+        vocab = set(CUE_WORDS)
+        for _, alias, _ in build_network().gazetteer:
+            vocab |= {w for w in re.findall(r"[a-z]+", alias) if len(w) >= 5}
+        cand: dict[str, set[str]] = {}
+        for w in vocab:
+            for i in range(len(w)):
+                cand.setdefault(w[:i] + w[i + 1:], set()).add(w)                   # one letter dropped
+            for i in range(len(w) - 1):
+                cand.setdefault(w[:i] + w[i + 1] + w[i] + w[i + 2:], set()).add(w)  # neighbours swapped
+        _FIX = {t: next(iter(ws)) for t, ws in cand.items() if len(ws) == 1 and t not in vocab and len(t) >= 5}
+    return _FIX
+
+
+def repair(text: str) -> str:
+    fx = _fixes()
+    return re.sub(r"[A-Za-z]{5,}", lambda m: fx.get(m.group(0).lower(), m.group(0)), text)
+
+
 def story_key(headline: str) -> str:
     """Normalised headline used to spot syndicated copies of the same story."""
     h = TEMPLATE_SUFFIX.sub("", str(headline).lower()).strip()
@@ -176,10 +246,11 @@ def _duration(text: str) -> float | None:
 def triage_news(row) -> Triaged:
     net = build_network()
     text = normalise(row.headline, row.snippet)
-    links = [h["node"] for h in net.match(text)]
+    scan = repair(text)                      # typo-repaired copy used for matching; the text shown stays as written
+    links = [h["node"] for h in net.match(scan)]
     found, score, tags = [], 0.0, []
     for pat, w, tag in CUES_C:
-        m = pat.search(text)
+        m = pat.search(scan)
         if m:
             found.append(f"{m.group(0).lower()}({w:+g})")
             score += w
@@ -281,7 +352,8 @@ def tune_threshold(T: pd.DataFrame) -> float:
             continue
         f1 = 2 * m["precision"] * m["recall"] / (m["precision"] + m["recall"])
         key = (m["recall"] >= 0.8, round(f1, 3))
-        if key > best_key:
+        # Ties go to the HIGHER threshold: equally accurate on train, fewer alerts (brief §8, alert fatigue).
+        if key >= best_key:
             best, best_key = th, key
     return best
 

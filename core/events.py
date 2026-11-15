@@ -36,6 +36,12 @@ FORECAST = ("may ", "could", "likely", "forecast", "signals", "warning", "warn",
             "watch", "intensifies", "strengthens", "calls")
 
 
+# General crisis vocabulary for follow-up headlines (an update to an open alert, never an alert on its own).
+FOLLOWUP_WORDS = (r"(?i)\b(?:crisis|situation|conflict|war|tensions?|risks?|threats?|on alert|attacks?|aggression|"
+                  r"instability|unrest|security|vulnerable|impact|fallout|aftermath|recovery|continues|ongoing|"
+                  r"persists?|squeeze|shortages?|disrupt\w*)\b")
+
+
 def scope_parts(links: list[str]) -> set[str]:
     """Parts a set of links points at. Specific nodes ∩ category when both are named (Shenzhen ∩ PCBs)."""
     net = build_network()
@@ -62,6 +68,9 @@ class Event:
     parts: set[str] = field(default_factory=set)
     story_keys: set[str] = field(default_factory=set)
     seed_parts: set[str] = field(default_factory=set)
+    # Follow-up headlines about the same place while the alert is open ("Suez squeeze continues"). Shown to the
+    # owner as updates; they never change the alert's likelihood, impact, sources or briefing.
+    updates: list[dict] = field(default_factory=list)
 
     @property
     def first_seen(self) -> pd.Timestamp:
@@ -96,12 +105,25 @@ def build_events(T: pd.DataFrame, threshold: float) -> tuple[list[Event], pd.Dat
     T = T.sort_values(["published", "signal_id"], kind="mergesort")
     flagged = T[T["score"] >= threshold]
     unlinked = T[(T["link_strength"] == 0) & (T["cue_score"] >= threshold)]
-    cand = pd.concat([flagged.assign(_unlinked=False), unlinked.assign(_unlinked=True)]).sort_values(["published", "signal_id"], kind="mergesort")
+    # A possible update: a news item below the bar that names a specific place of ours, speaks of a crisis that is
+    # still running, and does not say "all clear". Routine official weather and neutral business news never qualify.
+    specific = T["links"].map(lambda ls: any(n.startswith(SPECIFIC) for n in ls))
+    crisis = T["text"].str.contains(FOLLOWUP_WORDS, regex=True)
+    followup = T[(T["score"] < threshold) & specific & crisis & (T["cue_score"] >= 0) & (T["kind"] == "news")
+                 & ~T.index.isin(unlinked.index)]
+    cand = pd.concat([flagged.assign(_unlinked=False, _followup=False), unlinked.assign(_unlinked=True, _followup=False),
+                      followup.assign(_unlinked=False, _followup=True)]).sort_values(["published", "signal_id"], kind="mergesort")
     events: list[Event] = []
     review = []
     for s in cand.to_dict("records"):
         open_ev = [e for e in events if (s["published"] - e.last_seen).days <=
                    (SLOW_WINDOW_DAYS if e.event_type in SLOW_TYPES else EVENT_WINDOW_DAYS)]
+        if s["_followup"]:
+            named = {n for n in s["links"] if n.startswith(SPECIFIC)}
+            match = [e for e in open_ev if named & {n for n in e.links if n.startswith(SPECIFIC)}]
+            if match:                               # joins the most recent open alert on that place; never a new alert
+                match[-1].updates.append({**s, "linked_via": "update to open alert"})
+            continue
         if s["_unlinked"]:
             match = [e for e in open_ev if (s["published"] - e.last_seen).days <= FOLLOWUP_DAYS
                      and s["event_type"] and _compatible(e.event_type, s["event_type"])]
