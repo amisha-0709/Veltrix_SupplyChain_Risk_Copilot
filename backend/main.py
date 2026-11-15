@@ -321,20 +321,10 @@ class SignalIn(BaseModel):
 @app.post("/api/simulate")
 def simulate(sig: SignalIn, request: Request, x_copilot_session: str | None = Header(default=None)):
     """Run the whole co-pilot on one signal. Returns what it would do: ignore, review, watch or alert."""
-    import pandas as pd
-
-    from core.alerts import build_alert
-    from core.events import build_events
-    from core.snapshot import alert_record, clean
-    from core.triage import triage_text
-    th = snap()["meta"]["threshold"]
     session = _session(x_copilot_session)
-    t = triage_text(sig.headline, sig.snippet, sig.source, pd.Timestamp.now(), signal_id=f"SIM-{secrets.token_hex(4)}")
-    if sig.duration_days is not None:
-        t["duration_days"] = sig.duration_days
     # Claude reads the signal too (must-have 1: classify and extract). Our gazetteer links what it extracts; the rule
     # that combines Claude and the word list was chosen on train data only (snapshot meta 'triage_rule').
-    ext, rule = None, snap()["meta"].get("triage_rule", "rules")
+    ext = None
     from core import llm_chat
     if llm_chat.enabled():
         who = (request.headers.get("x-forwarded-for", "").split(",")[0].strip()
@@ -342,6 +332,25 @@ def simulate(sig: SignalIn, request: Request, x_copilot_session: str | None = He
         if _llm_allowed(who)[0]:
             from core.triage_llm import live_extraction
             ext = live_extraction(f"{sig.headline}. {sig.snippet}".strip(". "))
+    return _evaluate(sig.headline, sig.snippet, sig.source, None, "SIM", sig.duration_days, ext, session)
+
+
+def _evaluate(headline: str, snippet: str, source: str, published, prefix: str, duration_days, ext: dict | None,
+              session: str | None) -> dict:
+    """The whole co-pilot on one signal, shared by 'Try a signal' and the live news feed."""
+    import pandas as pd
+
+    from core.alerts import build_alert
+    from core.events import build_events
+    from core.snapshot import alert_record, clean
+    from core.triage import triage_text
+    th = snap()["meta"]["threshold"]
+    rule = snap()["meta"].get("triage_rule", "rules")
+    sig = SignalIn.model_construct(headline=headline, snippet=snippet, source=source, duration_days=duration_days)
+    t = triage_text(sig.headline, sig.snippet, sig.source, published if published is not None else pd.Timestamp.now(),
+                    signal_id=f"{prefix}-{secrets.token_hex(4)}")
+    if sig.duration_days is not None:
+        t["duration_days"] = sig.duration_days
     promoted = False
     if ext and rule == "either" and ext["relevant"] and t["score"] < th:
         t["links"] = list(dict.fromkeys(list(t["links"]) + ext["geo_links"] + ext["cat_links"]))
@@ -384,7 +393,7 @@ def simulate(sig: SignalIn, request: Request, x_copilot_session: str | None = He
     events, _ = build_events(pd.DataFrame([t]), th)
     a = build_alert(events[0])
     rec = alert_record(a)
-    rec["alert_id"] = t["signal_id"].replace("SIM", "SIM-AL")
+    rec["alert_id"] = t["signal_id"].replace(prefix, f"{prefix}-AL", 1)
     rec["brief"]["alert_id"] = rec["alert_id"]
     from core.briefing import render_html, render_text
     rec["brief_html"] = render_html(rec["brief"], standalone=False)
@@ -399,6 +408,92 @@ def simulate(sig: SignalIn, request: Request, x_copilot_session: str | None = He
         for v in _SIMULATED.values():
             v.pop(old, None)
     return {**base, "decision": "inbox" if rec["inbox"] else "watch", "alert": rec}
+
+
+# ---------------- live news feed ----------------
+# Real headlines (core/live_feed.py) through the same pipeline. Shared by every viewer (it is public news); kept in
+# memory per server instance. A refresh within LIVE_COOLDOWN seconds returns the last result instead of fetching again.
+LIVE_COOLDOWN = int(os.environ.get("COPILOT_LIVE_COOLDOWN", "300"))
+LIVE_LLM_PER_REFRESH = int(os.environ.get("COPILOT_LIVE_LLM", "10"))
+LIVE_LLM_PER_DAY = int(os.environ.get("COPILOT_LIVE_LLM_DAY", "150"))
+_LIVE: dict = {"fetched_at": None, "items": [], "errors": [], "fetched_ts": 0.0}
+_LIVE_LOCK = threading.Lock()
+_LIVE_EXT: dict[str, dict | None] = {}          # headline -> Claude extraction, so a refresh never re-asks
+_live_llm_day: list[float] = []
+
+
+def _live_view(cached: bool = False) -> dict:
+    items = _LIVE["items"]
+    counts = {k: sum(i["decision"] == k for i in items) for k in ("inbox", "watch", "needs_review", "ignored")}
+    return {"fetched_at": _LIVE["fetched_at"], "items": items, "errors": _LIVE["errors"], "counts": counts,
+            "cached": cached, "cooldown_s": LIVE_COOLDOWN,
+            "note": "Real headlines from Google News; Veltrix's suppliers, stock and customers are synthetic."}
+
+
+@app.get("/api/live")
+def live():
+    return _live_view(cached=True)
+
+
+@app.post("/api/live/refresh")
+def live_refresh():
+    import time as _t
+    from concurrent.futures import ThreadPoolExecutor
+
+    import pandas as pd
+
+    from core import live_feed, llm_chat
+    from core.triage import triage_text
+    if _LIVE["fetched_at"] and _t.time() - _LIVE["fetched_ts"] < LIVE_COOLDOWN:
+        return _live_view(cached=True)
+    if not _LIVE_LOCK.acquire(blocking=False):            # someone else is refreshing: show what we have
+        return _live_view(cached=True)
+    try:
+        news, errors = live_feed.fetch_all()
+        if not news:
+            _LIVE["errors"] = errors or ["No headlines returned"]
+            return _live_view(cached=True)
+        th = snap()["meta"]["threshold"]
+
+        def when(n):
+            return pd.Timestamp(n["published"]).tz_convert(None) if n["published"] else pd.Timestamp.now()
+        # Claude reads only headlines the word list links to our network or scores as a disruption, newest first,
+        # capped per refresh and per day; answers are remembered by headline so a refresh never asks twice.
+        now = _t.time()
+        _live_llm_day[:] = [x for x in _live_llm_day if now - x < 86400]
+        todo = []
+        if llm_chat.enabled():
+            for n in news:
+                if n["title"] in _LIVE_EXT or len(todo) >= LIVE_LLM_PER_REFRESH or len(_live_llm_day) + len(todo) >= LIVE_LLM_PER_DAY:
+                    continue
+                r = triage_text(n["title"], "", n["source"], when(n))
+                if r["link_strength"] or r["cue_score"] >= th / 2:
+                    todo.append(n["title"])
+        if todo:
+            from core.triage_llm import live_extraction
+            with ThreadPoolExecutor(max_workers=min(8, len(todo))) as ex:
+                for title, x in zip(todo, ex.map(live_extraction, todo)):
+                    _LIVE_EXT[title] = x
+                    _live_llm_day.append(now)
+        items = []
+        for n in news:
+            r = _evaluate(n["title"], "", n["source"], when(n), "LIVE", None, _LIVE_EXT.get(n["title"]), None)
+            t, x, a = r["triage"], r.get("extraction"), r.get("alert")
+            items.append({**n, "decision": r["decision"], "message": r.get("message"), "score": t["score"],
+                          "threshold": r["threshold"], "links": t["links"], "event_type": t["event_type"],
+                          "reason": t["reason"], "claude_promoted": r["claude_promoted"],
+                          "claude": {k: x[k] for k in ("relevant", "status", "event_type", "reason")} if x else None,
+                          "alert": {k: a.get(k) for k in ("alert_id", "title", "priority", "revenue_at_risk_fmt", "owner",
+                                                          "response", "inbox")} if a else None})
+        order = {"inbox": 0, "watch": 1, "needs_review": 2, "ignored": 3}
+        items.sort(key=lambda i: (order[i["decision"]], -(i["score"] or 0)))
+        _LIVE.update(items=items, errors=errors, fetched_ts=_t.time(),
+                     fetched_at=pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"))
+        if len(_LIVE_EXT) > 2000:
+            _LIVE_EXT.clear()
+        return _live_view()
+    finally:
+        _LIVE_LOCK.release()
 
 
 class DecisionIn(BaseModel):

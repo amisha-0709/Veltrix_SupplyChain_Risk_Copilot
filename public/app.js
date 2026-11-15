@@ -421,6 +421,44 @@ async function viewBusiness() {
       <a href="reports/coo_onepager.html" target="_blank" rel="noopener">COO one-pager</a> (prints on one A4 page)</p>`;
 }
 
+/* ---------------- live news feed ---------------- */
+const ago = (s) => { if (!s) return ""; const m = Math.round((Date.now() - new Date(s)) / 60000);
+  return m < 60 ? `${Math.max(m, 1)} min ago` : m < 2880 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; };
+async function viewLive(refresh) {
+  $("#app").innerHTML = `<h1>Live news</h1>
+    <p class="sub">Real headlines from the last 3 days (Google News), searched for our ports, lanes, fab clusters and commodities, and run through
+    the same pipeline as <a href="#/simulate">Try a signal</a>: triage, Claude extraction, linking, impact and options.
+    <b>Live news · synthetic company data:</b> real ports, lanes and commodities link to the network; impact is worked out on Veltrix's synthetic stock and customers.</p>
+    <div class="btns"><button class="btn" id="lrefresh">Fetch latest news</button> <span class="muted" id="lstamp"></span></div>
+    <div id="lout"><p class="muted">${refresh ? "Fetching and reading the news… (up to 30 s)" : "Loading…"}</p></div>`;
+  $("#lrefresh").onclick = () => viewLive(true);
+  let r;
+  try {
+    r = await api(refresh ? "/api/live/refresh" : "/api/live", refresh ? { method: "POST" } : {});
+    if (!r.fetched_at && !refresh) return viewLive(true);           // first visit: fetch straight away
+  } catch (e) { $("#lout").innerHTML = `<div class="result needs_review">Could not fetch the news: ${esc(e.message.slice(0, 200))}</div>`; return; }
+  const c = r.counts;
+  $("#lstamp").textContent = r.fetched_at ? `Fetched ${ago(r.fetched_at)}${r.cached && refresh ? " (refreshes at most every " + Math.round(r.cooldown_s / 60) + " min)" : ""}` : "";
+  const head = { ignored: "Ignored", needs_review: "Needs review", watch: "Watch log", inbox: "Alert: inbox" };
+  const card = (i) => `<div class="result ${esc(i.decision)}">
+      <b>${esc(head[i.decision])}</b> · <a href="${esc(/^https?:\/\//.test(i.url) ? i.url : "#/live")}" target="_blank" rel="noopener noreferrer">${esc(i.title)}</a>
+      <p class="muted" style="margin:4px 0">${esc(i.sources.join(", "))}${i.sources.length > 1 ? ` (${i.sources.length} sources, one story)` : ""} · ${esc(ago(i.published))}
+        · score ${i.score} vs ${i.threshold}${i.event_type ? ` · ${esc(i.event_type.replace(/_/g, " "))}` : ""}</p>
+      ${i.message ? `<p style="margin:4px 0">${esc(i.message)}</p>` : ""}
+      ${i.claude ? `<p class="muted" style="margin:4px 0">Claude: ${i.claude.relevant ? "supply risk to our network" : "not a live risk to our network"} (${esc(i.claude.status.replace(/_/g, " "))}) · ${esc(i.claude.reason)}${i.claude_promoted ? " · flagged what the word list missed" : ""}</p>` : ""}
+      ${i.links.length ? `<div>${i.links.map(node).join("")}</div>` : ""}
+      ${i.alert ? `<div class="btns" style="margin-top:6px"><a class="btn small" href="#/alert/${encodeURIComponent(i.alert.alert_id)}">Open alert · P${i.alert.priority} · ${esc(i.alert.revenue_at_risk_fmt)} at risk · ${esc(i.alert.owner)}</a></div>` : ""}</div>`;
+  const hot = r.items.filter((i) => i.decision !== "ignored"), cold = r.items.filter((i) => i.decision === "ignored");
+  $("#lout").innerHTML = `<div class="tiles">
+      <div class="tile"><b>${r.items.length}</b><span>headlines read (duplicates merged)</span></div>
+      <div class="tile"><b>${c.inbox}</b><span>alerts for the inbox</span></div>
+      <div class="tile"><b>${c.watch + c.needs_review}</b><span>watch or needs review</span></div>
+      <div class="tile"><b>${c.ignored}</b><span>ignored: not a supply event for our network</span></div></div>
+    ${r.errors.length ? `<p class="muted">Source problems: ${esc(r.errors.join("; "))}</p>` : ""}
+    ${hot.length ? hot.map(card).join("") : `<div class="result"><b>Nothing touches Veltrix's network right now.</b><p>Every headline was read and none is a supply event on our ports, lanes, fab clusters or commodities. That is the normal day: the co-pilot stays quiet rather than spamming the team.</p></div>`}
+    ${cold.length ? `<details class="card"><summary><b>${cold.length} ignored headlines</b> and why</summary>${cold.map(card).join("")}</details>` : ""}`;
+}
+
 /* ---------------- router ---------------- */
 async function route() {
   const [, r, id] = (location.hash || "#/home").split("/");
@@ -436,6 +474,7 @@ async function route() {
     else if (r === "register") await viewRegister();
     else if (r === "exposure") await viewExposure();
     else if (r === "simulate") await viewSimulate();
+    else if (r === "live") await viewLive(false);
     else if (r === "ask") await viewAsk();
     else if (r === "replay") await viewReplay(id ? decodeURIComponent(id) : "D05");
     else if (r === "backtest") await viewBacktest();
