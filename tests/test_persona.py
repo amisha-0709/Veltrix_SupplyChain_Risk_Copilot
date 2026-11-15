@@ -26,7 +26,8 @@ def test_ui_ships_persona_pages():
     from pathlib import Path
     html = Path("public/index.html").read_text(encoding="utf-8")
     js = Path("public/personas.js").read_text(encoding="utf-8")
-    assert "personas.js" in html and "#/p/coo" in html
+    assert "personas.js" in html and 'id="role"' in html                     # "View as" role switcher
+    assert all(f'value="{k}"' in html for k in ("category", "hosc", "coo", "sales"))
     for v in ("viewCategory", "viewHosc", "viewCoo", "viewSales"):
         assert v in js
 

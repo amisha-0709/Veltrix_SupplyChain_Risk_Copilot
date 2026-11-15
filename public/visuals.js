@@ -20,7 +20,7 @@ function flowStrip(a) {
   const maxShort = Math.max(0, ...parts.map((p) => p.shortage_days || 0));
   const best = goodOpts(a)[0];
   const atRisk = (a.revenue_at_risk || 0) > 0;
-  const step = (n, k, big, small, cls = "") => `<div class="fstep ${cls}"><span class="fk"><i>${n}</i>${esc(k)}</span><b>${big}</b><span>${small}</span></div>`;
+  const step = (n, k, big, small, cls = "") => `<div class="fstep ${cls}"><span class="fk"><i>0${n}</i>${esc(k)}</span><b>${big}</b><span>${small}</span></div>`;
   return `<div class="flow" role="list" aria-label="How the co-pilot got from signal to decision">
     ${step(1, "Signal", `${a.n_signals} signal${a.n_signals === 1 ? "" : "s"} · ${a.n_sources} source${a.n_sources === 1 ? "" : "s"}`,
       `${esc(a.kind)} · ${Math.round((a.confidence || 0) * 100)}% confidence`)}
@@ -53,7 +53,7 @@ function traceCols(a) {
       `${p.part_id}: ${p.days_of_cover} d cover vs ${p.effective_delay_days} d delay`]))}
     ${col("Products", sortHit(prodShort).map(([n, u]) => [n, u > 0 ? "hit" : "safe", u > 0 ? `${Math.round(u).toLocaleString("en-IN")} units short` : "no shortage"]))}
     ${col("Customers", sortHit(custShort).map(([n, u]) => [n, u > 0 ? "hit" : "safe", u > 0 ? "deliveries at risk" : "no shortage"]))}
-  </div><div class="legend"><span><span class="sw" style="background:var(--crit)"></span>runs short</span><span><span class="sw" style="background:var(--good)"></span>covered</span></div>`;
+  </div><div class="legend"><span><span class="sw pig"></span>runs short</span><span><span class="sw ink"></span>covered</span></div>`;
 }
 
 function coverChart(a) {
@@ -74,8 +74,8 @@ function coverChart(a) {
       <span class="cval ${short ? "bad" : "ok"}">${short ? `short ${Math.round(p.shortage_days)} d` : `holds, +${Math.round(p.days_of_cover - p.effective_delay_days)} d spare`}</span></div>`;
   }).join("");
   return `<div class="cchart"><div class="crow cax"><span></span><span class="ctrack axis">${ticks.map((d) => `<em style="left:${pc(d)}">day ${d}</em>`).join("")}</span><span></span></div>${rows}</div>
-    <div class="legend"><span><span class="sw" style="background:var(--bar)"></span>stock lasts</span><span><span class="sw" style="background:var(--crit)"></span>line runs short</span>
-      <span><span class="sw" style="background:var(--ink);width:3px"></span>supply back (expected delay)</span><span><span class="sw" style="background:var(--good)"></span>best option lands</span></div>`;
+    <div class="legend"><span><span class="sw hatch"></span>stock lasts</span><span><span class="sw box"></span>line runs short</span>
+      <span><span class="sw rule"></span>supply back (expected delay)</span><span><span class="sw mark" style="transform:rotate(45deg)"></span>best option lands</span></div>`;
 }
 
 function alertVisual(a) {

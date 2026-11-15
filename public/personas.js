@@ -3,13 +3,13 @@
 "use strict";
 
 const PERSONAS = [
-  { key: "category", name: "Category manager", q: "What threatens my parts, and what can I do?",
+  { key: "category", name: "Category manager", q: "What threatens my parts, and what can I do?", hed: "What threatens <em>my parts</em>, and what can I do?",
     gets: ["Alerts for your category", "Your parts that run out before resupply", "Check any news headline"] },
-  { key: "hosc", name: "Head of Supply Chain", q: "What needs my decision?",
+  { key: "hosc", name: "Head of Supply Chain", q: "What needs my decision?", hed: "What needs <em>my decision</em> today?",
     gets: ["Approval queue with impact and options together", "Approve, escalate or reject", "Weekly risk review"] },
-  { key: "coo", name: "COO", q: "What is at risk this month?",
+  { key: "coo", name: "COO", q: "What is at risk this month?", hed: "What is <em>at risk</em> this month?",
     gets: ["Revenue and customers at risk, at a glance", "Top three risks in one line each", "Large mitigations to approve"] },
-  { key: "sales", name: "Sales / key-account manager", q: "Which customer deliveries are at risk?",
+  { key: "sales", name: "Sales / key-account manager", q: "Which customer deliveries are at risk?", hed: "Which <em>customer deliveries</em> are at risk?",
     gets: ["Products at risk for each customer, and when", "Weeks below the 95% OTIF target", "A draft note to the customer"] },
 ];
 const PERSONA_ASK = {
@@ -52,8 +52,8 @@ const statusTag = (a) => {
 function personaHead(key, extra = "") {
   const p = PERSONAS.find((x) => x.key === key);
   pset("persona", key);
-  return `<div class="phead"><div><p class="muted" style="margin:0"><a href="#/home">← Switch role</a></p>
-    <h1>${esc(p.name)}</h1><p class="sub" style="margin:0">${esc(p.q)} Impact is worked out on stock as of 30 Sep 2026.</p></div>${extra}</div>`;
+  return `<div class="phead"><div><p class="kicker">My desk · ${esc(p.name)}</p>
+    <h1>${p.hed}</h1><p class="sub" style="margin:0">${esc(p.gets.join(" · "))}. Impact is worked out on stock as of 30 Sep 2026.</p></div>${extra}</div>`;
 }
 
 /* ---------- shared: ask box ---------- */
@@ -89,16 +89,19 @@ async function viewHome() {
       <div><b>${bt.lead.test.median_lead_days.toFixed(1)} days</b><span>warning before impact; the team noticed ${Math.abs(bt.lead_all.median_team_lead_days)} day after</span></div>
       <div><b>&lt; 1 second</b><span>from signal to ₹ impact and ranked options (was 1–2 days by hand)</span></div>
       ${roi ? `<div><b>${roi.toFixed(1)}×</b><span>return on the co-pilot's running cost, replayed over two years</span></div>` : ""}</div>` : "";
-  $("#app").innerHTML = `${proof}<div class="hero"><h1>Who is using the co-pilot today?</h1>
-    <p class="sub">Pick your role. Each page shows only what that role needs, with plain numbers and one place to ask questions.
-    The co-pilot reads outside news and warnings, works out what they mean for Veltrix's parts, products and customers, and recommends what to do.
-    People decide.</p></div>
-    <div class="pgrid">${PERSONAS.map((p) => `<a class="pcard${p.key === last ? " last" : ""}" href="#/p/${p.key}">
-      <span class="pname">${esc(p.name)}${p.key === last ? ' <small class="muted">· last used</small>' : ""}</span>
-      <span class="pq">“${esc(p.q)}”</span>
-      <ul>${p.gets.map((g) => `<li>${esc(g)}</li>`).join("")}</ul><span class="go">Open →</span></a>`).join("")}</div>
-    <p class="muted" style="margin-top:22px">Evaluating the MVP? <a href="#/inbox">All tools</a> has the full alert inbox, risk register,
-    exposure map, signal tester, replays, back-test and business case.</p>`;
+  $("#app").innerHTML = `<div class="hero"><p class="kicker">A resilience co-pilot for Veltrix Components</p>
+    <h1>From headline to decision <em>in under a second</em>.</h1>
+    <p class="sub">The co-pilot reads outside news and warnings, traces them through Veltrix's suppliers, parts, products and customers,
+    puts a rupee figure on the impact and ranks what to do, with the person who approves it. People decide; it never orders or contacts anyone.</p></div>
+    ${proof}
+    <h2>Choose a <em>seat</em></h2>
+    <p class="sub">Each desk shows what that role needs. The shared pages (alerts, live news, ask, exposure, register, replay, business case,
+    evidence) are open to every role. Switch any time with <b>View as</b> at the top.</p>
+    <div class="seats">${PERSONAS.map((p, i) => `<a class="${p.key === last ? "last" : ""}" href="#/p/${p.key}">
+      <span class="snum">0${i + 1}</span>
+      <span class="sname">${esc(p.name)}</span>
+      <span class="sq">“${esc(p.q)}”<span class="sgets">${p.gets.map(esc).join(" · ")}</span></span>
+      <span class="go">${p.key === last ? "Your desk →" : "Open desk →"}</span></a>`).join("")}</div>`;
 }
 
 /* ---------- category manager ---------- */

@@ -22,17 +22,13 @@ const pill = (p, L, I) => `<span class="pill ${pcls(p)}" title="Priority = likel
 const toast = (m) => { const t = $("#toast"); t.textContent = m; t.style.display = "block"; clearTimeout(t._h); t._h = setTimeout(() => (t.style.display = "none"), 2600); };
 const node = (n) => { const [t, name] = n.split(":"); return `<span class="tag" title="${esc(t)}">${esc(name)}</span>`; };
 
-/* theme */
-(function theme() {
-  let t = null; try { t = localStorage.getItem("theme"); } catch (e) {}
-  if (t) document.documentElement.dataset.theme = t;
-  $("#theme").onclick = () => {
-    const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    const nx = cur === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = nx;
-    try { localStorage.setItem("theme", nx); } catch (e) {}
-    route();
-  };
-})();
+/* page heading: a mono kicker over a serif headline (one italic phrase in the pigment; static text only) */
+const hed = (k, h) => `<p class="kicker">${esc(k)}</p><h1>${h}</h1>`;
+/* role ("View as"): remembered in this browser; no sign-in */
+const ROLE_NAMES = { category: "Category manager", hosc: "Head of Supply Chain", coo: "COO", sales: "Sales / key-account manager" };
+const role = () => { let r = ""; try { r = localStorage.getItem("persona") || ""; } catch (e) {} return ROLE_NAMES[r] ? r : ""; };
+const setRole = (r) => { try { localStorage.setItem("persona", r); } catch (e) {} };
+const roleNote = () => role() ? `<p class="kicker" style="margin-top:-6px">Viewing as ${esc(ROLE_NAMES[role()])}</p>` : "";
 
 /* ---------------- views ---------------- */
 async function viewInbox(tab = "inbox") {
@@ -41,8 +37,14 @@ async function viewInbox(tab = "inbox") {
   const bt = meta.backtest;
   const reviewRows = review.map((r) => `<tr><td>${date(r.published)}</td><td>${esc(r.source)}</td><td>${esc(r.text)}${r.simulated ? ' <span class="tag">simulated</span>' : ""}</td>
       <td class="muted">${esc(r.reason || "")}</td></tr>`).join("");
-  const rows = (tab === "inbox" ? inbox : watch).map((a) => `
-    <tr class="click" data-id="${esc(a.alert_id)}">
+  const r0 = role(), myCat = r0 === "category" ? (pget("persona-cat", "") || "") : "";
+  const isMine = (a) => !!myCat && a.owner.endsWith(myCat);
+  const list0 = tab === "inbox" ? inbox : watch;
+  const list = r0 === "coo" ? list0.slice().sort((x, y) => (y.revenue_at_risk || 0) - (x.revenue_at_risk || 0))
+    : myCat ? list0.slice().sort((x, y) => isMine(y) - isMine(x)) : list0;
+  const nMine = myCat ? inbox.filter(isMine).length : 0;
+  const rows = list.map((a) => `
+    <tr class="click${isMine(a) ? " mine" : ""}" data-id="${esc(a.alert_id)}">
       <td>${pill(a.priority, a.likelihood, a.impact)}</td>
       <td><b>${esc(a.title)}</b>${a.simulated ? ' <span class="tag">simulated</span>' : ""}<div class="muted">${esc(a.kind)} · ${a.links.slice(0, 4).map(node).join("")}</div></td>
       <td>${date(a.first_seen)}</td>
@@ -53,7 +55,9 @@ async function viewInbox(tab = "inbox") {
       <td>${esc(a.response.split(";")[0])}</td>
     </tr>`).join("");
   $("#app").innerHTML = `
-    <h1>Alerts</h1>
+    ${hed("Alerts · shared", "Every signal, <em>one alert</em> per event.")}${roleNote()}
+    ${myCat ? `<p class="sub"><b>${nMine}</b> of ${inbox.length} inbox alerts are yours (${esc(myCat)}): listed first and marked.</p>` : ""}
+    ${r0 === "coo" ? `<p class="sub">Sorted by revenue at risk, largest first.</p>` : ""}
     <p class="sub">Every external signal that touches Veltrix's suppliers, ports, lanes or commodities becomes one alert per event, quantified with
     the playbook method. Priority ≥ 6 goes to the inbox; the rest is the watch log. Stock position: ${esc(meta.snapshot_date)}.</p>
     <div class="tiles">
@@ -79,9 +83,12 @@ async function viewInbox(tab = "inbox") {
 let BRIEF_CSS = null;
 async function briefFrame(a) {
   BRIEF_CSS ??= await (await fetch("/api/brief.css")).text();
-  const dark = (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
-  const darkCss = dark ? ":root{color-scheme:dark;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--line:#2c2c2a;--surface:#1a1a19;--page:#1a1a19}.ask{background:#16263b}" : ":root{--page:#ffffff}";
-  return `<!doctype html><html><head><meta charset=utf-8><style>${BRIEF_CSS}${darkCss}.sheet{margin:0;max-width:none;border:0;border-radius:10px}body{background:var(--surface)}</style></head><body>${a.brief_html}</body></html>`;
+  const ed = ":root{--ink:#141414;--ink2:#444343;--muted:#7A7A7A;--line:#C7C7C7;--surface:#E3E2DE;--page:#E3E2DE;--crit:#1351AA;--serious:#1351AA;--warn:#7A7A7A;--accent:#1351AA}" +
+    "*{border-radius:0!important;box-shadow:none!important}body{font-family:'General Sans','Aileron',Arial,sans-serif;font-size:13px}" +
+    "h1{font-weight:700;letter-spacing:-.03em;font-size:30px;line-height:1}.top{border-bottom-width:1px}h2{font-size:11px;letter-spacing:.2em;color:#7A7A7A}" +
+    ".badge{background:#1351AA!important;color:#E3E2DE!important;font-size:11px;letter-spacing:.14em;text-transform:uppercase}" +
+    ".ask{background:#D6D5D0;border-left:4px solid #1351AA;font-weight:600}.kv div{border-color:#C7C7C7}.kv b{font-size:20px;letter-spacing:-.02em}";
+  return `<!doctype html><html><head><meta charset=utf-8><link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap"><style>${BRIEF_CSS}${ed}.sheet{margin:0;max-width:none;border:0}body{background:var(--surface)}</style></head><body>${a.brief_html}</body></html>`;
 }
 
 async function viewAlert(id, tab = "options") {
@@ -103,6 +110,9 @@ async function viewAlert(id, tab = "options") {
   const skus = (a.skus || []).filter((s) => s.units_short > 0).map((s) => `<tr><td>${esc(s.sku_id)}</td><td>${esc(s.customer)}</td><td>${esc(s.binding_part)}</td>
     <td class="num">${s.shortage_days}</td><td class="num">${(s.units_short || 0).toLocaleString("en-IN")}</td><td class="num">${inr(s.revenue_at_risk_inr)}</td>
     <td class="num">${inr(s.margin_at_risk_inr)}</td><td class="num">${inr(s.penalty_inr)}</td></tr>`).join("");
+  const r0 = role();
+  const canDecide = r0 === "sales" ? [] : r0 === "category" ? ["proposed", "watching"] : ["proposed", "approved", "escalated", "rejected", "watching", "dismissed"];
+  const myBy = r0 ? ROLE_NAMES[r0] : a.owner;
   const otif = {}; (a.otif || []).forEach((o) => ((otif[o.customer] ??= []).push(o)));
   const otifRows = Object.entries(otif).map(([c, ws]) => `<tr><td>${esc(c)}</td>${ws.slice(0, 10).map((w) =>
     `<td class="num" style="${w.below_target ? "color:var(--crit);font-weight:600" : ""}" title="week of ${esc(w.week_start)}">${Math.round(w.otif * 100)}%</td>`).join("")}</tr>`).join("");
@@ -128,10 +138,11 @@ async function viewAlert(id, tab = "options") {
           <td class="num">${inr(s.value_inr)}</td><td class="num">${s.cover_days ?? "—"}</td><td class="num">${s.held_up_days ?? "—"}</td><td>${esc(s.verdict || "")}</td></tr>`).join("")}
         </tbody></table><p class="muted">Already shipped, so caught by an event at the destination port or on the route: cover counts on-hand stock only.</p>` : ""}`,
     sources: `<table><thead><tr><th>Date</th><th>Source</th><th>Headline</th><th>ID</th></tr></thead><tbody>${srcs}</tbody></table>`,
-    decide: `<form class="stack" id="dec">
+    decide: !canDecide.length ? `<p class="sub">Viewing as ${esc(ROLE_NAMES[r0])}: sales can't record a decision on an alert. Share the briefing with the owner, ${esc(a.owner)}.</p>` : `<form class="stack" id="dec">
       <label>Option<select name="option">${opts.map((o) => `<option>${esc((o.part_id ? partName(o.part_id) + " (" + o.part_id + ") · " : "") + optText(o))}</option>`).join("")}</select></label>
-      <label>Decision<select name="decision"><option>proposed</option><option>approved</option><option>escalated</option><option>rejected</option><option>watching</option><option>dismissed</option></select></label>
-      <label>Decided by (role)<select name="by">${[a.owner, ...["Category manager", "Head of Supply Chain", "Head of Supply Chain + Quality", "Head of Supply Chain + CFO", "Head of Sales + Supply Chain", "COO", "COO + CFO", "CEO", "Risk analyst"]].filter((v, i, x) => x.indexOf(v) === i)
+      <label>Decision<select name="decision">${canDecide.map((d) => `<option>${d}</option>`).join("")}</select></label>
+      ${r0 === "category" ? `<p class="muted" style="margin:0">A category manager proposes; the approver on the option decides.</p>` : ""}
+      <label>Decided by (role)<select name="by">${[myBy, a.owner, ...["Category manager", "Head of Supply Chain", "Head of Supply Chain + Quality", "Head of Supply Chain + CFO", "Head of Sales + Supply Chain", "COO", "COO + CFO", "CEO", "Risk analyst"]].filter((v, i, x) => x.indexOf(v) === i)
         .map((r) => `<option>${esc(r)}</option>`).join("")}</select></label>
       <label>Note<textarea name="note" placeholder="Why, and any conditions"></textarea></label>
       <div class="btns"><button class="btn" type="submit">Record decision</button></div>
@@ -140,16 +151,16 @@ async function viewAlert(id, tab = "options") {
       ${decRows ? `<h3 style="margin-top:14px">Decision log</h3><table><thead><tr><th>When</th><th>Who</th><th>Decision</th><th>Option</th><th>Note</th></tr></thead><tbody>${decRows}</tbody></table>` : ""}`,
   };
   $("#app").innerHTML = `
-    <p><a href="#/inbox">← Alerts</a></p>
-    <div class="btns" style="justify-content:space-between;align-items:center">
-      <h1 style="margin:0">${pill(a.priority, a.likelihood, a.impact)} ${esc(a.title)}</h1>
+    <p class="kicker"><a href="#/inbox">Alerts</a> · ${esc(a.alert_id)} · ${pill(a.priority, a.likelihood, a.impact)}</p>
+    <div class="btns" style="justify-content:space-between;align-items:flex-end">
+      <h1 style="margin:0">${esc(a.title)}</h1>
       <div class="btns"><a class="btn secondary" href="/api/alerts/${encodeURIComponent(a.alert_id)}/briefing" target="_blank" rel="noopener">Printable briefing</a>
       <button class="btn secondary" id="copy">Copy as email</button></div></div>
-    <p class="muted">${esc(a.alert_id)} · ${esc(a.kind)} · first seen ${date(a.first_seen)} · ${a.n_signals} signals from ${a.n_sources} sources
+    <p class="muted">${esc(a.kind)} · first seen ${date(a.first_seen)} · ${a.n_signals} signals from ${a.n_sources} sources
       · impact on stock as of 30 Sep 2026 · quantified in ${a.seconds_to_quantify}s${a.actual_disruptions?.length ? ` · history: ${esc(a.actual_disruptions.join(", "))}` : ""}</p>
     ${alertVisual(a)}
     <div class="row">
-      <div class="card" style="padding:0"><iframe class="brief" id="brief" title="One-page briefing"></iframe></div>
+      <div class="card" style="padding:0;border:0"><iframe class="brief" id="brief" title="One-page briefing"></iframe></div>
       <div><div class="tabs">${["options", "working", "sources", "decide"].map((t) =>
         `<button data-t="${t}" class="${t === tab ? "on" : ""}">${{ options: "Options", working: "Working", sources: "Sources", decide: "Decide" }[t]}</button>`).join("")}</div>
       <div class="card" id="tab">${T[tab]}</div></div>
@@ -176,7 +187,7 @@ async function viewRegister() {
       m += `<div class="${pcls(p)}" style="opacity:${n ? 1 : 0.25}" title="L${L} × I${I} = ${p}">${n || ""}</div>`; }
   }
   m += "</div>";
-  $("#app").innerHTML = `<h1>Risk register</h1>
+  $("#app").innerHTML = `${hed("Risk register · shared", "Open risks, <em>owned</em> and scored.")}
     <p class="sub">Open risks scored likelihood × impact (playbook §2), with owner, response time and status. Status shows the latest human decision.</p>
     <div class="row"><div class="card"><table><thead><tr><th>Priority</th><th>Risk</th><th>Owner</th><th>Response</th><th class="num">At risk</th><th>Status</th></tr></thead><tbody>
     ${rows.map((r) => `<tr class="click" data-id="${esc(r.alert_id)}"><td>${pill(r.priority, r.likelihood, r.impact)}</td><td><b>${esc(r.title)}</b>
@@ -197,7 +208,7 @@ async function viewExposure() {
   const [ex, meta] = await Promise.all([get("/api/exposure"), get("/api/meta")]);
   const h = meta.headline; const cr = (v) => `₹${Math.round(v).toLocaleString("en-IN")} cr`;
   const ss = ex.parts.filter((p) => p.single_source);
-  $("#app").innerHTML = `<h1>Exposure map</h1>
+  $("#app").innerHTML = `${hed("Exposure · shared", "Where one event <em>stops the line</em>.")}
     <p class="sub">Where one event stops the line. Revenue behind a node = annual revenue of every product that needs a single-source part
     shipped from or through it (a product stops when any one part runs out).</p>
     <div class="tiles"><div class="tile"><b>${h.single_source_cover_below_lead} of ${h.single_source_parts}</b><span>single-source parts with cover below lead time</span></div>
@@ -207,7 +218,7 @@ async function viewExposure() {
     <div class="row"><div class="card"><h3>By port of loading</h3>${bars(ex.ports, "node", "revenue_behind_single_source_inr_cr", cr)}</div>
       <div class="card"><h3>By commodity</h3>${bars(ex.categories, "node", "revenue_behind_single_source_inr_cr", cr)}</div></div>
     <div class="card"><h3>Single-source parts, most fragile first</h3>
-      <div class="legend"><span><span class="sw" style="background:var(--bar)"></span>days of cover</span><span><span class="sw" style="background:var(--ink);width:2px"></span>supplier lead time</span></div>
+      <div class="legend"><span><span class="sw hatch"></span>days of cover</span><span><span class="sw rule"></span>supplier lead time</span></div>
       <table><thead><tr><th>Part</th><th>Supplier · port</th><th class="num">Cover</th><th class="num">Lead</th><th>Cover vs lead</th><th class="num">SKUs</th>
       <th class="num">Revenue dep. (₹ cr/yr)</th><th>Fallback</th></tr></thead><tbody>
       ${ss.map((p) => `<tr><td><b>${esc(p.part_id)}</b> ${esc(p.description)}</td><td>${esc(p.supplier_name)}<div class="muted">${esc(p.port_of_loading)} · ${esc(p.country)}</div></td>
@@ -230,7 +241,7 @@ const EXAMPLES = [
 ];
 
 async function viewSimulate() {
-  $("#app").innerHTML = `<h1>Try a signal</h1>
+  $("#app").innerHTML = `${hed("Ask · shared", "Check a <em>headline</em>.")}<nav class="seg" aria-label="Ask mode"><a href="#/ask" class="">Ask a question</a><a href="#/simulate" class="on">Check a headline</a></nav>
     <p class="sub">Paste a headline and the co-pilot runs the full pipeline live: triage → link to the network → impact on today's stock → ranked options → briefing.
     Signals you try here are visible only to you, in this browser tab: they never reach anyone else's inbox. Nothing is ordered or sent.</p>
     <div class="examples">${EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e[0])}</button>`).join("")}</div>
@@ -240,6 +251,7 @@ async function viewSimulate() {
       <label>Expected duration in days (optional)<input name="duration_days" type="number" min="0" max="365" step="1"></label>
       <div class="btns"><button class="btn" type="submit">Run the co-pilot</button></div></form></div>
     <div id="out"></div>`;
+  const pend = takePending("h");
   document.querySelectorAll(".examples button").forEach((b) => (b.onclick = () => {
     const e = EXAMPLES[+b.dataset.i]; const f = $("#sim"); f.headline.value = e[1]; f.snippet.value = e[2]; f.duration_days.value = ""; f.requestSubmit();
   }));
@@ -267,20 +279,21 @@ async function viewSimulate() {
       if (r.alert) {
         const a = r.alert;
         html += `${alertVisual(a)}<div class="btns" style="margin:8px 0"><a class="btn" href="#/alert/${encodeURIComponent(a.alert_id)}">Open full alert</a></div>
-          <div class="card" style="padding:0"><iframe class="brief" id="sbrief" title="Briefing"></iframe></div>`;
+          <div class="card" style="padding:0;border:0"><iframe class="brief" id="sbrief" title="Briefing"></iframe></div>`;
       }
       $("#out").innerHTML = html;
       $("#out").scrollIntoView({ behavior: "smooth", block: "start" });
       if (r.alert) { const f = $("#sbrief"); f.srcdoc = await briefFrame(r.alert); f.onload = () => { try { f.style.height = f.contentDocument.body.scrollHeight + 20 + "px"; } catch (e) {} }; }
     } catch (e) { $("#out").innerHTML = `<div class="result needs_review">Error: ${esc(e.message.slice(0, 300))}</div>`; }
   };
+  if (pend) { const f = $("#sim"); f.headline.value = pend; f.snippet.value = PENDING_SNIPPET; f.requestSubmit(); }
 }
 
 async function viewBacktest() {
   const b = await get("/api/backtest");
   const s = b.signals.test, a = b.alerts.test, l = b.lead.test;
   const m2 = b.m2?.summary;
-  $("#app").innerHTML = `<h1>Back-test</h1>
+  $("#app").innerHTML = `${hed("Evidence · shared", "Tested on months it <em>never saw</em>.")}
     <p class="sub">Every signal from Oct 2024 to Sep 2026 was replayed through the co-pilot. Rules were tuned on the train period; results below are the test period
     (from 1 Feb 2026, disruptions D14–D18), scored against the ground-truth labels.</p>
     <div class="tiles"><div class="tile"><b>${(s.recall * 100).toFixed(1)}%</b><span>recall: ${s.tp}/${s.relevant} relevant signals caught (target ≥ 80%)</span></div>
@@ -300,7 +313,18 @@ async function viewBacktest() {
       <a href="reports/acceptance.html" target="_blank" rel="noopener">Acceptance tests T1–T10</a> · <a href="#/replay/D05">D05 replay (T10)</a> ·
       <b><a href="reports/must_haves.html" target="_blank" rel="noopener">Must-have evidence</a></b> ·
       Persona tests: <a href="reports/persona_test.html" target="_blank" rel="noopener">round 1</a>, <a href="reports/persona_test_round2.html" target="_blank" rel="noopener">round 2</a>,
-      <a href="reports/persona_test_round3.html" target="_blank" rel="noopener">round 3 (Claude chat)</a></p></div>`;
+      <a href="reports/persona_test_round3.html" target="_blank" rel="noopener">round 3 (Claude chat)</a></p></div>
+    <h2>Beyond the data pack: <em>harder</em> news</h2>
+    <p class="sub">Rules were changed on train data only, then each test set was scored once. Real news: 416 archived headlines from 2023–24
+      (Red Sea, Taiwan quake, Baltimore bridge, gallium controls and three quiet periods), tuned on 2023 and scored on 2024.</p>
+    <div class="card"><table><thead><tr><th>Measure</th><th class="num">Brief's target</th><th class="num">Two-year forecast test</th><th class="num">Real news, 2024</th></tr></thead><tbody>
+      <tr><td>Alert precision: alerts that were real risks</td><td class="num">≥ 60%</td><td class="num">100%</td><td class="num">86% <span class="muted">(6 of 7)</span></td></tr>
+      <tr><td>Relevant signals surfaced in an alert</td><td class="num">≥ 80%</td><td class="num">94.9%</td><td class="num">68% <span class="muted">(19 of 28)</span></td></tr>
+      <tr><td>Real events that raised an alert</td><td class="num">—</td><td class="num">—</td><td class="num">6 of 6</td></tr>
+      <tr><td>False alerts per week</td><td class="num">—</td><td class="num">—</td><td class="num">0.12</td></tr>
+      <tr><td>Median warning before impact</td><td class="num">≥ 7 d</td><td class="num">13.3 d</td><td class="num">—</td></tr></tbody></table>
+      <p class="muted">Most real-news misses are follow-up stories about a crisis that already has an open alert. Method and caveats:
+      <a href="https://github.com/amisha-0709/Veltrix_SupplyChain_Risk_Copilot/blob/main/docs/EVALUATION.md" target="_blank" rel="noopener">EVALUATION.md</a>.</p></div>`;
 }
 
 /* ---------------- ask (chat) ---------------- */
@@ -322,14 +346,14 @@ const engineBadge = (r) => r.engine === "claude"
   : r.engine === "rules" ? `<p class="muted" style="margin-top:0">Rule-based answer${r.engine_note ? ": " + esc(r.engine_note) : ""}</p>` : "";
 function renderChat() {
   $("#log").innerHTML = chat.map((m) => m.role === "user"
-    ? `<div class="result" style="border-color:var(--axis)"><b>You</b><p>${esc(m.text)}</p></div>`
+    ? `<div class="result ignored"><p class="kicker" style="margin:0">You asked</p><p style="font:400 22px/1.25 var(--serif);margin:4px 0">${esc(m.text)}</p></div>`
     : `<div class="card">${engineBadge(m.r)}<p style="white-space:pre-line;margin-top:0">${esc(m.r.answer)}</p>
         ${(m.r.tables || []).map(tableHtml).join("")}
         ${m.r.working?.length ? `<details><summary class="muted">${m.r.engine === "claude" ? "Working: Claude's reading and the engine's steps" : "Working (playbook §3)"}</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
         ${m.r.assumptions?.length ? `<details><summary class="muted">Assumptions</summary><ul>${m.r.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></details>` : ""}</div>`).join("");
 }
 async function viewAsk() {
-  $("#app").innerHTML = `<h1>Ask the co-pilot</h1>
+  $("#app").innerHTML = `${hed("Ask · shared", "Ask the <em>co-pilot</em>.")}<nav class="seg" aria-label="Ask mode"><a href="#/ask" class="on">Ask a question</a><a href="#/simulate" class="">Check a headline</a></nav>
     <p class="sub">Claude reads your question (typos, Hinglish and comparisons are fine) and turns it into a query for the impact engine that
     quantifies alerts. The answer is the engine's own text, so every number is reproducible, and you can see how Claude read the question.
     It recommends; people decide. If Claude is unavailable, a rule-based parser reads the question instead.
@@ -348,6 +372,7 @@ async function viewAsk() {
   };
   document.querySelectorAll(".examples button").forEach((b) => (b.onclick = () => send(ASK_EXAMPLES[+b.dataset.i])));
   $("#askf").onsubmit = (ev) => { ev.preventDefault(); const q = ev.target.q.value.trim(); if (q) { ev.target.q.value = ""; send(q); } };
+  const pend = takePending("q"); if (pend) send(pend);
 }
 
 /* ---------------- replay (T10) ---------------- */
@@ -359,7 +384,7 @@ async function viewReplay(did = "D04") {
   const rec = r.recommended.length ? r.recommended.map((x) => `<li><b>${esc(optText(x))}</b> for ${esc(partName(x.part_id))} <span class="pid">${esc(x.part_id)}</span>: ${inr(x.cost_inr)}, ${x.time_to_effect_days} d to effect; ${esc(x.approver)}</li>`).join("")
     : "<li>No option clears the playbook's net-value bar (margin protected must exceed cost).</li>";
   const st = r.structural;
-  $("#app").innerHTML = `<h1>Replay: what if the co-pilot had been live?</h1>
+  $("#app").innerHTML = `${hed("Replay · shared", "What if it had been <em>live</em>?")}
     <p class="sub">The co-pilot sees only what it would have known that day: its own alert date from the signal back-test, stock cover at the time, and its
     <i>own</i> delay estimate. Its plan is then applied to what actually happened.</p>
     <div class="tiles"><div class="tile"><b>₹${s.revenue_protected_expected_cr} cr</b><span>expected revenue protected across all 18 disruptions (of ₹${s.actual_revenue_lost_cr} cr lost)</span></div>
@@ -403,7 +428,7 @@ async function viewBusiness() {
   const x = (v) => v == null ? "—" : `${v.toFixed(1)}×`;
   const pc = (v) => v == null ? "—" : `${Math.round(v * 100)}%`;
   const moves = m.structural.filter((r) => r.net_annual_value_inr > 0);
-  $("#app").innerHTML = `<h1>Business case</h1>
+  $("#app").innerHTML = `${hed("Business case · shared", "What resilience is <em>worth</em> to Veltrix.")}
     <p class="sub">All 18 disruptions replayed as if the co-pilot had been live. Only what it adds over the team's own actions is credited, in margin,
     weighted by the chance each action works, net of what the actions cost; annualised over 2 years.</p>
     <div class="tiles"><div class="tile"><b>${inr(b.net)}</b><span>net benefit per year</span></div>
@@ -434,10 +459,9 @@ async function viewBusiness() {
 const ago = (s) => { if (!s) return ""; const m = Math.round((Date.now() - new Date(s)) / 60000);
   return m < 60 ? `${Math.max(m, 1)} min ago` : m < 2880 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; };
 async function viewLive(refresh) {
-  $("#app").innerHTML = `<h1>Live news</h1>
+  $("#app").innerHTML = `${hed("Live news · shared", "Today's news, <em>read for Veltrix</em>.")}
     <p class="sub">Real headlines from the last 3 days (Google News), searched for our ports, lanes, fab clusters and commodities, and run through
-    the same pipeline as <a href="#/simulate">Try a signal</a>: triage, Claude extraction, linking, impact and options.
-    <b>Live news · synthetic company data:</b> real ports, lanes and commodities link to the network; impact is worked out on Veltrix's synthetic stock and customers.</p>
+    the same pipeline as <a href="#/simulate">Check a headline</a>: triage, Claude extraction, linking to Veltrix's network, impact on today's stock and options.</p>
     <div class="btns"><button class="btn" id="lrefresh">Fetch latest news</button> <span class="muted" id="lstamp"></span></div>
     <div id="lout"><p class="muted">${refresh ? "Fetching and reading the news… (up to 30 s)" : "Loading…"}</p></div>`;
   $("#lrefresh").onclick = () => viewLive(true);
@@ -476,18 +500,54 @@ async function viewLive(refresh) {
     ${cold.length ? `<details class="card"><summary><b>${cold.length} ignored headlines</b> and why</summary>${cold.map(card).join("")}</details>` : ""}`;
 }
 
+/* ---------------- ask bar (every page) ---------------- */
+let PENDING = null;                       /* text typed in the masthead ask bar, picked up by the Ask or Check page */
+let PENDING_SNIPPET = "";
+const takePending = (kind) => { const p = PENDING; if (p && p.kind === kind) { PENDING = null; PENDING_SNIPPET = p.snippet || ""; return p.text; } return null; };
+const goPending = (p) => { PENDING = p; const want = p.kind === "q" ? "#/ask" : "#/simulate"; if (location.hash === want) route(); else location.hash = want; };
+/* suggestions under the ask bar: the same example questions and test headlines as the Ask and Check pages */
+(function askSuggestions() {
+  const box = $("#asksug"), inp = $("#askbar").q;
+  const render = () => {
+    const qs2 = [...new Set([...(typeof PERSONA_ASK !== "undefined" && role() ? PERSONA_ASK[role()] : []), ...ASK_EXAMPLES])];
+    box.innerHTML = `<div><h3>Ask a question</h3>${qs2.map((q, i) => `<button type="button" data-sq="${i}">${esc(q)}</button>`).join("")}</div>
+      <div><h3>Check a test headline</h3>${EXAMPLES.map((e, i) => `<button type="button" data-sh="${i}"><b>${esc(e[0])}</b> ${esc(e[1])}</button>`).join("")}</div>`;
+    box.querySelectorAll("[data-sq]").forEach((b) => (b.onmousedown = (ev) => { ev.preventDefault(); box.hidden = true; inp.blur(); goPending({ kind: "q", text: qs2[+b.dataset.sq] }); }));
+    box.querySelectorAll("[data-sh]").forEach((b) => (b.onmousedown = (ev) => { ev.preventDefault(); box.hidden = true; inp.blur(); const e = EXAMPLES[+b.dataset.sh]; goPending({ kind: "h", text: e[1], snippet: e[2] }); }));
+  };
+  inp.addEventListener("focus", () => { render(); box.hidden = false; });
+  inp.addEventListener("input", () => { box.hidden = inp.value.trim().length > 0; });
+  inp.addEventListener("blur", () => { box.hidden = true; });
+  inp.addEventListener("keydown", (ev) => { if (ev.key === "Escape") { box.hidden = true; inp.blur(); } });
+})();
+const looksLikeQuestion = (t) => /\?\s*$/.test(t) || /^(what|which|who|whom|when|where|why|how|is|are|was|were|do|does|did|can|could|should|will|would|show|list|compare|tell|give|kya|kaun|kitna)\b/i.test(t);
+$("#askbar").onsubmit = (ev) => {
+  ev.preventDefault(); const t = ev.target.q.value.trim(); if (!t) return;
+  ev.target.q.value = ""; PENDING = { kind: looksLikeQuestion(t) ? "q" : "h", text: t };
+  const want = PENDING.kind === "q" ? "#/ask" : "#/simulate";
+  if (location.hash === want) route(); else location.hash = want;
+};
+/* ---------------- role switcher ---------------- */
+$("#role").onchange = (ev) => {
+  setRole(ev.target.value);
+  const r = (location.hash || "#/home").split("/")[1];
+  if (!r || ["home", "desk", "p"].includes(r)) { if (location.hash === "#/desk") route(); else location.hash = "#/desk"; }
+  else route();
+};
+
 /* ---------------- router ---------------- */
+const NAVMAP = { desk: "desk", p: "desk", inbox: "alerts", alert: "alerts", live: "live", ask: "ask", simulate: "ask", exposure: "exposure",
+  register: "register", replay: "replay", business: "business", backtest: "evidence", evidence: "evidence" };
 async function route() {
   const [, r, id] = (location.hash || "#/home").split("/");
-  const persona = r === "p" && PERSONA_VIEWS[id] ? id : null;
-  const isTool = !persona && r !== "home" && r !== undefined && r !== "";
-  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", persona ? a.dataset.r === `p-${persona}` : isTool ? a.dataset.r === "tools" : a.dataset.r === "home"));
-  $("#tools").hidden = !isTool;
-  document.querySelectorAll("#tools a").forEach((a) => a.classList.toggle("on", a.dataset.r === (r === "alert" ? "inbox" : r)));
+  if (r === "p" && PERSONA_VIEWS[id]) setRole(id);
+  const sec = !r || r === "home" ? "home" : NAVMAP[r] || "alerts";
+  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.r === sec));
+  $("#role").value = role();
   try {
     await loadNames();
-    if (persona) await PERSONA_VIEWS[persona]();
-    else if (!isTool) await viewHome();
+    if (sec === "home") await viewHome();
+    else if (sec === "desk") { const k = role(); if (k) await PERSONA_VIEWS[k](); else await viewHome(); }
     else if (r === "alert" && id) await viewAlert(decodeURIComponent(id));
     else if (r === "register") await viewRegister();
     else if (r === "exposure") await viewExposure();
@@ -495,7 +555,7 @@ async function route() {
     else if (r === "live") await viewLive(false);
     else if (r === "ask") await viewAsk();
     else if (r === "replay") await viewReplay(id ? decodeURIComponent(id) : "D04");
-    else if (r === "backtest") await viewBacktest();
+    else if (sec === "evidence") await viewBacktest();
     else if (r === "business") await viewBusiness();
     else await viewInbox();
     window.scrollTo(0, 0);

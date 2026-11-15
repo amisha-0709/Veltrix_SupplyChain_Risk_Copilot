@@ -3,40 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Veltrix Risk Co-Pilot</title>
-<meta name="description" content="Supply-chain resilience co-pilot for Veltrix Components (fictional, synthetic data).">
-<link rel="stylesheet" href="styles.css?v=20">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M8 21l5-6 4 4 7-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>Veltrix Resilience Co-Pilot</title>
+<meta name="description" content="Supply-chain resilience co-pilot prepared for Veltrix Components: signals to ₹ impact, ranked options and a named approver.">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap">
+<link rel="stylesheet" href="styles.css?v=23">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231351AA'/%3E%3Cpath d='M7 8l9 16 9-16' stroke='%23E3E2DE' stroke-width='4' fill='none'/%3E%3C/svg%3E">
 </head>
 <body>
-<header class="bar">
-  <a class="brand" href="#/home"><span class="logo" aria-hidden="true"></span>Veltrix Risk Co-Pilot</a>
-  <nav id="nav" aria-label="Roles">
-    <a href="#/home" data-r="home">Home</a>
-    <a href="#/p/category" data-r="p-category">Category manager</a>
-    <a href="#/p/hosc" data-r="p-hosc">Head of Supply Chain</a>
-    <a href="#/p/coo" data-r="p-coo">COO</a>
-    <a href="#/p/sales" data-r="p-sales">Sales</a>
-    <a href="#/inbox" data-r="tools" class="tools-link">All tools</a>
-  </nav>
-  <button id="theme" class="ghost" title="Toggle theme" aria-label="Toggle light/dark theme">◐</button>
-</header>
-<nav id="tools" class="subnav" aria-label="All tools" hidden>
-    <a href="#/inbox" data-r="inbox">Alerts</a>
-    <a href="#/register" data-r="register">Risk register</a>
-    <a href="#/exposure" data-r="exposure">Exposure</a>
-    <a href="#/ask" data-r="ask">Ask</a>
-    <a href="#/simulate" data-r="simulate">Try a signal</a>
+<header class="mast">
+  <div class="mast-top">
+    <a class="brand" href="#/home"><span class="wm">Veltrix <em>Resilience</em> Co-Pilot</span>
+      <span class="kicker">Prepared for Veltrix Components · by Team 6</span></a>
+    <label class="viewas"><span class="kicker">View as</span>
+      <select id="role" aria-label="View as role">
+        <option value="">Choose a seat…</option>
+        <option value="category">Category manager</option>
+        <option value="hosc">Head of Supply Chain</option>
+        <option value="coo">COO</option>
+        <option value="sales">Sales / key-account manager</option>
+      </select></label>
+  </div>
+  <nav id="nav" aria-label="Pages">
+    <a href="#/desk" data-r="desk">My desk</a>
+    <a href="#/inbox" data-r="alerts">Alerts</a>
     <a href="#/live" data-r="live">Live news</a>
+    <a href="#/ask" data-r="ask">Ask</a>
+    <a href="#/exposure" data-r="exposure">Exposure</a>
+    <a href="#/register" data-r="register">Risk register</a>
     <a href="#/replay" data-r="replay">Replay</a>
-    <a href="#/backtest" data-r="backtest">Back-test</a>
     <a href="#/business" data-r="business">Business case</a>
-</nav>
-<div class="banner">Synthetic data · Veltrix Components is fictional · The co-pilot recommends; people decide. It never orders, books freight or contacts suppliers.</div>
+    <a href="#/evidence" data-r="evidence">Evidence</a>
+  </nav>
+  <form id="askbar" class="askbar" autocomplete="off">
+    <span class="kicker">Ask</span>
+    <input name="q" maxlength="400" required aria-label="Ask a question or paste a headline" placeholder="Ask a question or paste a headline…">
+    <button class="btn" type="submit">Check</button>
+    <div id="asksug" class="asksug" hidden></div>
+  </form>
+</header>
 <main id="app"><p class="muted">Loading…</p></main>
+<footer class="foot"><span>The co-pilot recommends; your team decides. It never orders, books freight or contacts suppliers.</span>
+  <span>Veltrix Components · Supply-chain resilience programme</span></footer>
 <div id="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=20"></script>
-<script src="visuals.js?v=20"></script>
-<script src="personas.js?v=20"></script>
+<script src="app.js?v=23"></script>
+<script src="visuals.js?v=23"></script>
+<script src="personas.js?v=23"></script>
 </body>
 </html>
