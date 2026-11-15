@@ -269,7 +269,7 @@ async function viewSimulate() {
       const x = r.extraction;
       if (x) {
         const e = x.entities, list = (k, lab) => e[k]?.length ? `<li><b>${lab}:</b> ${e[k].map(esc).join(", ")}</li>` : "";
-        html += `<div class="card"><h3 style="margin-top:0">What Claude extracted</h3>
+        html += `<div class="card"><h3 style="margin-top:0">What Veltrix Co-Pilot extracted</h3>
           <p class="muted" style="margin-top:0">Status <b>${esc(x.status.replace(/_/g, " "))}</b> · ${esc(x.event_type.replace(/_/g, " "))} · severity ${x.severity}/5${x.duration_days ? ` · ${x.duration_days} days` : ""}
           · ${x.relevant ? "supply risk that touches our network" : "not a live risk to our network"} (confidence ${Math.round(x.confidence * 100)}%)</p>
           <ul>${list("locations", "Locations")}${list("ports", "Ports")}${list("routes", "Routes")}${list("companies", "Companies")}${list("commodities", "Commodities")}</ul>
@@ -313,7 +313,7 @@ async function viewBacktest() {
       <a href="reports/acceptance.html" target="_blank" rel="noopener">Acceptance tests T1–T10</a> · <a href="#/replay/D05">D05 replay (T10)</a> ·
       <b><a href="reports/must_haves.html" target="_blank" rel="noopener">Must-have evidence</a></b> ·
       Persona tests: <a href="reports/persona_test.html" target="_blank" rel="noopener">round 1</a>, <a href="reports/persona_test_round2.html" target="_blank" rel="noopener">round 2</a>,
-      <a href="reports/persona_test_round3.html" target="_blank" rel="noopener">round 3 (Claude chat)</a></p></div>
+      <a href="reports/persona_test_round3.html" target="_blank" rel="noopener">round 3 (AI chat)</a></p></div>
     <h2>Beyond the data pack: <em>harder</em> news</h2>
     <p class="sub">Rules were changed on train data only, then each test set was scored once. Real news: 416 archived headlines from 2023–24
       (Red Sea, Taiwan quake, Baltimore bridge, gallium controls and three quiet periods), tuned on 2023 and scored on 2024.</p>
@@ -340,30 +340,30 @@ const chat = [];
 const tableHtml = (t) => `<h3 style="margin-top:12px">${esc(t.title)}</h3><div style="overflow-x:auto"><table><thead><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
   <tbody>${t.rows.map((r) => `<tr>${r.map((v) => `<td>${esc(v === true ? "yes" : v === false ? "no" : v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 const engineBadge = (r) => r.engine === "claude"
-  ? (r.tool_calls ? `<p class="muted" style="margin-top:0">Claude (${esc(r.model)}) read your question as: <span class="mono">${(r.interpretation || []).map(esc).join(" + ")}</span>.
+  ? (r.tool_calls ? `<p class="muted" style="margin-top:0">Veltrix Co-Pilot read your question as: <span class="mono">${(r.interpretation || []).map(esc).join(" + ")}</span>.
       The answer below is the engine's own text · ${r.seconds}s.</p>`
-      : `<p class="muted" style="margin-top:0">Claude (${esc(r.model)}): no engine query fits this question.</p>`)
+      : `<p class="muted" style="margin-top:0">Veltrix Co-Pilot: no engine query fits this question.</p>`)
   : r.engine === "rules" ? `<p class="muted" style="margin-top:0">Rule-based answer${r.engine_note ? ": " + esc(r.engine_note) : ""}</p>` : "";
 function renderChat() {
   $("#log").innerHTML = chat.map((m) => m.role === "user"
     ? `<div class="result ignored"><p class="kicker" style="margin:0">You asked</p><p style="font:400 22px/1.25 var(--serif);margin:4px 0">${esc(m.text)}</p></div>`
     : `<div class="card">${engineBadge(m.r)}<p style="white-space:pre-line;margin-top:0">${esc(m.r.answer)}</p>
         ${(m.r.tables || []).map(tableHtml).join("")}
-        ${m.r.working?.length ? `<details><summary class="muted">${m.r.engine === "claude" ? "Working: Claude's reading and the engine's steps" : "Working (playbook §3)"}</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
+        ${m.r.working?.length ? `<details><summary class="muted">${m.r.engine === "claude" ? "Working: Veltrix Co-Pilot's reading and the engine's steps" : "Working (playbook §3)"}</summary><ol class="steps">${m.r.working.map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>` : ""}
         ${m.r.assumptions?.length ? `<details><summary class="muted">Assumptions</summary><ul>${m.r.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></details>` : ""}</div>`).join("");
 }
 async function viewAsk() {
   $("#app").innerHTML = `${hed("Ask · shared", "Ask the <em>co-pilot</em>.")}<nav class="seg" aria-label="Ask mode"><a href="#/ask" class="on">Ask a question</a><a href="#/simulate" class="">Check a headline</a></nav>
-    <p class="sub">Claude reads your question (typos, Hinglish and comparisons are fine) and turns it into a query for the impact engine that
-    quantifies alerts. The answer is the engine's own text, so every number is reproducible, and you can see how Claude read the question.
-    It recommends; people decide. If Claude is unavailable, a rule-based parser reads the question instead.
+    <p class="sub">Veltrix Co-Pilot reads your question (typos, Hinglish and comparisons are fine) and turns it into a query for the impact engine that
+    quantifies alerts. The answer is the engine's own text, so every number is reproducible, and you can see how Veltrix Co-Pilot read the question.
+    It recommends; people decide. If its AI reader is unavailable, a rule-based parser reads the question instead.
     <span id="eng" class="muted"></span></p>
     <div class="examples">${ASK_EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e)}</button>`).join("")}</div>
     <div id="log"></div>
     <form class="card stack" id="askf"><label>Your question<input name="q" required maxlength="400" placeholder="e.g. Which products stop first if Ningbo closes for three weeks?"></label>
       <div class="btns"><button class="btn" type="submit">Ask</button></div></form>`;
   renderChat();
-  api("/api/chat-engine").then((e) => { const el = $("#eng"); if (el) el.textContent = e.engine === "claude" ? `Now answering: Claude (${e.model}).` : "Now answering: rule-based parser (no API key set)."; }).catch(() => {});
+  api("/api/chat-engine").then((e) => { const el = $("#eng"); if (el) el.textContent = e.engine === "claude" ? `Now answering: Veltrix Co-Pilot AI reader.` : "Now answering: rule-based parser (no API key set)."; }).catch(() => {});
   const send = async (q) => {
     chat.push({ role: "user", text: q }); chat.push({ role: "bot", r: { answer: "Reading your question…" } }); renderChat(); chat.pop();
     try { const r = await api("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q }) });
@@ -461,7 +461,7 @@ const ago = (s) => { if (!s) return ""; const m = Math.round((Date.now() - new D
 async function viewLive(refresh) {
   $("#app").innerHTML = `${hed("Live news · shared", "Today's news, <em>read for Veltrix</em>.")}
     <p class="sub">Real headlines from the last 3 days (Google News), searched for our ports, lanes, fab clusters and commodities, and run through
-    the same pipeline as <a href="#/simulate">Check a headline</a>: triage, Claude extraction, linking to Veltrix's network, impact on today's stock and options.</p>
+    the same pipeline as <a href="#/simulate">Check a headline</a>: triage, Veltrix Co-Pilot extraction, linking to Veltrix's network, impact on today's stock and options.</p>
     <div class="btns"><button class="btn" id="lrefresh">Fetch latest news</button> <span class="muted" id="lstamp"></span></div>
     <div id="lout"><p class="muted">${refresh ? "Fetching and reading the news… (up to 30 s)" : "Loading…"}</p></div>`;
   $("#lrefresh").onclick = () => viewLive(true);
@@ -482,7 +482,7 @@ async function viewLive(refresh) {
       ${i.links.length ? `<div>${i.links.map(node).join("")}</div>` : ""}
       ${i.alert ? `<div class="btns" style="margin-top:6px"><a class="btn small" href="#/alert/${encodeURIComponent(i.alert.alert_id)}">Open alert · P${i.alert.priority} · ${esc(i.alert.revenue_at_risk_fmt)} at risk · ${esc(i.alert.owner)}</a></div>` : ""}</div>`;
   const hot = r.items.filter((i) => i.decision !== "ignored");
-  /* Claude thinks it touches our network, but the decision rule chosen on train data is the word list: shown for a person, not alerted */
+  /* the AI reader thinks it touches our network, but the decision rule chosen on train data is the word list: shown for a person, not alerted */
   const flagged = r.items.filter((i) => i.decision === "ignored" && i.claude?.relevant);
   const cold = r.items.filter((i) => i.decision === "ignored" && !i.claude?.relevant);
   const fcard = (i) => card({ ...i, decision: "needs_review", message: null }).replace(">Needs review<", ">Veltrix Co-Pilot flagged · not alerted<");

@@ -280,9 +280,9 @@ def _llm_allowed(key: str) -> tuple[bool, str]:
         hits = _llm_hits.setdefault(key, [])
         hits[:] = [t for t in hits if now - t < 3600]
         if len(_llm_day) >= LLM_PER_DAY:
-            return False, "the demo's daily limit for Claude answers is used up"
+            return False, "the demo's daily limit for AI answers is used up"
         if len(hits) >= LLM_PER_CLIENT_HOUR:
-            return False, f"you've asked {LLM_PER_CLIENT_HOUR} Claude questions in the last hour"
+            return False, f"you've asked {LLM_PER_CLIENT_HOUR} AI-read questions in the last hour"
         hits.append(now)
         _llm_day.append(now)
     return True, ""
@@ -315,7 +315,7 @@ def ask_endpoint(q: AskIn, request: Request, x_copilot_session: str | None = Hea
                 return clean(llm_chat.chat(q.question, alerts=al, get_alert=get,
                                            extras={"m6": s.get("m6"), "replays": s.get("replays")}))
             except Exception as e:      # never break the chat: fall back to the rule-based answer
-                note = f"Claude was unavailable ({type(e).__name__}), so the rule-based chat answered."
+                note = f"The AI reader was unavailable ({type(e).__name__}), so the rule-based chat answered."
         else:
             note = f"Answered by the rule-based chat because {why}."
     r = ask(q.question, alerts=al, get_alert=get)
@@ -376,7 +376,7 @@ def _evaluate(headline: str, snippet: str, source: str, published, prefix: str, 
         t["links"] = list(dict.fromkeys(list(t["links"]) + ext["geo_links"] + ext["cat_links"]))
         t["link_strength"] = max(float(t["link_strength"] or 0), 1.0)
         t["score"], t["event_type"] = th, t["event_type"] or ext["event_type"]
-        t["reason"] = f"Claude: {ext['reason']}"
+        t["reason"] = f"Veltrix Co-Pilot: {ext['reason']}"
         promoted = True
     if ext and rule != "rules" and t.get("duration_days") is None and ext["duration_days"]:
         t["duration_days"] = ext["duration_days"]

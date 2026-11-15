@@ -93,8 +93,8 @@ def run_backtest(use_llm: bool = True) -> dict:
     near = te[(~te.alerted) & (te.score > 0) & (te.score < th)]
     return {
         "threshold": th,
-        "llm_judge": ("rules only (no cached Claude verdicts yet)" if not judge_summary or not judge_summary["verdicts"]
-                      else f"rules + Claude ({judge_summary['model']}): {judge_summary['verdicts']} borderline stories "
+        "llm_judge": ("rules only (no cached AI verdicts yet)" if not judge_summary or not judge_summary["verdicts"]
+                      else f"rules + AI review: {judge_summary['verdicts']} borderline stories "
                            f"reviewed, {judge_summary['signals_promoted']} signals promoted"),
         "judge_summary": judge_summary,
         "triage_rule": rule, "triage_variants": V, "extraction_coverage": cov,

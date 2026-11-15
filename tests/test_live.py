@@ -48,4 +48,4 @@ def test_ui_has_live_tab():
     html = c.get("/").text
     assert 'href="#/live"' in html
     js = c.get("/app.js").text
-    assert "viewLive" in js and "Claude flagged for a person to check" in js
+    assert "viewLive" in js and "Veltrix Co-Pilot flagged for a person to check" in js

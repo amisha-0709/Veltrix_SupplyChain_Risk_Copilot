@@ -214,7 +214,7 @@ def chat(question: str, alerts: list[dict] | None = None, get_alert=None, extras
             seen.add(title)
             uniq.append({**t, "title": title})
     return {"intent": "llm", "answer": text, "tables": uniq[:6],
-            "working": [f"Claude read the question as: {x}" for x in trace] + working,
+            "working": [f"Veltrix Co-Pilot read the question as: {x}" for x in trace] + working,
             "assumptions": assumptions, "evidence": evidence, "interpretation": trace,
             "engine": "claude", "model": MODEL, "tool_calls": len(trace),
             "seconds": round(time.time() - t0, 1), "usage": usage}
