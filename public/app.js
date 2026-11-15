@@ -88,11 +88,15 @@ async function viewAlert(id, tab = "options") {
   const a = await api(`/api/alerts/${encodeURIComponent(id)}`);
   const dec = await api(`/api/decisions?alert_id=${encodeURIComponent(id)}`).catch(() => []);
   const opts = a.options || [];
-  const optRows = opts.map((o) => `<tr><td class="num">${o.rank ?? 1}</td><td>${esc(o.part_id || "")}</td>
-    <td title="${esc(o.note || "")}"><b>${esc(o.option)}</b>${o.note ? ' <span class="muted" aria-hidden="true">ⓘ</span>' : ""}</td>
+  const good = goodOpts(a), rec = good.slice(0, 3), rest = opts.filter((o) => !rec.includes(o) && o.part_id);
+  const noAct = opts.find((o) => !o.part_id);
+  const optRow = (o, i, top) => `<tr class="${top && i === 0 ? "optrec" : ""}"><td class="num">${i + 1}</td>
+    <td title="${esc(o.note || "")}">${top && i === 0 ? '<span class="badge">Recommended</span><br>' : ""}${niceOpt(o)}${o.note ? ' <span class="muted" aria-hidden="true">ⓘ</span>' : ""}</td>
     <td class="num">${o.time_to_effect_days ?? "—"} d</td><td>${o.on_time === false ? "late" : "in time"}</td>
     <td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td><td class="num">${o.roi == null ? "—" : o.roi.toFixed(1) + "×"}</td>
-    <td>${esc(o.approver)}</td></tr>`).join("");
+    <td>${esc(o.approver)}</td></tr>`;
+  const optHead = `<thead><tr><th class="num">#</th><th>Option</th><th class="num">Effect</th><th>Timing</th><th class="num">Cost</th>
+      <th class="num">Net value</th><th class="num">ROI</th><th>Approver</th></tr></thead>`;
   const parts = (a.parts || []).map((p) => `<tr><td>${esc(p.part_id)}</td><td>${esc(p.description)}</td><td>${p.single_source ? "single" : "dual"}</td>
     <td class="num">${p.days_of_cover}</td><td class="num">${p.effective_delay_days}</td><td class="num">${p.shortage_days}</td>
     <td><div class="cov" title="cover vs delay"><i style="width:${Math.min(100, (p.days_of_cover / 70) * 100)}%"></i><b style="left:${Math.min(100, (p.effective_delay_days / 70) * 100)}%"></b></div></td></tr>`).join("");
@@ -105,8 +109,10 @@ async function viewAlert(id, tab = "options") {
   const srcs = (a.brief.sources || []).map((s) => `<tr><td>${esc(s.date)}</td><td>${esc(s.source)}</td><td>${esc(s.text)}</td><td class="muted">${esc(s.id)}</td></tr>`).join("");
   const decRows = dec.map((d) => `<tr><td>${esc(d.at)}</td><td>${esc(d.by)}</td><td><b>${esc(d.decision)}</b></td><td>${esc(d.option)}</td><td>${esc(d.note)}</td></tr>`).join("");
   const T = {
-    options: `<table><thead><tr><th class="num">#</th><th>Part</th><th>Option</th><th class="num">Effect</th><th>Timing</th><th class="num">Cost</th>
-      <th class="num">Net value</th><th class="num">ROI</th><th>Approver</th></tr></thead><tbody>${optRows}</tbody></table>
+    options: `${rec.length ? `<table>${optHead}<tbody>${rec.map((o, i) => optRow(o, i, true)).join("")}</tbody></table>`
+        : `<div class="result" style="border-color:var(--good)"><b>No action recommended.</b><p>${esc(noAct ? noAct.option : "Stock lasts longer than the expected delay.")}</p></div>`}
+      ${rest.length ? `<details><summary>${rest.length} other option${rest.length === 1 ? "" : "s"} ranked lower (cost more than they save, or land too late)</summary>
+        <table>${optHead}<tbody>${rest.map((o, i) => optRow(o, rec.length + i, false)).join("")}</tbody></table></details>` : ""}
       <p class="muted">Net value = margin avoided × P(works in time) − cost − penalties anyway (playbook §5). Options are shown for approval, never as approved.</p>`,
     working: `<ol class="steps">${(a.working || []).map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol>
       <h3 style="margin-top:14px">Parts</h3><table><thead><tr><th>Part</th><th>Description</th><th>Sourcing</th><th class="num">Cover (d)</th><th class="num">Delay (d)</th>
@@ -123,7 +129,7 @@ async function viewAlert(id, tab = "options") {
         </tbody></table><p class="muted">Already shipped, so caught by an event at the destination port or on the route: cover counts on-hand stock only.</p>` : ""}`,
     sources: `<table><thead><tr><th>Date</th><th>Source</th><th>Headline</th><th>ID</th></tr></thead><tbody>${srcs}</tbody></table>`,
     decide: `<form class="stack" id="dec">
-      <label>Option<select name="option">${opts.map((o) => `<option>${esc((o.part_id ? o.part_id + " · " : "") + o.option)}</option>`).join("")}</select></label>
+      <label>Option<select name="option">${opts.map((o) => `<option>${esc((o.part_id ? partName(o.part_id) + " (" + o.part_id + ") · " : "") + optText(o))}</option>`).join("")}</select></label>
       <label>Decision<select name="decision"><option>proposed</option><option>approved</option><option>escalated</option><option>rejected</option><option>watching</option><option>dismissed</option></select></label>
       <label>Decided by (role)<select name="by">${[a.owner, ...["Category manager", "Head of Supply Chain", "Head of Supply Chain + Quality", "Head of Supply Chain + CFO", "Head of Sales + Supply Chain", "COO", "COO + CFO", "CEO", "Risk analyst"]].filter((v, i, x) => x.indexOf(v) === i)
         .map((r) => `<option>${esc(r)}</option>`).join("")}</select></label>
@@ -141,6 +147,7 @@ async function viewAlert(id, tab = "options") {
       <button class="btn secondary" id="copy">Copy as email</button></div></div>
     <p class="muted">${esc(a.alert_id)} · ${esc(a.kind)} · first seen ${date(a.first_seen)} · ${a.n_signals} signals from ${a.n_sources} sources
       · impact on stock as of 30 Sep 2026 · quantified in ${a.seconds_to_quantify}s${a.actual_disruptions?.length ? ` · history: ${esc(a.actual_disruptions.join(", "))}` : ""}</p>
+    ${alertVisual(a)}
     <div class="row">
       <div class="card" style="padding:0"><iframe class="brief" id="brief" title="One-page briefing"></iframe></div>
       <div><div class="tabs">${["options", "working", "sources", "decide"].map((t) =>
@@ -259,10 +266,11 @@ async function viewSimulate() {
       }
       if (r.alert) {
         const a = r.alert;
-        html += `<div class="btns" style="margin:8px 0"><a class="btn" href="#/alert/${encodeURIComponent(a.alert_id)}">Open full alert</a></div>
+        html += `${alertVisual(a)}<div class="btns" style="margin:8px 0"><a class="btn" href="#/alert/${encodeURIComponent(a.alert_id)}">Open full alert</a></div>
           <div class="card" style="padding:0"><iframe class="brief" id="sbrief" title="Briefing"></iframe></div>`;
       }
       $("#out").innerHTML = html;
+      $("#out").scrollIntoView({ behavior: "smooth", block: "start" });
       if (r.alert) { const f = $("#sbrief"); f.srcdoc = await briefFrame(r.alert); f.onload = () => { try { f.style.height = f.contentDocument.body.scrollHeight + 20 + "px"; } catch (e) {} }; }
     } catch (e) { $("#out").innerHTML = `<div class="result needs_review">Error: ${esc(e.message.slice(0, 300))}</div>`; }
   };
@@ -343,12 +351,12 @@ async function viewAsk() {
 }
 
 /* ---------------- replay (T10) ---------------- */
-async function viewReplay(did = "D05") {
+async function viewReplay(did = "D04") {
   const [list, r] = await Promise.all([get("/api/replays"), api(`/api/replays/${encodeURIComponent(did)}`)]);
   const s = list.summary;
-  const opts = (r.top_options || []).map((o) => `<tr><td>${esc(o.option)}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td>
+  const opts = (r.top_options || []).map((o) => `<tr><td>${niceOpt(o)}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td>
     <td>${o.on_time ? "in time" : "late"}</td><td>${esc(o.approver)}</td></tr>`).join("");
-  const rec = r.recommended.length ? r.recommended.map((x) => `<li><b>${esc(x.option)}</b> (${esc(x.part_id)}): ${inr(x.cost_inr)}, ${x.time_to_effect_days} d to effect; ${esc(x.approver)}</li>`).join("")
+  const rec = r.recommended.length ? r.recommended.map((x) => `<li><b>${esc(optText(x))}</b> for ${esc(partName(x.part_id))} <span class="pid">${esc(x.part_id)}</span>: ${inr(x.cost_inr)}, ${x.time_to_effect_days} d to effect; ${esc(x.approver)}</li>`).join("")
     : "<li>No option clears the playbook's net-value bar (margin protected must exceed cost).</li>";
   const st = r.structural;
   $("#app").innerHTML = `<h1>Replay: what if the co-pilot had been live?</h1>
@@ -359,8 +367,9 @@ async function viewReplay(did = "D05") {
       <div class="tile"><b>₹${s.avoided_waste_cr} cr</b><span>of ₹${s.team_wasted_cr} cr wasted spend avoided (cover was enough)</span></div>
       <div class="tile"><b>₹${s.structural_protected_cr} cr</b><span>more if unqualified alternates had been qualified in advance (structural; overlaps with plans)</span></div></div>
     <div class="tabs">${list.rows.map((x) => `<button data-d="${esc(x.disruption_id)}" class="${x.disruption_id === r.disruption_id ? "on" : ""}">${esc(x.disruption_id)}</button>`).join("")}</div>
+    <h2>${esc(r.disruption_id)} · ${esc(r.title)}</h2>
+    ${replayTimeline(r)}
     <div class="row"><div class="card">
-      <h2 style="margin-top:0">${esc(r.disruption_id)} · ${esc(r.title)}</h2>
       <table><tbody>
         <tr><td>Impact started</td><td>${date(r.start_date)}</td></tr>
         <tr><td><b>Co-pilot first alert</b></td><td><b>${r.detected ? date(r.copilot_alert_date) + ` (${r.copilot_lead_days} d before impact)` : "not detected"}</b></td></tr>
@@ -476,6 +485,7 @@ async function route() {
   $("#tools").hidden = !isTool;
   document.querySelectorAll("#tools a").forEach((a) => a.classList.toggle("on", a.dataset.r === (r === "alert" ? "inbox" : r)));
   try {
+    await loadNames();
     if (persona) await PERSONA_VIEWS[persona]();
     else if (!isTool) await viewHome();
     else if (r === "alert" && id) await viewAlert(decodeURIComponent(id));
@@ -484,7 +494,7 @@ async function route() {
     else if (r === "simulate") await viewSimulate();
     else if (r === "live") await viewLive(false);
     else if (r === "ask") await viewAsk();
-    else if (r === "replay") await viewReplay(id ? decodeURIComponent(id) : "D05");
+    else if (r === "replay") await viewReplay(id ? decodeURIComponent(id) : "D04");
     else if (r === "backtest") await viewBacktest();
     else if (r === "business") await viewBusiness();
     else await viewInbox();

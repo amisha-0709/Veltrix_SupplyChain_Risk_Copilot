@@ -81,7 +81,15 @@ function wireAsk(key) {
 /* ---------- home: who are you? ---------- */
 async function viewHome() {
   const last = pget("persona", "");
-  $("#app").innerHTML = `<div class="hero"><h1>Who is using the co-pilot today?</h1>
+  const [meta, bc] = await Promise.all([get("/api/meta").catch(() => null), get("/api/business-case").catch(() => null)]);
+  const bt = meta?.backtest, roi = bc?.scenarios?.[0]?.roi;
+  const proof = bt ? `<div class="proof" aria-label="Back-test results">
+      <div><b>${(bt.signals.test.recall * 100).toFixed(0)}%</b><span>of real risk signals caught on held-out months (target 80%)</span></div>
+      <div><b>${Math.round(bt.alerts.test.precision * 100)}%</b><span>of alerts were real risks, so no spam (target 60%)</span></div>
+      <div><b>${bt.lead.test.median_lead_days.toFixed(1)} days</b><span>warning before impact; the team noticed ${Math.abs(bt.lead_all.median_team_lead_days)} day after</span></div>
+      <div><b>&lt; 1 second</b><span>from signal to ₹ impact and ranked options (was 1–2 days by hand)</span></div>
+      ${roi ? `<div><b>${roi.toFixed(1)}×</b><span>return on the co-pilot's running cost, replayed over two years</span></div>` : ""}</div>` : "";
+  $("#app").innerHTML = `${proof}<div class="hero"><h1>Who is using the co-pilot today?</h1>
     <p class="sub">Pick your role. Each page shows only what that role needs, with plain numbers and one place to ask questions.
     The co-pilot reads outside news and warnings, works out what they mean for Veltrix's parts, products and customers, and recommends what to do.
     People decide.</p></div>
@@ -107,7 +115,7 @@ async function viewCategory() {
     <div class="qtop">${pill(a.priority)} <b>${esc(a.title)}</b> ${statusTag(a)}</div>
     <p class="qline"><b>${esc(a.revenue_at_risk_fmt || "—")}</b> revenue at risk · ${a.customers.length} customer(s) hit · ${briefLink(a)} · <a href="#/alert/${encodeURIComponent(a.alert_id)}">Full detail</a></p>
     ${a.options.length ? `<table><thead><tr><th>Recommended option</th><th class="num">Cost</th><th class="num">Net value</th><th>Takes effect</th><th>Who approves</th><th></th></tr></thead><tbody>
-      ${a.options.map((o, i) => `<tr><td>${esc(optLabel(o))}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td>
+      ${a.options.map((o, i) => `<tr><td>${niceOpt(o)}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td>
         <td>${o.time_to_effect_days ?? "—"} days${o.on_time === false ? " (late)" : ""}</td><td>${esc(o.approver)}</td>
         <td><button class="btn small" data-prop="${esc(a.alert_id)}" data-oi="${i}">Propose</button></td></tr>`).join("")}</tbody></table>`
       : `<p class="muted">No action needed: stock lasts longer than the expected delay.</p>`}</div>`;
@@ -171,7 +179,7 @@ async function viewHosc() {
       <p class="qline"><b>${esc(a.revenue_at_risk_fmt || "—")}</b> revenue at risk · customers: ${a.customers.map((c) => esc(c.customer)).join(", ") || "none"} ·
         owner ${esc(a.owner)} · ${briefLink(a)}</p>
       ${a.options.length ? `<table><thead><tr><th>Recommended</th><th class="num">Cost</th><th class="num">Net value</th><th>Approver</th></tr></thead><tbody>
-        ${a.options.map((o) => `<tr><td>${esc(optLabel(o))}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td><td>${esc(o.approver)}</td></tr>`).join("")}</tbody></table>`
+        ${a.options.map((o) => `<tr><td>${niceOpt(o)}</td><td class="num">${inr(o.cost_inr)}</td><td class="num">${inr(o.net_value_inr)}</td><td>${esc(o.approver)}</td></tr>`).join("")}</tbody></table>`
         : `<p class="muted">No action recommended: stock covers the delay.</p>`}
       ${needsCoo ? `<p class="muted">One option is above your limit and needs the COO.</p>` : ""}
       <div class="btns"><button class="btn good" data-d="approved" data-a="${esc(a.alert_id)}">Approve</button>
@@ -211,7 +219,7 @@ async function viewCoo() {
     <section class="block"><h2>Top risks</h2>${hot.slice(0, 3).map((a) => `<div class="qcard">
       <div class="qtop">${pill(a.priority)} <b>${esc(a.title)}</b> ${statusTag(a)}</div>
       <p class="qline"><b>${esc(a.revenue_at_risk_fmt)}</b> at risk · ${a.customers.length} customer(s): ${a.customers.slice(0, 4).map((c) => esc(c.customer)).join(", ")}${a.customers.length > 4 ? ` +${a.customers.length - 4} more` : ""}</p>
-      <p class="qline">${esc((a.ask || "").replace(/^Decide:\s*/, "Recommended: "))}</p><p class="qline">${briefLink(a, "Read the one-page briefing")}</p></div>`).join("")}
+      <p class="qline">${esc(nameIds((a.ask || "").replace(/^Decide:\s*/, "Recommended: ")))}</p><p class="qline">${briefLink(a, "Read the one-page briefing")}</p></div>`).join("")}
       ${hot.length > 3 ? `<p class="muted">${hot.length - 3} more in the <a href="#/p/hosc">Head of Supply Chain queue</a>.</p>` : ""}</section>
     <section class="block"><h2>Needs your approval</h2>${mine.length ? mine.map((a) => `<div class="qcard">
       <div class="qtop">${pill(a.priority)} <b>${esc(a.title)}</b> ${statusTag(a)}</div>

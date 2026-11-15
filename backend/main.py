@@ -237,8 +237,28 @@ def replays():
 def replay_one(did: str):
     for r in snap()["replays"]:
         if r["disruption_id"] == did.upper():
-            return r
+            hist = next((t for t in snap()["timeline"] if t["disruption_id"] == r["disruption_id"]), {})
+            return {**r, "first_signal_date": hist.get("first_signal_date"), "decision_date": hist.get("decision_date"),
+                    "had_warning": hist.get("had_warning")}
     raise HTTPException(404, f"No disruption {did}")
+
+
+@lru_cache(maxsize=1)
+def _names() -> dict:
+    """Plain names for part and supplier ids, so the UI never shows a bare PRT-/SUP- code."""
+    import pandas as pd
+    proc = ROOT / "data" / "processed"
+    sup = pd.read_pickle(proc / "suppliers.pkl")
+    prt = pd.read_pickle(proc / "parts.pkl")
+    return {"suppliers": {r.supplier_id: {"name": r.supplier_name, "country": r.country, "port": r.port_of_loading}
+                          for r in sup.itertuples()},
+            "parts": {r.part_id: {"name": r.description, "category": r.category, "single_source": bool(r.single_source)}
+                      for r in prt.itertuples()}}
+
+
+@app.get("/api/names")
+def names():
+    return _names()
 
 
 class AskIn(BaseModel):
