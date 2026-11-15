@@ -61,6 +61,25 @@ def flags(T: pd.DataFrame, threshold: float, rule: str) -> pd.Series:
     return {"rules": r, "claude": c, "either": r | c, "both": r & c}[rule]
 
 
+def apply_rule(T: pd.DataFrame, threshold: float, rule: str) -> pd.DataFrame:
+    """Make the score column follow a triage rule, so alert clustering uses it. A signal the rule adds gets Claude's
+    links merged into its own and sits exactly on the threshold; a signal it drops sits just below. Returns a copy."""
+    T = T.copy()
+    if rule == "rules":
+        return T
+    f = flags(T, threshold, rule)
+    add, drop = f & ~(T["score"] >= threshold), ~f & (T["score"] >= threshold)
+    # One list per row: assigning a list of lists through .loc makes pandas read it as a 2-D block and fail.
+    T["links"] = T["links"].astype(object)
+    for i in T.index[add]:
+        T.at[i, "links"] = list(dict.fromkeys(list(T.at[i, "links"]) + list(T.at[i, "llm_links"])))
+    T.loc[add, "link_strength"] = T.loc[add, "link_strength"].clip(lower=1.0)
+    T.loc[add, "event_type"] = T.loc[add, "event_type"].fillna(T.loc[add, "llm_event_type"])
+    T.loc[add, "score"] = threshold
+    T.loc[drop, "score"] = threshold - 0.01
+    return T
+
+
 def _m(f: pd.Series, y: pd.Series) -> dict:
     tp, fp, fn = int((f & y).sum()), int((f & ~y).sum()), int((~f & y).sum())
     p = tp / (tp + fp) if tp + fp else None

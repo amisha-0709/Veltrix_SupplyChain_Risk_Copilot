@@ -29,19 +29,12 @@ def run_backtest(use_llm: bool = True) -> dict:
         T, judge_summary = apply_judge(T, th, run=False)   # cached Claude verdicts only; no API calls here
     # Claude's extraction of every signal (cached; core/llm_triage.py). The rule combining it with the word list is
     # chosen on TRAIN only and applied here; the comparison of all four rules is kept for the report.
-    from core.triage_llm import RULES, choose, coverage, flags, variants, with_extraction
+    from core.triage_llm import RULES, apply_rule, choose, coverage, flags, variants, with_extraction
     T = with_extraction(T)
     V = variants(T, th)
     cov = coverage(T)
     rule = choose(V) if cov["unique_extracted"] else "rules"
-    if rule != "rules":
-        add = flags(T, th, rule) & ~(T["score"] >= th)
-        drop = ~flags(T, th, rule) & (T["score"] >= th)
-        T.loc[add, "links"] = [list(dict.fromkeys(list(a) + list(b))) for a, b in zip(T.loc[add, "links"], T.loc[add, "llm_links"])]
-        T.loc[add, "link_strength"] = T.loc[add, "link_strength"].clip(lower=1.0)
-        T.loc[add, "event_type"] = T.loc[add, "event_type"].fillna(T.loc[add, "llm_event_type"])
-        T.loc[add, "score"] = th
-        T.loc[drop, "score"] = th - 0.01
+    T = apply_rule(T, th, rule)
     events, review = build_events(T, th)
     in_alert = {s["signal_id"]: e.event_id for e in events for s in e.signals}
     T["alerted"] = T["signal_id"].isin(in_alert)
