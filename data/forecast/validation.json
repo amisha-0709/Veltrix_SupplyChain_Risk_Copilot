@@ -1,0 +1,250 @@
+{
+ "rows": {
+  "disruptions per year": {
+   "history": 9.0,
+   "generated": 11.5
+  },
+  "median duration (days)": {
+   "history": 16.5,
+   "generated": 16.0
+  },
+  "share of events warned in advance": {
+   "history": 0.83,
+   "generated": 0.83
+  },
+  "news items per week": {
+   "history": 29.01,
+   "generated": 28.13
+  },
+  "share of news relevant": {
+   "history": 0.05,
+   "generated": 0.05
+  },
+  "median warning lead (days, warned only)": {
+   "history": 16.0,
+   "generated": 15.0
+  },
+  "mean congestion index": {
+   "history": 46.42,
+   "generated": 47.7
+  },
+  "sd congestion index": {
+   "history": 10.05,
+   "generated": 10.73
+  },
+  "shipments per week": {
+   "history": 39.87,
+   "generated": 40.11
+  },
+  "mean sea delay (days)": {
+   "history": 1.97,
+   "generated": 1.4
+  },
+  "share of shipments hit by an event": {
+   "history": 0.11,
+   "generated": 0.04
+  },
+  "mean delay, unaffected shipments (days)": {
+   "history": 0.8,
+   "generated": 0.8
+  },
+  "demand growth, year on year": {
+   "history": 1.08,
+   "generated": 1.09
+  },
+  "weekly demand: last history year vs first forecast year": {
+   "history": 56922.21,
+   "generated": 61675.69
+  }
+ },
+ "counts": {
+  "disruptions": 23,
+  "news": 2926,
+  "warnings": 151,
+  "shipments": 4171,
+  "port_weeks": 1560,
+  "demand_rows": 2704,
+  "test_news": 748
+ },
+ "fitted": {
+  "congestion_per_port": {
+   "Busan": {
+    "phi": 0.53,
+    "noise_sd": 6.34
+   },
+   "Chennai Port": {
+    "phi": 0.17,
+    "noise_sd": 5.85
+   },
+   "Hai Phong": {
+    "phi": 0.18,
+    "noise_sd": 5.45
+   },
+   "Hamburg": {
+    "phi": 0.58,
+    "noise_sd": 6.82
+   },
+   "Kaohsiung": {
+    "phi": 0.55,
+    "noise_sd": 6.01
+   },
+   "Keelung": {
+    "phi": 0.0,
+    "noise_sd": 3.67
+   },
+   "Laem Chabang": {
+    "phi": 0.0,
+    "noise_sd": 3.62
+   },
+   "Nhava Sheva (JNPT)": {
+    "phi": 0.05,
+    "noise_sd": 5.42
+   },
+   "Ningbo": {
+    "phi": 0.41,
+    "noise_sd": 6.0
+   },
+   "Penang": {
+    "phi": 0.07,
+    "noise_sd": 3.28
+   },
+   "Port Klang": {
+    "phi": 0.6,
+    "noise_sd": 7.02
+   },
+   "Rotterdam": {
+    "phi": 0.72,
+    "noise_sd": 6.07
+   },
+   "Shanghai": {
+    "phi": 0.44,
+    "noise_sd": 7.12
+   },
+   "Yantian (Shenzhen)": {
+    "phi": 0.63,
+    "noise_sd": 5.95
+   },
+   "Yokohama": {
+    "phi": 0.0,
+    "noise_sd": 3.9
+   }
+  },
+  "congestion_uplift_pre_during": [
+   2.9,
+   19.9
+  ],
+  "delay_days_per_congestion_point": -0.016,
+  "demand_per_sku": {
+   "BMS-48V-16S": {
+    "growth": 1.105,
+    "noise_sd": 0.081
+   },
+   "BMS-60V-20S": {
+    "growth": 1.113,
+    "noise_sd": 0.082
+   },
+   "BMS-72V-LFP": {
+    "growth": 1.067,
+    "noise_sd": 0.09
+   },
+   "CHG-PORT-2W": {
+    "growth": 1.066,
+    "noise_sd": 0.095
+   },
+   "DCDC-1KW": {
+    "growth": 1.083,
+    "noise_sd": 0.086
+   },
+   "DCDC-500W": {
+    "growth": 1.055,
+    "noise_sd": 0.09
+   },
+   "HARN-2W-MAIN": {
+    "growth": 1.11,
+    "noise_sd": 0.077
+   },
+   "HARN-3W-MAIN": {
+    "growth": 1.091,
+    "noise_sd": 0.084
+   },
+   "HARN-HV-PACK": {
+    "growth": 1.073,
+    "noise_sd": 0.073
+   },
+   "HL-LED-2W": {
+    "growth": 1.075,
+    "noise_sd": 0.077
+   },
+   "HL-LED-3W": {
+    "growth": 1.079,
+    "noise_sd": 0.088
+   },
+   "IC-SEG-35": {
+    "growth": 1.06,
+    "noise_sd": 0.072
+   },
+   "IC-TFT-5": {
+    "growth": 1.096,
+    "noise_sd": 0.089
+   },
+   "MCU-12KW-3W": {
+    "growth": 1.085,
+    "noise_sd": 0.075
+   },
+   "MCU-2KW": {
+    "growth": 1.094,
+    "noise_sd": 0.081
+   },
+   "MCU-3KW": {
+    "growth": 1.054,
+    "noise_sd": 0.092
+   },
+   "MCU-7KW": {
+    "growth": 1.075,
+    "noise_sd": 0.079
+   },
+   "MTR-HUB-2KW": {
+    "growth": 1.08,
+    "noise_sd": 0.082
+   },
+   "OBC-1KW": {
+    "growth": 1.089,
+    "noise_sd": 0.07
+   },
+   "OBC-3KW": {
+    "growth": 1.1,
+    "noise_sd": 0.085
+   },
+   "PACK-2W-3KWH": {
+    "growth": 1.098,
+    "noise_sd": 0.08
+   },
+   "SW-ASSY": {
+    "growth": 1.054,
+    "noise_sd": 0.082
+   },
+   "TL-LED": {
+    "growth": 1.08,
+    "noise_sd": 0.087
+   },
+   "TLM-4G": {
+    "growth": 1.067,
+    "noise_sd": 0.086
+   },
+   "TLM-4G-GPS": {
+    "growth": 1.086,
+    "noise_sd": 0.078
+   },
+   "VCU-2W": {
+    "growth": 1.079,
+    "noise_sd": 0.092
+   }
+  }
+ },
+ "settings": {
+  "years": 2,
+  "seed": 42,
+  "start": "2026-10-05",
+  "test_from": "2028-04-05"
+ }
+}

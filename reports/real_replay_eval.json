@@ -1,0 +1,670 @@
+{
+  "what": "Real archived headlines (Google News), co-pilot run unchanged, labels written blind",
+  "split": {
+    "train_2023": {
+      "headlines": 256,
+      "relevant": 38,
+      "alerts": 11,
+      "real_alerts": 8,
+      "alert_precision": 0.727,
+      "false_alerts_per_week": 0.18,
+      "updates_attached": 1,
+      "surfaced": {
+        "n": 256,
+        "relevant": 38,
+        "tp": 38,
+        "fp": 3,
+        "fn": 0,
+        "tn": 215,
+        "precision": 0.927,
+        "recall": 1.0,
+        "f1": 0.962,
+        "accuracy": 0.988,
+        "false_positive_rate": 0.014,
+        "precision_95ci": [
+          0.838,
+          1.0
+        ],
+        "recall_95ci": [
+          1.0,
+          1.0
+        ],
+        "resamples": 2000
+      },
+      "triage": {
+        "n": 256,
+        "relevant": 38,
+        "tp": 37,
+        "fp": 3,
+        "fn": 1,
+        "tn": 215,
+        "precision": 0.925,
+        "recall": 0.974,
+        "f1": 0.949,
+        "accuracy": 0.984,
+        "false_positive_rate": 0.014
+      }
+    },
+    "test_2024": {
+      "headlines": 160,
+      "relevant": 28,
+      "alerts": 7,
+      "real_alerts": 6,
+      "alert_precision": 0.857,
+      "false_alerts_per_week": 0.15,
+      "updates_attached": 6,
+      "surfaced": {
+        "n": 160,
+        "relevant": 28,
+        "tp": 19,
+        "fp": 8,
+        "fn": 9,
+        "tn": 124,
+        "precision": 0.704,
+        "recall": 0.679,
+        "f1": 0.691,
+        "accuracy": 0.894,
+        "false_positive_rate": 0.061,
+        "precision_95ci": [
+          0.522,
+          0.875
+        ],
+        "recall_95ci": [
+          0.5,
+          0.842
+        ],
+        "resamples": 2000
+      },
+      "triage": {
+        "n": 160,
+        "relevant": 28,
+        "tp": 14,
+        "fp": 5,
+        "fn": 14,
+        "tn": 127,
+        "precision": 0.737,
+        "recall": 0.5,
+        "f1": 0.596,
+        "accuracy": 0.881,
+        "false_positive_rate": 0.038
+      }
+    }
+  },
+  "threshold": 3.5,
+  "headlines": 416,
+  "relevant": 66,
+  "triage": {
+    "n": 416,
+    "relevant": 66,
+    "tp": 51,
+    "fp": 8,
+    "fn": 15,
+    "tn": 342,
+    "precision": 0.864,
+    "recall": 0.773,
+    "f1": 0.816,
+    "accuracy": 0.945,
+    "false_positive_rate": 0.023,
+    "precision_95ci": [
+      0.775,
+      0.944
+    ],
+    "recall_95ci": [
+      0.667,
+      0.867
+    ],
+    "resamples": 2000
+  },
+  "in_alert": {
+    "n": 416,
+    "relevant": 66,
+    "tp": 57,
+    "fp": 11,
+    "fn": 9,
+    "tn": 339,
+    "precision": 0.838,
+    "recall": 0.864,
+    "f1": 0.851,
+    "accuracy": 0.952,
+    "false_positive_rate": 0.031
+  },
+  "alerts": {
+    "total": 18,
+    "real": 14,
+    "alert_precision": 0.778,
+    "false_alerts_per_week": 0.17,
+    "weeks_covered": 23.4,
+    "list": [
+      {
+        "alert_id": "EV-001",
+        "first_seen": "2023-05-19 07:00:00",
+        "signals": 1,
+        "real": true,
+        "windows": [
+          "Q1"
+        ],
+        "headlines": [
+          "Over 3 lakh consumers in Pune, Pimpri-Chinchwad face 12-hour power outage | Hindustan Times"
+        ]
+      },
+      {
+        "alert_id": "EV-002",
+        "first_seen": "2023-07-01 07:00:00",
+        "signals": 1,
+        "real": true,
+        "windows": [
+          "R4"
+        ],
+        "headlines": [
+          "Penang island hit by flash floods after early morning downpour"
+        ]
+      },
+      {
+        "alert_id": "EV-003",
+        "first_seen": "2023-07-17 07:00:00",
+        "signals": 1,
+        "real": true,
+        "windows": [
+          "R4"
+        ],
+        "headlines": [
+          "Hong Kong and Chinese ports halt operations as Typhoon Talim hits"
+        ]
+      },
+      {
+        "alert_id": "EV-004",
+        "first_seen": "2023-07-23 07:00:00",
+        "signals": 1,
+        "real": true,
+        "windows": [
+          "R4"
+        ],
+        "headlines": [
+          "Erratic tropical storm might hit Taiwan: CWB"
+        ]
+      },
+      {
+        "alert_id": "EV-005",
+        "first_seen": "2023-07-28 07:00:00",
+        "signals": 1,
+        "real": false,
+        "windows": [
+          "R4"
+        ],
+        "headlines": [
+          "Cargo flow woes persist at India’s Mundra Port after cyclone disruption"
+        ]
+      },
+      {
+        "alert_id": "EV-006",
+        "first_seen": "2023-08-03 07:00:00",
+        "signals": 2,
+        "real": true,
+        "windows": [
+          "R4"
+        ],
+        "headlines": [
+          "Typhoons and downpours clog China’s logistics flows and port traffic",
+          "Chinese ports brace for Typhoon Kanu"
+        ]
+      },
+      {
+        "alert_id": "EV-007",
+        "first_seen": "2023-08-07 07:00:00",
+        "signals": 4,
+        "real": true,
+        "windows": [
+          "R4"
+        ],
+        "headlines": [
+          "Update: Typhoon Khanun heading for Busan, South Korea after a change in trajectory",
+          "(LEAD) Typhoon Khanun to land on S. Korea's southeast coast this week",
+          "One dead as Tropical Storm Khanun causes floods, evacuations in S Korea"
+        ]
+      },
+      {
+        "alert_id": "EV-008",
+        "first_seen": "2023-11-21 08:00:00",
+        "signals": 1,
+        "real": false,
+        "windows": [
+          "R1"
+        ],
+        "headlines": [
+          "Germany’s River Rhine still closed to shipping due to high water"
+        ]
+      },
+      {
+        "alert_id": "EV-009",
+        "first_seen": "2023-11-22 08:00:00",
+        "signals": 26,
+        "real": true,
+        "windows": [
+          "R1"
+        ],
+        "headlines": [
+          "Houthis’ helicopter-borne attack on ship raises risks in crucial Red Sea",
+          "3 commercial ships hit by missiles in Houthi attack in Red Sea, US warship downs 3 drones",
+          "Global shipping on alert after Houthis attack vessels"
+        ]
+      },
+      {
+        "alert_id": "EV-010",
+        "first_seen": "2023-12-10 08:00:00",
+        "signals": 1,
+        "real": true,
+        "windows": [
+          "R1"
+        ],
+        "headlines": [
+          "China's international marine shipping affected by disruption from major canals, cost surge among delays"
+        ]
+      },
+      {
+        "alert_id": "EV-011",
+        "first_seen": "2023-12-14 08:00:00",
+        "signals": 1,
+        "real": false,
+        "windows": [
+          "R1"
+        ],
+        "headlines": [
+          "Death toll rises to 11 in Pune Talawade factory fire incident | Hindustan Times"
+        ]
+      },
+      {
+        "alert_id": "EV-012",
+        "first_seen": "2024-03-24 07:00:00",
+        "signals": 3,
+        "real": true,
+        "windows": [
+          "R2",
+          "R3"
+        ],
+        "headlines": [
+          "Chinese-owned oil tanker hit by Houthi missiles in Red Sea",
+          "US says it foiled Houthi drone, missile attack at US Navy ship in Red Sea",
+          "Houthi Red Sea Attacks Have Global Economic Repercussions"
+        ]
+      },
+      {
+        "alert_id": "EV-013",
+        "first_seen": "2024-03-26 07:00:00",
+        "signals": 6,
+        "real": true,
+        "windows": [
+          "R2",
+          "R3"
+        ],
+        "headlines": [
+          "Fire breaks out at Wistron plant in north Taiwan",
+          "TSMC resumes chip production following biggest earthquake in 25 years — incurred no damage to its critical tools",
+          "Taiwan quake to hit some chip output, disrupt supply chain, analysts say"
+        ]
+      },
+      {
+        "alert_id": "EV-014",
+        "first_seen": "2024-04-01 07:00:00",
+        "signals": 1,
+        "real": false,
+        "windows": [
+          "R2"
+        ],
+        "headlines": [
+          "Karnataka gets insulated aerial work platform vehicles, no power cut during maintenance"
+        ]
+      },
+      {
+        "alert_id": "EV-015",
+        "first_seen": "2024-06-09 07:00:00",
+        "signals": 1,
+        "real": true,
+        "windows": [
+          "Q3"
+        ],
+        "headlines": [
+          "Source, cause of Westports container yard fire yet to be determined"
+        ]
+      },
+      {
+        "alert_id": "EV-016",
+        "first_seen": "2024-06-10 07:00:00",
+        "signals": 2,
+        "real": true,
+        "windows": [
+          "Q3"
+        ],
+        "headlines": [
+          "Monsoon arrives in Pune: Power outages spanning over 20 hours after heavy rain make citizens angry",
+          "16 hour power cut in SoBo; outage in parts of suburbs too"
+        ]
+      },
+      {
+        "alert_id": "EV-017",
+        "first_seen": "2024-06-10 07:00:00",
+        "signals": 7,
+        "real": true,
+        "windows": [
+          "Q3"
+        ],
+        "headlines": [
+          "Houthi Attacks on Merchant Vessels in the Red Sea",
+          "Ship severely flooded after Houthi attack in Red Sea",
+          "Yemen's Houthi rebels launch boat-borne bomb attack against Greek-owned ship in Red Sea"
+        ]
+      },
+      {
+        "alert_id": "EV-018",
+        "first_seen": "2024-06-16 07:00:00",
+        "signals": 1,
+        "real": true,
+        "windows": [
+          "Q3"
+        ],
+        "headlines": [
+          "Congestion at ports of Singapore, Shanghai/Ningbo escalates disruption in global shipping"
+        ]
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": "R1",
+      "title": "Red Sea attacks force carriers to divert via the Cape",
+      "touches_veltrix": true,
+      "relevant_headlines": 28,
+      "alerted_relevant": 28,
+      "first_alert": "2023-11-22 08:00:00",
+      "lead_days_vs_impact": 25.7,
+      "false_alarm_headlines_alerted": 2
+    },
+    {
+      "id": "R2",
+      "title": "Hualien earthquake, Taiwan (TSMC halts some lines)",
+      "touches_veltrix": true,
+      "relevant_headlines": 5,
+      "alerted_relevant": 3,
+      "first_alert": "2024-04-05 07:00:00",
+      "lead_days_vs_impact": -2.3,
+      "false_alarm_headlines_alerted": 4
+    },
+    {
+      "id": "R3",
+      "title": "Baltimore Key Bridge collapse closes the port",
+      "touches_veltrix": false,
+      "relevant_headlines": 9,
+      "alerted_relevant": 4,
+      "first_alert": "2024-03-24 07:00:00",
+      "lead_days_vs_impact": 1.7,
+      "false_alarm_headlines_alerted": 2
+    },
+    {
+      "id": "R4",
+      "title": "China export controls on gallium and germanium",
+      "touches_veltrix": false,
+      "relevant_headlines": 9,
+      "alerted_relevant": 9,
+      "first_alert": "2023-07-01 07:00:00",
+      "lead_days_vs_impact": 30.7,
+      "false_alarm_headlines_alerted": 1
+    }
+  ],
+  "by_window": {
+    "Q1": {
+      "n": 29,
+      "relevant": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 28,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "accuracy": 1.0,
+      "false_positive_rate": 0.0
+    },
+    "Q2": {
+      "n": 56,
+      "relevant": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 56,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy": 1.0,
+      "false_positive_rate": 0.0
+    },
+    "Q3": {
+      "n": 66,
+      "relevant": 14,
+      "tp": 9,
+      "fp": 0,
+      "fn": 5,
+      "tn": 52,
+      "precision": 1.0,
+      "recall": 0.643,
+      "f1": 0.783,
+      "accuracy": 0.924,
+      "false_positive_rate": 0.0
+    },
+    "R1": {
+      "n": 74,
+      "relevant": 28,
+      "tp": 27,
+      "fp": 2,
+      "fn": 1,
+      "tn": 44,
+      "precision": 0.931,
+      "recall": 0.964,
+      "f1": 0.947,
+      "accuracy": 0.959,
+      "false_positive_rate": 0.043
+    },
+    "R2": {
+      "n": 42,
+      "relevant": 5,
+      "tp": 1,
+      "fp": 3,
+      "fn": 4,
+      "tn": 34,
+      "precision": 0.25,
+      "recall": 0.2,
+      "f1": 0.222,
+      "accuracy": 0.833,
+      "false_positive_rate": 0.081
+    },
+    "R3": {
+      "n": 52,
+      "relevant": 9,
+      "tp": 4,
+      "fp": 2,
+      "fn": 5,
+      "tn": 41,
+      "precision": 0.667,
+      "recall": 0.444,
+      "f1": 0.533,
+      "accuracy": 0.865,
+      "false_positive_rate": 0.047
+    },
+    "R4": {
+      "n": 97,
+      "relevant": 9,
+      "tp": 9,
+      "fp": 1,
+      "fn": 0,
+      "tn": 87,
+      "precision": 0.9,
+      "recall": 1.0,
+      "f1": 0.947,
+      "accuracy": 0.99,
+      "false_positive_rate": 0.011
+    }
+  },
+  "misses": [
+    {
+      "signal_id": "H0227",
+      "window": "R1",
+      "score": 0.0,
+      "title": "Shipping firms respond to Houthi attacks in Red Sea",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0262",
+      "window": "R3",
+      "score": 3.0,
+      "title": "Shipping disruptions in the Red Sea: Local shock, global impact",
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)"
+    },
+    {
+      "signal_id": "H0264",
+      "window": "R3",
+      "score": 0.0,
+      "title": "Yemen’s Houthis Tell China, Russia Their Ships Won’t Be Targeted",
+      "reason": "links Red Sea / Suez Canal, China; cues none"
+    },
+    {
+      "signal_id": "H0266",
+      "window": "R3",
+      "score": 0.0,
+      "title": "The Red Sea Has Become a War Zone Full of Vulnerable Ships",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0270",
+      "window": "R3",
+      "score": 0.0,
+      "title": "Chinese Tanker Hit with Houthi Missile in the Red Sea",
+      "reason": "links China, Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0271",
+      "window": "R3",
+      "score": 0.0,
+      "title": "China-run tanker shipping Russian oil hit by Houthis, US says",
+      "reason": "links Red Sea / Suez Canal, China; cues none"
+    },
+    {
+      "signal_id": "H0304",
+      "window": "R2",
+      "score": 0.0,
+      "title": "Navy downs 4 drones targeting ship in Red Sea",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0335",
+      "window": "R2",
+      "score": 0.0,
+      "title": "Shipping: No quick fix to Red Sea situation",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0339",
+      "window": "R2",
+      "score": 0.0,
+      "title": "Dire Straits – Houthi aggression in the Bab al-Mandab Strait: Joshua Krasna",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0342",
+      "window": "R2",
+      "score": 0.0,
+      "title": "Protection of Shipping in the Red Sea and the Gulf of Aden",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0360",
+      "window": "Q3",
+      "score": 3.0,
+      "title": "Maersk Sees Deeper Impact to World Trade From Red Sea Disruption",
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)"
+    },
+    {
+      "signal_id": "H0365",
+      "window": "Q3",
+      "score": 3.0,
+      "title": "Navigating global supply chain disruption: How the construction industry can cope with the Bab al-Mandab instability",
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)"
+    },
+    {
+      "signal_id": "H0398",
+      "window": "Q3",
+      "score": 3.0,
+      "title": "DFS warning as Red Sea disruption hits deliveries",
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)"
+    },
+    {
+      "signal_id": "H0403",
+      "window": "Q3",
+      "score": 0.0,
+      "title": "Suez squeeze continues",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    },
+    {
+      "signal_id": "H0411",
+      "window": "Q3",
+      "score": 0.0,
+      "title": "Houthi attack forces crew to abandon coal carrier in Red Sea",
+      "reason": "links Red Sea / Suez Canal; cues none"
+    }
+  ],
+  "false_alarms": [
+    {
+      "signal_id": "H0108",
+      "window": "R4",
+      "score": 4.5,
+      "title": "Cargo flow woes persist at India’s Mundra Port after cyclone disruption",
+      "reason": "links India; cues cyclone(+2), disruption(+2)"
+    },
+    {
+      "signal_id": "H0184",
+      "window": "R1",
+      "score": 3.5,
+      "title": "Germany’s River Rhine still closed to shipping due to high water",
+      "reason": "links Germany; cues closed(+3)"
+    },
+    {
+      "signal_id": "H0217",
+      "window": "R1",
+      "score": 4.0,
+      "title": "Death toll rises to 11 in Pune Talawade factory fire incident | Hindustan Times",
+      "reason": "links Domestic — Pune; cues fire(+3)"
+    },
+    {
+      "signal_id": "H0283",
+      "window": "R3",
+      "score": 4.0,
+      "title": "Fire breaks out at Wistron plant in north Taiwan",
+      "reason": "links Keelung; cues fire(+3)"
+    },
+    {
+      "signal_id": "H0312",
+      "window": "R2",
+      "score": 4.0,
+      "title": "Karnataka gets insulated aerial work platform vehicles, no power cut during maintenance",
+      "reason": "links Domestic — Bengaluru/Hosur; cues power cut(+3)"
+    },
+    {
+      "signal_id": "H0319",
+      "window": "R2",
+      "score": 3.5,
+      "title": "TSMC resumes chip production following biggest earthquake in 25 years — incurred no damage to its critical tools",
+      "reason": "links Semiconductors; cues earthquake(+3)"
+    },
+    {
+      "signal_id": "H0329",
+      "window": "R2",
+      "score": 5.5,
+      "title": "TSMC restarts operations after earthquake, reassuring no chip supply disruption",
+      "reason": "links Semiconductors; cues earthquake(+3), disruption(+2)"
+    },
+    {
+      "signal_id": "H0331",
+      "window": "R3",
+      "score": 4.0,
+      "title": "US says it foiled Houthi drone, missile attack at US Navy ship in Red Sea",
+      "reason": "links Red Sea / Suez Canal; cues houthi drone, missile attack at us navy ship(+3)"
+    }
+  ]
+}

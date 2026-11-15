@@ -1,0 +1,1479 @@
+{
+  "what": "Co-pilot run unchanged on generated forecast data (news_claude.csv) vs signal_labels.csv",
+  "threshold": 3.5,
+  "threshold_source": "tune_threshold on the data pack's train split (as deployed)",
+  "mode": "rules + cached Claude (partial)",
+  "llm": {
+    "rule": "either",
+    "coverage": {
+      "overall": {
+        "signals": 2926,
+        "with_extraction": 496,
+        "unique_texts": 2629,
+        "unique_extracted": 433
+      },
+      "by_split": {
+        "test": {
+          "signals": 748,
+          "with_claude": 121,
+          "relevant": 39,
+          "relevant_with_claude": 7
+        },
+        "train": {
+          "signals": 2178,
+          "with_claude": 375,
+          "relevant": 112,
+          "relevant_with_claude": 15
+        }
+      },
+      "by_style": {
+        "caps": {
+          "signals": 100,
+          "with_claude": 40
+        },
+        "explainer": {
+          "signals": 113,
+          "with_claude": 0
+        },
+        "hindi": {
+          "signals": 212,
+          "with_claude": 0
+        },
+        "hinglish": {
+          "signals": 171,
+          "with_claude": 56
+        },
+        "local": {
+          "signals": 225,
+          "with_claude": 38
+        },
+        "rewrite": {
+          "signals": 887,
+          "with_claude": 186
+        },
+        "ticker": {
+          "signals": 215,
+          "with_claude": 32
+        },
+        "trade": {
+          "signals": 372,
+          "with_claude": 52
+        },
+        "typos": {
+          "signals": 288,
+          "with_claude": 32
+        },
+        "wire": {
+          "signals": 343,
+          "with_claude": 60
+        }
+      }
+    },
+    "covered_subset": {
+      "overall": {
+        "rules": {
+          "n": 496,
+          "relevant": 22,
+          "tp": 19,
+          "fp": 0,
+          "fn": 3,
+          "tn": 474,
+          "precision": 1.0,
+          "recall": 0.864,
+          "f1": 0.927,
+          "accuracy": 0.994,
+          "false_positive_rate": 0.0
+        },
+        "claude": {
+          "n": 496,
+          "relevant": 22,
+          "tp": 18,
+          "fp": 19,
+          "fn": 4,
+          "tn": 455,
+          "precision": 0.486,
+          "recall": 0.818,
+          "f1": 0.61,
+          "accuracy": 0.954,
+          "false_positive_rate": 0.04
+        },
+        "either": {
+          "n": 496,
+          "relevant": 22,
+          "tp": 19,
+          "fp": 19,
+          "fn": 3,
+          "tn": 455,
+          "precision": 0.5,
+          "recall": 0.864,
+          "f1": 0.633,
+          "accuracy": 0.956,
+          "false_positive_rate": 0.04
+        }
+      },
+      "test": {
+        "rules": {
+          "n": 121,
+          "relevant": 7,
+          "tp": 4,
+          "fp": 0,
+          "fn": 3,
+          "tn": 114,
+          "precision": 1.0,
+          "recall": 0.571,
+          "f1": 0.727,
+          "accuracy": 0.975,
+          "false_positive_rate": 0.0
+        },
+        "claude": {
+          "n": 121,
+          "relevant": 7,
+          "tp": 4,
+          "fp": 3,
+          "fn": 3,
+          "tn": 111,
+          "precision": 0.571,
+          "recall": 0.571,
+          "f1": 0.571,
+          "accuracy": 0.95,
+          "false_positive_rate": 0.026
+        },
+        "either": {
+          "n": 121,
+          "relevant": 7,
+          "tp": 4,
+          "fp": 3,
+          "fn": 3,
+          "tn": 111,
+          "precision": 0.571,
+          "recall": 0.571,
+          "f1": 0.571,
+          "accuracy": 0.95,
+          "false_positive_rate": 0.026
+        }
+      }
+    },
+    "examples": {
+      "claude_added_true": [],
+      "claude_added_false": [
+        {
+          "signal_id": "FNEWS-00414",
+          "split": "train",
+          "style": "hinglish",
+          "score": 0.0,
+          "headline": "EV battery safety ka naya BIS standard ab lagu ho gaya hai",
+          "llm_reason": "New BIS safety standard now in force requires manufacturers to test EV battery packs against updated thermal-runaway criteria; a regulatory/compliance requirement that could affect goods supply, but no disruption is reported."
+        },
+        {
+          "signal_id": "FNEWS-00590",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "BIS standard on EV battery safety now in force",
+          "llm_reason": "New BIS battery safety standard now in force requires testing of EV battery packs, a regulatory compliance requirement that could affect goods supply, with no stated stoppage."
+        },
+        {
+          "signal_id": "FNEWS-00769",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "BIS standard on EV battery safety now in force",
+          "llm_reason": "A new battery safety standard now in force requires manufacturers to test packs to updated criteria, a compliance requirement on goods that could affect supply, though no stoppage is reported."
+        },
+        {
+          "signal_id": "FNEWS-00782",
+          "split": "train",
+          "style": "hinglish",
+          "score": 0.0,
+          "headline": "EV battery safety ka naya BIS standard ab lagu ho gaya",
+          "llm_reason": "New BIS battery safety standard now in force requires manufacturers to retest packs under updated thermal-runaway criteria, a regulatory/compliance requirement on goods with possible minor supply impact."
+        },
+        {
+          "signal_id": "FNEWS-00854",
+          "split": "train",
+          "style": "hinglish",
+          "score": 0.0,
+          "headline": "EV battery safety ke liye naya BIS standard ab lagu ho gaya",
+          "llm_reason": "New BIS standard now in force requires manufacturers to test EV battery packs to updated thermal-runaway criteria; a regulatory/compliance requirement that could affect goods supply, minor impact."
+        },
+        {
+          "signal_id": "FNEWS-00956",
+          "split": "train",
+          "style": "hinglish",
+          "score": 0.0,
+          "headline": "EV battery safety ke liye naya BIS standard ab lagu ho gaya",
+          "llm_reason": "New BIS standard now in force requires manufacturers to test EV battery packs to updated thermal-runaway criteria; a regulatory/compliance requirement that could affect goods supply, minor impact."
+        },
+        {
+          "signal_id": "FNEWS-01063",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "BIS standard on EV battery safety now in force",
+          "llm_reason": "A new battery safety standard now in force requires manufacturers to test packs to updated criteria, a compliance requirement on goods that could affect supply, though no stoppage is reported."
+        },
+        {
+          "signal_id": "FNEWS-01139",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "BIS standard on EV battery safety takes effect",
+          "llm_reason": "A new battery safety standard now requires makers to test packs, which is a regulatory compliance requirement that could affect goods supply, but no disruption is stated."
+        },
+        {
+          "signal_id": "FNEWS-01243",
+          "split": "train",
+          "style": "wire",
+          "score": -4.5,
+          "headline": "China may tighten gallium export curbs, reports say",
+          "llm_reason": "Reports say China may tighten gallium export controls; unconfirmed but a possible licensing restriction on a chip material."
+        },
+        {
+          "signal_id": "FNEWS-01364",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "BIS safety standard for EV batteries now in force",
+          "llm_reason": "A new BIS battery safety standard is now in force, requiring makers to test packs; this is a regulatory compliance requirement that could affect goods supply, though no disruption is stated."
+        },
+        {
+          "signal_id": "FNEWS-01436",
+          "split": "train",
+          "style": "caps",
+          "score": 0.0,
+          "headline": "BREAKING: NEW BIS STANDARD FOR EV BATTERY SAFETY NOW IN FORCE",
+          "llm_reason": "A new BIS battery safety standard is now in force, requiring testing and certification of EV packs, which is a regulatory compliance requirement that could slow supply but does not stop it."
+        },
+        {
+          "signal_id": "FNEWS-01440",
+          "split": "train",
+          "style": "caps",
+          "score": -3.0,
+          "headline": "BREAKING: NEW BIS STANDARD FOR EV BATTERY SAFETY COMES INTO FORCE",
+          "llm_reason": "A new BIS safety standard now in force requires testing of EV battery packs, a regulatory/compliance requirement on goods that could affect supply, but no stoppage is reported."
+        },
+        {
+          "signal_id": "FNEWS-01693",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "EV battery safety ka naya BIS standard ab lagu",
+          "llm_reason": "New BIS safety standard now in force requires manufacturers to test EV battery packs against updated thermal-runaway criteria; a regulatory/compliance requirement that could affect goods supply, but no stoppage stated."
+        },
+        {
+          "signal_id": "FNEWS-01874",
+          "split": "train",
+          "style": "caps",
+          "score": -3.0,
+          "headline": "BREAKING: NEW BIS STANDARD FOR EV BATTERY SAFETY COMES INTO FORCE",
+          "llm_reason": "A new BIS safety standard now in force requires testing of EV battery packs, a regulatory/compliance requirement on goods that could affect supply, but no stoppage is reported."
+        },
+        {
+          "signal_id": "FNEWS-01875",
+          "split": "train",
+          "style": "hinglish",
+          "score": 0.0,
+          "headline": "EV battery safety ka naya BIS standard ab lagu ho gaya hai",
+          "llm_reason": "New BIS EV battery safety standard now in force requires manufacturers to retest packs against updated thermal-runaway criteria, a regulatory compliance requirement that could affect goods supply."
+        }
+      ],
+      "claude_missed_relevant_rules_caught": [
+        {
+          "signal_id": "FNEWS-00941",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.5,
+          "headline": "Distributors say low-voltage MOSFET supply is tightening",
+          "llm_reason": "Distributors report tightening MOSFET supply with lead times over 30 weeks, a current component shortage."
+        }
+      ]
+    }
+  },
+  "notes": [
+    "Forecast data has news only; the data-pack baseline also includes weather alerts and trade notices.",
+    "Detection counts a disruption as caught when at least one of its labelled signals is in an alert before the disruption starts. Sudden events (warned = false) cannot be caught before impact.",
+    "alerts_per_week counts every alert (inbox and watch log)."
+  ],
+  "forecast": {
+    "overall": {
+      "triage": {
+        "n": 2926,
+        "relevant": 151,
+        "tp": 143,
+        "fp": 19,
+        "fn": 8,
+        "tn": 2756,
+        "precision": 0.883,
+        "recall": 0.947,
+        "f1": 0.914,
+        "accuracy": 0.991,
+        "false_positive_rate": 0.007,
+        "precision_95ci": [
+          0.831,
+          0.931
+        ],
+        "recall_95ci": [
+          0.909,
+          0.979
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 2926,
+        "relevant": 151,
+        "tp": 147,
+        "fp": 19,
+        "fn": 4,
+        "tn": 2756,
+        "precision": 0.886,
+        "recall": 0.974,
+        "f1": 0.927,
+        "accuracy": 0.992,
+        "false_positive_rate": 0.007
+      },
+      "detection": {
+        "disruptions": 23,
+        "warned": 19,
+        "caught_before_impact": 19,
+        "share_caught": 0.826,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 14.9,
+        "p10_lead_days": 9.7,
+        "p90_lead_days": 23.0,
+        "alerts": 28,
+        "alerts_per_week": 0.27,
+        "alert_precision": 0.75
+      }
+    },
+    "test": {
+      "triage": {
+        "n": 748,
+        "relevant": 39,
+        "tp": 33,
+        "fp": 3,
+        "fn": 6,
+        "tn": 706,
+        "precision": 0.917,
+        "recall": 0.846,
+        "f1": 0.88,
+        "accuracy": 0.988,
+        "false_positive_rate": 0.004,
+        "precision_95ci": [
+          0.818,
+          1.0
+        ],
+        "recall_95ci": [
+          0.727,
+          0.951
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 748,
+        "relevant": 39,
+        "tp": 37,
+        "fp": 3,
+        "fn": 2,
+        "tn": 706,
+        "precision": 0.925,
+        "recall": 0.949,
+        "f1": 0.937,
+        "accuracy": 0.993,
+        "false_positive_rate": 0.004
+      },
+      "detection": {
+        "disruptions": 6,
+        "warned": 4,
+        "caught_before_impact": 4,
+        "share_caught": 0.667,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 13.3,
+        "p10_lead_days": 10.1,
+        "p90_lead_days": 18.2,
+        "alerts": 8,
+        "alerts_per_week": 0.31,
+        "alert_precision": 0.75
+      }
+    },
+    "per_disruption": [
+      {
+        "disruption_id": "F004",
+        "title": "All-India transporters' strike",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-10-29",
+        "relevant_signals": 6,
+        "signals_alerted_before_impact": 6,
+        "first_alert": "2026-10-19 03:35:23.638368318",
+        "lead_days": 9.9
+      },
+      {
+        "disruption_id": "F006",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-11-30",
+        "relevant_signals": 4,
+        "signals_alerted_before_impact": 4,
+        "first_alert": "2026-11-15 03:07:00.597088651",
+        "lead_days": 14.9
+      },
+      {
+        "disruption_id": "F013",
+        "title": "Typhoon Haiyan closes Kaohsiung port",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-12-22",
+        "relevant_signals": 10,
+        "signals_alerted_before_impact": 8,
+        "first_alert": "2026-11-28 05:07:52.897698506",
+        "lead_days": 23.8
+      },
+      {
+        "disruption_id": "F012",
+        "title": "Port Klang port congestion after systems outage",
+        "type": "Logistics",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-12-31",
+        "relevant_signals": 5,
+        "signals_alerted_before_impact": 3,
+        "first_alert": "2026-12-14 19:34:08.567352909",
+        "lead_days": 16.2
+      },
+      {
+        "disruption_id": "F007",
+        "title": "Anti-dumping duty on Chinese aluminium castings (+18% landed cost)",
+        "type": "Trade policy",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-02-15",
+        "relevant_signals": 4,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2027-02-07 19:04:40.656331310",
+        "lead_days": 7.2
+      },
+      {
+        "disruption_id": "F001",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-03-15",
+        "relevant_signals": 3,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2027-02-21 05:53:18.828894080",
+        "lead_days": 21.8
+      },
+      {
+        "disruption_id": "F011",
+        "title": "Heatwave and power cuts at Pune suppliers",
+        "type": "Weather / power",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-04-22",
+        "relevant_signals": 11,
+        "signals_alerted_before_impact": 10,
+        "first_alert": "2027-04-03 16:55:56.941095994",
+        "lead_days": 18.3
+      },
+      {
+        "disruption_id": "F003",
+        "title": "Fire at a Penang MOSFET plant",
+        "type": "Supplier incident",
+        "split": "train",
+        "warned": false,
+        "start_date": "2027-05-23",
+        "relevant_signals": 8,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      },
+      {
+        "disruption_id": "F009",
+        "title": "Monsoon flooding slows Shenzhen",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-06-07",
+        "relevant_signals": 5,
+        "signals_alerted_before_impact": 3,
+        "first_alert": "2027-05-19 14:36:00.876595523",
+        "lead_days": 18.4
+      },
+      {
+        "disruption_id": "F010",
+        "title": "PCB supplier enters insolvency",
+        "type": "Supplier financial",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-06-17",
+        "relevant_signals": 11,
+        "signals_alerted_before_impact": 10,
+        "first_alert": "2027-04-26 00:36:01.188507850",
+        "lead_days": 52.0
+      },
+      {
+        "disruption_id": "F008",
+        "title": "Flooding in Japan",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-07-03",
+        "relevant_signals": 2,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2027-06-19 21:46:23.344343560",
+        "lead_days": 13.1
+      },
+      {
+        "disruption_id": "F005",
+        "title": "Yokohama congestion and Malacca delays",
+        "type": "Logistics",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-07-16",
+        "relevant_signals": 8,
+        "signals_alerted_before_impact": 7,
+        "first_alert": "2027-06-23 18:21:48.948661434",
+        "lead_days": 22.2
+      },
+      {
+        "disruption_id": "F002",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-08-25",
+        "relevant_signals": 4,
+        "signals_alerted_before_impact": 3,
+        "first_alert": "2027-08-02 03:43:13.668261151",
+        "lead_days": 22.8
+      },
+      {
+        "disruption_id": "F020",
+        "title": "All-India transporters' strike",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-10-13",
+        "relevant_signals": 7,
+        "signals_alerted_before_impact": 7,
+        "first_alert": "2027-09-29 03:10:12.225444342",
+        "lead_days": 13.9
+      },
+      {
+        "disruption_id": "F023",
+        "title": "All-India transporters' strike",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-12-31",
+        "relevant_signals": 7,
+        "signals_alerted_before_impact": 5,
+        "first_alert": "2027-12-18 07:43:14.592979686",
+        "lead_days": 12.7
+      },
+      {
+        "disruption_id": "F017",
+        "title": "Cyclone and flooding in Keelung",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2028-01-08",
+        "relevant_signals": 9,
+        "signals_alerted_before_impact": 8,
+        "first_alert": "2027-12-24 08:07:37.744640961",
+        "lead_days": 14.7
+      },
+      {
+        "disruption_id": "F019",
+        "title": "Earthquake halts fab output for inspection",
+        "type": "Natural disaster",
+        "split": "train",
+        "warned": false,
+        "start_date": "2028-03-05",
+        "relevant_signals": 8,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      },
+      {
+        "disruption_id": "F014",
+        "title": "Heatwave and power cuts at Pune suppliers",
+        "type": "Weather / power",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-05-09",
+        "relevant_signals": 10,
+        "signals_alerted_before_impact": 8,
+        "first_alert": "2028-04-24 17:59:24.890215670",
+        "lead_days": 14.3
+      },
+      {
+        "disruption_id": "F021",
+        "title": "Anti-dumping duty on Chinese aluminium castings (+18% landed cost)",
+        "type": "Trade policy",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-06-15",
+        "relevant_signals": 3,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2028-06-05 22:07:30.514628040",
+        "lead_days": 9.1
+      },
+      {
+        "disruption_id": "F018",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-07-17",
+        "relevant_signals": 3,
+        "signals_alerted_before_impact": 3,
+        "first_alert": "2028-06-27 02:17:32.404417858",
+        "lead_days": 19.9
+      },
+      {
+        "disruption_id": "F022",
+        "title": "Flooding in Taiwan",
+        "type": "Weather",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-07-26",
+        "relevant_signals": 5,
+        "signals_alerted_before_impact": 3,
+        "first_alert": "2028-07-13 16:15:52.518776017",
+        "lead_days": 12.3
+      },
+      {
+        "disruption_id": "F016",
+        "title": "Ransomware attack halts a Japanese passives supplier",
+        "type": "Cyber",
+        "split": "test",
+        "warned": false,
+        "start_date": "2028-08-11",
+        "relevant_signals": 11,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      },
+      {
+        "disruption_id": "F015",
+        "title": "Earthquake halts fab output for inspection",
+        "type": "Natural disaster",
+        "split": "test",
+        "warned": false,
+        "start_date": "2028-09-27",
+        "relevant_signals": 7,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      }
+    ],
+    "breakdowns": {
+      "overall": {
+        "by_style": {
+          "caps": {
+            "n": 100,
+            "relevant": 10,
+            "tp": 10,
+            "fp": 3,
+            "fn": 0,
+            "tn": 87,
+            "precision": 0.769,
+            "recall": 1.0,
+            "f1": 0.87,
+            "accuracy": 0.97,
+            "false_positive_rate": 0.033
+          },
+          "explainer": {
+            "n": 113,
+            "relevant": 7,
+            "tp": 7,
+            "fp": 0,
+            "fn": 0,
+            "tn": 106,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "hindi": {
+            "n": 212,
+            "relevant": 10,
+            "tp": 9,
+            "fp": 0,
+            "fn": 1,
+            "tn": 202,
+            "precision": 1.0,
+            "recall": 0.9,
+            "f1": 0.947,
+            "accuracy": 0.995,
+            "false_positive_rate": 0.0
+          },
+          "hinglish": {
+            "n": 171,
+            "relevant": 13,
+            "tp": 12,
+            "fp": 7,
+            "fn": 1,
+            "tn": 151,
+            "precision": 0.632,
+            "recall": 0.923,
+            "f1": 0.75,
+            "accuracy": 0.953,
+            "false_positive_rate": 0.044
+          },
+          "local": {
+            "n": 225,
+            "relevant": 9,
+            "tp": 8,
+            "fp": 0,
+            "fn": 1,
+            "tn": 216,
+            "precision": 1.0,
+            "recall": 0.889,
+            "f1": 0.941,
+            "accuracy": 0.996,
+            "false_positive_rate": 0.0
+          },
+          "rewrite": {
+            "n": 887,
+            "relevant": 47,
+            "tp": 43,
+            "fp": 7,
+            "fn": 4,
+            "tn": 833,
+            "precision": 0.86,
+            "recall": 0.915,
+            "f1": 0.887,
+            "accuracy": 0.988,
+            "false_positive_rate": 0.008
+          },
+          "ticker": {
+            "n": 215,
+            "relevant": 13,
+            "tp": 13,
+            "fp": 1,
+            "fn": 0,
+            "tn": 201,
+            "precision": 0.929,
+            "recall": 1.0,
+            "f1": 0.963,
+            "accuracy": 0.995,
+            "false_positive_rate": 0.005
+          },
+          "trade": {
+            "n": 372,
+            "relevant": 17,
+            "tp": 16,
+            "fp": 0,
+            "fn": 1,
+            "tn": 355,
+            "precision": 1.0,
+            "recall": 0.941,
+            "f1": 0.97,
+            "accuracy": 0.997,
+            "false_positive_rate": 0.0
+          },
+          "typos": {
+            "n": 288,
+            "relevant": 13,
+            "tp": 13,
+            "fp": 0,
+            "fn": 0,
+            "tn": 275,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "wire": {
+            "n": 343,
+            "relevant": 12,
+            "tp": 12,
+            "fp": 1,
+            "fn": 0,
+            "tn": 330,
+            "precision": 0.923,
+            "recall": 1.0,
+            "f1": 0.96,
+            "accuracy": 0.997,
+            "false_positive_rate": 0.003
+          }
+        },
+        "recall_by_event_type": {
+          "Cyber": {
+            "relevant": 11,
+            "caught": 6,
+            "recall": 0.545
+          },
+          "Labour": {
+            "relevant": 34,
+            "caught": 34,
+            "recall": 1.0
+          },
+          "Logistics": {
+            "relevant": 13,
+            "caught": 13,
+            "recall": 1.0
+          },
+          "Natural disaster": {
+            "relevant": 15,
+            "caught": 15,
+            "recall": 1.0
+          },
+          "Supplier financial": {
+            "relevant": 11,
+            "caught": 11,
+            "recall": 1.0
+          },
+          "Supplier incident": {
+            "relevant": 8,
+            "caught": 6,
+            "recall": 0.75
+          },
+          "Trade policy": {
+            "relevant": 7,
+            "caught": 7,
+            "recall": 1.0
+          },
+          "Weather": {
+            "relevant": 31,
+            "caught": 31,
+            "recall": 1.0
+          },
+          "Weather / power": {
+            "relevant": 21,
+            "caught": 20,
+            "recall": 0.952
+          }
+        },
+        "false_positives_by_news_category": {
+          "Corporate": {
+            "background_items": 317,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Cyber": {
+            "background_items": 118,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Geopolitical": {
+            "background_items": 20,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Labour": {
+            "background_items": 157,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Logistics": {
+            "background_items": 468,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Markets": {
+            "background_items": 627,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Policy": {
+            "background_items": 313,
+            "false_positives": 1,
+            "false_positive_rate": 0.003
+          },
+          "Technology": {
+            "background_items": 377,
+            "false_positives": 18,
+            "false_positive_rate": 0.048
+          },
+          "Weather": {
+            "background_items": 378,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          }
+        }
+      },
+      "test": {
+        "by_style": {
+          "caps": {
+            "n": 24,
+            "relevant": 5,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0,
+            "tn": 19,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "explainer": {
+            "n": 31,
+            "relevant": 1,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "tn": 30,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "hindi": {
+            "n": 53,
+            "relevant": 3,
+            "tp": 2,
+            "fp": 0,
+            "fn": 1,
+            "tn": 50,
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "accuracy": 0.981,
+            "false_positive_rate": 0.0
+          },
+          "hinglish": {
+            "n": 42,
+            "relevant": 2,
+            "tp": 2,
+            "fp": 1,
+            "fn": 0,
+            "tn": 39,
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "accuracy": 0.976,
+            "false_positive_rate": 0.025
+          },
+          "local": {
+            "n": 64,
+            "relevant": 2,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1,
+            "tn": 62,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "accuracy": 0.984,
+            "false_positive_rate": 0.0
+          },
+          "rewrite": {
+            "n": 229,
+            "relevant": 10,
+            "tp": 7,
+            "fp": 1,
+            "fn": 3,
+            "tn": 218,
+            "precision": 0.875,
+            "recall": 0.7,
+            "f1": 0.778,
+            "accuracy": 0.983,
+            "false_positive_rate": 0.005
+          },
+          "ticker": {
+            "n": 61,
+            "relevant": 3,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0,
+            "tn": 57,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.857,
+            "accuracy": 0.984,
+            "false_positive_rate": 0.017
+          },
+          "trade": {
+            "n": 95,
+            "relevant": 4,
+            "tp": 3,
+            "fp": 0,
+            "fn": 1,
+            "tn": 91,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1": 0.857,
+            "accuracy": 0.989,
+            "false_positive_rate": 0.0
+          },
+          "typos": {
+            "n": 69,
+            "relevant": 5,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0,
+            "tn": 64,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "wire": {
+            "n": 80,
+            "relevant": 4,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0,
+            "tn": 76,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          }
+        },
+        "recall_by_event_type": {
+          "Cyber": {
+            "relevant": 11,
+            "caught": 6,
+            "recall": 0.545
+          },
+          "Labour": {
+            "relevant": 3,
+            "caught": 3,
+            "recall": 1.0
+          },
+          "Natural disaster": {
+            "relevant": 7,
+            "caught": 7,
+            "recall": 1.0
+          },
+          "Trade policy": {
+            "relevant": 3,
+            "caught": 3,
+            "recall": 1.0
+          },
+          "Weather": {
+            "relevant": 5,
+            "caught": 5,
+            "recall": 1.0
+          },
+          "Weather / power": {
+            "relevant": 10,
+            "caught": 9,
+            "recall": 0.9
+          }
+        },
+        "false_positives_by_news_category": {
+          "Corporate": {
+            "background_items": 85,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Cyber": {
+            "background_items": 23,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Geopolitical": {
+            "background_items": 7,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Labour": {
+            "background_items": 40,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Logistics": {
+            "background_items": 120,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Markets": {
+            "background_items": 162,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Policy": {
+            "background_items": 85,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Technology": {
+            "background_items": 95,
+            "false_positives": 3,
+            "false_positive_rate": 0.032
+          },
+          "Weather": {
+            "background_items": 92,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          }
+        }
+      }
+    },
+    "worst": {
+      "false_negatives": [
+        {
+          "signal_id": "FNEWS-02706",
+          "split": "test",
+          "style": "trade",
+          "score": 0.0,
+          "headline": "Components maker prolongs shutdown after cyber attack, per report",
+          "reason": "links nothing in our network; cues suspended(+3), cyber attack(+3), shutdown(+2)",
+          "linked_disruption_id": "F016",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-02708",
+          "split": "test",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "Components maker prolongs shutdown following cyber attack",
+          "reason": "links nothing in our network; cues suspended(+3), cyber attack(+3), shutdown(+2)",
+          "linked_disruption_id": "F016",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-02709",
+          "split": "test",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "Shutdown at components maker extended following cyber attack, latest update",
+          "reason": "links nothing in our network; cues cyber attack(+3), shutdown(+2)",
+          "linked_disruption_id": "F016",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-02714",
+          "split": "test",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "Cyber attack prolongs shutdown at components manufacturer",
+          "reason": "links nothing in our network; cues suspended(+3), cyber attack(+3), shutdown(+2)",
+          "linked_disruption_id": "F016",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-02715",
+          "split": "test",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "साइबर हमले के बाद कंपोनेंट्स निर्माता का शटडाउन बढ़ा: हम क्या जानते हैं",
+          "reason": "links nothing in our network; cues साइबर हमल(+3), शटडाउन(+2), निलंबित(+3)",
+          "linked_disruption_id": "F016",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-00936",
+          "split": "train",
+          "style": "rewrite",
+          "score": 2.5,
+          "headline": "Supply of low-voltage MOSFETs getting tighter, say distributors",
+          "reason": "links Semiconductors; cues lead times for some part numbers run past(+2)",
+          "linked_disruption_id": "F003",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-00939",
+          "split": "train",
+          "style": "hinglish",
+          "score": 2.5,
+          "headline": "Low-voltage MOSFETs ki supply tight ho rahi hai, distributors ne bataya (report)",
+          "reason": "links Semiconductors; cues supply tight(+2)",
+          "linked_disruption_id": "F003",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-02293",
+          "split": "test",
+          "style": "local",
+          "score": 3.0,
+          "headline": "Industrial units in Pune brace for planned power cuts as utility announces load-shedding on feeders, report says",
+          "reason": "links Domestic — Pune; cues outages(+3), power cuts(+3), planned power cuts(-4)",
+          "linked_disruption_id": "F014",
+          "days_before_impact": 4.0
+        }
+      ],
+      "false_positives": [
+        {
+          "signal_id": "FNEWS-00414",
+          "split": "train",
+          "style": "hinglish",
+          "score": 3.5,
+          "headline": "EV battery safety ka naya BIS standard ab lagu ho gaya hai",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-00590",
+          "split": "train",
+          "style": "rewrite",
+          "score": 3.5,
+          "headline": "BIS standard on EV battery safety now in force",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-00769",
+          "split": "train",
+          "style": "rewrite",
+          "score": 3.5,
+          "headline": "BIS standard on EV battery safety now in force",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-00782",
+          "split": "train",
+          "style": "hinglish",
+          "score": 3.5,
+          "headline": "EV battery safety ka naya BIS standard ab lagu ho gaya",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-00854",
+          "split": "train",
+          "style": "hinglish",
+          "score": 3.5,
+          "headline": "EV battery safety ke liye naya BIS standard ab lagu ho gaya",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-00956",
+          "split": "train",
+          "style": "hinglish",
+          "score": 3.5,
+          "headline": "EV battery safety ke liye naya BIS standard ab lagu ho gaya",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01063",
+          "split": "train",
+          "style": "rewrite",
+          "score": 3.5,
+          "headline": "BIS standard on EV battery safety now in force",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01139",
+          "split": "train",
+          "style": "rewrite",
+          "score": 3.5,
+          "headline": "BIS standard on EV battery safety takes effect",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01243",
+          "split": "train",
+          "style": "wire",
+          "score": 3.5,
+          "headline": "China may tighten gallium export curbs, reports say",
+          "reason": "links China; cues reports suggest(-1.5), gallium(-3)",
+          "category": "Policy"
+        },
+        {
+          "signal_id": "FNEWS-01364",
+          "split": "train",
+          "style": "rewrite",
+          "score": 3.5,
+          "headline": "BIS safety standard for EV batteries now in force",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01436",
+          "split": "train",
+          "style": "caps",
+          "score": 3.5,
+          "headline": "BREAKING: NEW BIS STANDARD FOR EV BATTERY SAFETY NOW IN FORCE",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01440",
+          "split": "train",
+          "style": "caps",
+          "score": 3.5,
+          "headline": "BREAKING: NEW BIS STANDARD FOR EV BATTERY SAFETY COMES INTO FORCE",
+          "reason": "links nothing in our network; cues comes into force(-3)",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01693",
+          "split": "train",
+          "style": "rewrite",
+          "score": 3.5,
+          "headline": "EV battery safety ka naya BIS standard ab lagu",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01874",
+          "split": "train",
+          "style": "caps",
+          "score": 3.5,
+          "headline": "BREAKING: NEW BIS STANDARD FOR EV BATTERY SAFETY COMES INTO FORCE",
+          "reason": "links nothing in our network; cues comes into force(-3)",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-01875",
+          "split": "train",
+          "style": "hinglish",
+          "score": 3.5,
+          "headline": "EV battery safety ka naya BIS standard ab lagu ho gaya hai",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-02165",
+          "split": "train",
+          "style": "hinglish",
+          "score": 3.5,
+          "headline": "EV battery safety ke liye naya BIS standard ab lagu ho gaya",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-02527",
+          "split": "test",
+          "style": "hinglish",
+          "score": 3.5,
+          "headline": "EV battery safety ke liye naya BIS standard ab lagu ho gaya",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-02533",
+          "split": "test",
+          "style": "ticker",
+          "score": 3.5,
+          "headline": "BIS EV battery safety norm now in force",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        },
+        {
+          "signal_id": "FNEWS-02555",
+          "split": "test",
+          "style": "rewrite",
+          "score": 3.5,
+          "headline": "BIS standard on EV battery safety takes effect",
+          "reason": "links nothing in our network; cues none",
+          "category": "Technology"
+        }
+      ]
+    }
+  },
+  "data_pack_baseline": {
+    "overall": {
+      "triage": {
+        "n": 3609,
+        "relevant": 179,
+        "tp": 172,
+        "fp": 0,
+        "fn": 7,
+        "tn": 3430,
+        "precision": 1.0,
+        "recall": 0.961,
+        "f1": 0.98,
+        "accuracy": 0.998,
+        "false_positive_rate": 0.0,
+        "precision_95ci": [
+          1.0,
+          1.0
+        ],
+        "recall_95ci": [
+          0.93,
+          0.988
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 3609,
+        "relevant": 179,
+        "tp": 177,
+        "fp": 0,
+        "fn": 2,
+        "tn": 3430,
+        "precision": 1.0,
+        "recall": 0.989,
+        "f1": 0.994,
+        "accuracy": 0.999,
+        "false_positive_rate": 0.0
+      },
+      "detection": {
+        "disruptions": 18,
+        "warned": 15,
+        "caught_before_impact": 15,
+        "share_caught": 0.833,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 17.7,
+        "p10_lead_days": 11.4,
+        "p90_lead_days": 31.9,
+        "alerts": 19,
+        "alerts_per_week": 0.18,
+        "alert_precision": 1.0
+      }
+    },
+    "test": {
+      "triage": {
+        "n": 1218,
+        "relevant": 43,
+        "tp": 36,
+        "fp": 0,
+        "fn": 7,
+        "tn": 1175,
+        "precision": 1.0,
+        "recall": 0.837,
+        "f1": 0.911,
+        "accuracy": 0.994,
+        "false_positive_rate": 0.0,
+        "precision_95ci": [
+          1.0,
+          1.0
+        ],
+        "recall_95ci": [
+          0.72,
+          0.938
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 1218,
+        "relevant": 43,
+        "tp": 41,
+        "fp": 0,
+        "fn": 2,
+        "tn": 1175,
+        "precision": 1.0,
+        "recall": 0.953,
+        "f1": 0.976,
+        "accuracy": 0.998,
+        "false_positive_rate": 0.0
+      },
+      "detection": {
+        "disruptions": 5,
+        "warned": 4,
+        "caught_before_impact": 4,
+        "share_caught": 0.8,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 13.8,
+        "p10_lead_days": 10.9,
+        "p90_lead_days": 32.6,
+        "alerts": 5,
+        "alerts_per_week": 0.15,
+        "alert_precision": 1.0
+      }
+    }
+  }
+}

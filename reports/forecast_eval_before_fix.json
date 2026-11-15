@@ -1,0 +1,1323 @@
+{
+  "what": "Co-pilot run unchanged on generated forecast data (news_claude.csv) vs signal_labels.csv",
+  "threshold": 3.5,
+  "threshold_source": "tune_threshold on the data pack's train split (as deployed)",
+  "mode": "rules only",
+  "llm": null,
+  "notes": [
+    "Forecast data has news only; the data-pack baseline also includes weather alerts and trade notices.",
+    "Detection counts a disruption as caught when at least one of its labelled signals is in an alert before the disruption starts. Sudden events (warned = false) cannot be caught before impact.",
+    "alerts_per_week counts every alert (inbox and watch log)."
+  ],
+  "forecast": {
+    "overall": {
+      "triage": {
+        "n": 2926,
+        "relevant": 151,
+        "tp": 114,
+        "fp": 34,
+        "fn": 37,
+        "tn": 2741,
+        "precision": 0.77,
+        "recall": 0.755,
+        "f1": 0.763,
+        "accuracy": 0.976,
+        "false_positive_rate": 0.012,
+        "precision_95ci": [
+          0.704,
+          0.837
+        ],
+        "recall_95ci": [
+          0.685,
+          0.821
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 2926,
+        "relevant": 151,
+        "tp": 121,
+        "fp": 34,
+        "fn": 30,
+        "tn": 2741,
+        "precision": 0.781,
+        "recall": 0.801,
+        "f1": 0.791,
+        "accuracy": 0.978,
+        "false_positive_rate": 0.012
+      },
+      "detection": {
+        "disruptions": 23,
+        "warned": 19,
+        "caught_before_impact": 19,
+        "share_caught": 0.826,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 13.9,
+        "p10_lead_days": 2.3,
+        "p90_lead_days": 19.5,
+        "alerts": 46,
+        "alerts_per_week": 0.44,
+        "alert_precision": 0.478
+      }
+    },
+    "test": {
+      "triage": {
+        "n": 748,
+        "relevant": 39,
+        "tp": 31,
+        "fp": 9,
+        "fn": 8,
+        "tn": 700,
+        "precision": 0.775,
+        "recall": 0.795,
+        "f1": 0.785,
+        "accuracy": 0.977,
+        "false_positive_rate": 0.013,
+        "precision_95ci": [
+          0.639,
+          0.9
+        ],
+        "recall_95ci": [
+          0.659,
+          0.919
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 748,
+        "relevant": 39,
+        "tp": 34,
+        "fp": 9,
+        "fn": 5,
+        "tn": 700,
+        "precision": 0.791,
+        "recall": 0.872,
+        "f1": 0.829,
+        "accuracy": 0.981,
+        "false_positive_rate": 0.013
+      },
+      "detection": {
+        "disruptions": 6,
+        "warned": 4,
+        "caught_before_impact": 4,
+        "share_caught": 0.667,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 10.7,
+        "p10_lead_days": 3.9,
+        "p90_lead_days": 13.7,
+        "alerts": 14,
+        "alerts_per_week": 0.55,
+        "alert_precision": 0.429
+      }
+    },
+    "per_disruption": [
+      {
+        "disruption_id": "F004",
+        "title": "All-India transporters' strike",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-10-29",
+        "relevant_signals": 6,
+        "signals_alerted_before_impact": 6,
+        "first_alert": "2026-10-19 03:35:23.638368318",
+        "lead_days": 9.9
+      },
+      {
+        "disruption_id": "F006",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-11-30",
+        "relevant_signals": 4,
+        "signals_alerted_before_impact": 4,
+        "first_alert": "2026-11-15 03:07:00.597088651",
+        "lead_days": 14.9
+      },
+      {
+        "disruption_id": "F013",
+        "title": "Typhoon Haiyan closes Kaohsiung port",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-12-22",
+        "relevant_signals": 10,
+        "signals_alerted_before_impact": 7,
+        "first_alert": "2026-11-28 05:07:52.897698506",
+        "lead_days": 23.8
+      },
+      {
+        "disruption_id": "F012",
+        "title": "Port Klang port congestion after systems outage",
+        "type": "Logistics",
+        "split": "train",
+        "warned": true,
+        "start_date": "2026-12-31",
+        "relevant_signals": 5,
+        "signals_alerted_before_impact": 3,
+        "first_alert": "2026-12-14 19:34:08.567352909",
+        "lead_days": 16.2
+      },
+      {
+        "disruption_id": "F007",
+        "title": "Anti-dumping duty on Chinese aluminium castings (+18% landed cost)",
+        "type": "Trade policy",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-02-15",
+        "relevant_signals": 4,
+        "signals_alerted_before_impact": 1,
+        "first_alert": "2027-02-12 03:38:43.703560711",
+        "lead_days": 2.8
+      },
+      {
+        "disruption_id": "F001",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-03-15",
+        "relevant_signals": 3,
+        "signals_alerted_before_impact": 1,
+        "first_alert": "2027-03-14 10:40:21.860331003",
+        "lead_days": 0.6
+      },
+      {
+        "disruption_id": "F011",
+        "title": "Heatwave and power cuts at Pune suppliers",
+        "type": "Weather / power",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-04-22",
+        "relevant_signals": 11,
+        "signals_alerted_before_impact": 10,
+        "first_alert": "2027-04-03 16:55:56.941095994",
+        "lead_days": 18.3
+      },
+      {
+        "disruption_id": "F003",
+        "title": "Fire at a Penang MOSFET plant",
+        "type": "Supplier incident",
+        "split": "train",
+        "warned": false,
+        "start_date": "2027-05-23",
+        "relevant_signals": 8,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      },
+      {
+        "disruption_id": "F009",
+        "title": "Monsoon flooding slows Shenzhen",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-06-07",
+        "relevant_signals": 5,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2027-05-19 14:36:00.876595523",
+        "lead_days": 18.4
+      },
+      {
+        "disruption_id": "F010",
+        "title": "PCB supplier enters insolvency",
+        "type": "Supplier financial",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-06-17",
+        "relevant_signals": 11,
+        "signals_alerted_before_impact": 6,
+        "first_alert": "2027-04-26 00:36:01.188507850",
+        "lead_days": 52.0
+      },
+      {
+        "disruption_id": "F008",
+        "title": "Flooding in Japan",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-07-03",
+        "relevant_signals": 2,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2027-06-19 21:46:23.344343560",
+        "lead_days": 13.1
+      },
+      {
+        "disruption_id": "F005",
+        "title": "Yokohama congestion and Malacca delays",
+        "type": "Logistics",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-07-16",
+        "relevant_signals": 8,
+        "signals_alerted_before_impact": 4,
+        "first_alert": "2027-06-27 16:00:06.382732969",
+        "lead_days": 18.3
+      },
+      {
+        "disruption_id": "F002",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-08-25",
+        "relevant_signals": 4,
+        "signals_alerted_before_impact": 1,
+        "first_alert": "2027-08-22 13:20:27.580193608",
+        "lead_days": 2.4
+      },
+      {
+        "disruption_id": "F020",
+        "title": "All-India transporters' strike",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-10-13",
+        "relevant_signals": 7,
+        "signals_alerted_before_impact": 6,
+        "first_alert": "2027-09-29 03:10:12.225444342",
+        "lead_days": 13.9
+      },
+      {
+        "disruption_id": "F023",
+        "title": "All-India transporters' strike",
+        "type": "Labour",
+        "split": "train",
+        "warned": true,
+        "start_date": "2027-12-31",
+        "relevant_signals": 7,
+        "signals_alerted_before_impact": 4,
+        "first_alert": "2027-12-18 07:43:14.592979686",
+        "lead_days": 12.7
+      },
+      {
+        "disruption_id": "F017",
+        "title": "Cyclone and flooding in Keelung",
+        "type": "Weather",
+        "split": "train",
+        "warned": true,
+        "start_date": "2028-01-08",
+        "relevant_signals": 9,
+        "signals_alerted_before_impact": 8,
+        "first_alert": "2027-12-24 08:07:37.744640961",
+        "lead_days": 14.7
+      },
+      {
+        "disruption_id": "F019",
+        "title": "Earthquake halts fab output for inspection",
+        "type": "Natural disaster",
+        "split": "train",
+        "warned": false,
+        "start_date": "2028-03-05",
+        "relevant_signals": 8,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      },
+      {
+        "disruption_id": "F014",
+        "title": "Heatwave and power cuts at Pune suppliers",
+        "type": "Weather / power",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-05-09",
+        "relevant_signals": 10,
+        "signals_alerted_before_impact": 8,
+        "first_alert": "2028-04-24 17:59:24.890215670",
+        "lead_days": 14.3
+      },
+      {
+        "disruption_id": "F021",
+        "title": "Anti-dumping duty on Chinese aluminium castings (+18% landed cost)",
+        "type": "Trade policy",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-06-15",
+        "relevant_signals": 3,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2028-06-05 22:07:30.514628040",
+        "lead_days": 9.1
+      },
+      {
+        "disruption_id": "F018",
+        "title": "Strike at Korean cell maker",
+        "type": "Labour",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-07-17",
+        "relevant_signals": 3,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2028-07-15 08:13:50.720433583",
+        "lead_days": 1.7
+      },
+      {
+        "disruption_id": "F022",
+        "title": "Flooding in Taiwan",
+        "type": "Weather",
+        "split": "test",
+        "warned": true,
+        "start_date": "2028-07-26",
+        "relevant_signals": 5,
+        "signals_alerted_before_impact": 2,
+        "first_alert": "2028-07-13 16:15:52.518776017",
+        "lead_days": 12.3
+      },
+      {
+        "disruption_id": "F016",
+        "title": "Ransomware attack halts a Japanese passives supplier",
+        "type": "Cyber",
+        "split": "test",
+        "warned": false,
+        "start_date": "2028-08-11",
+        "relevant_signals": 11,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      },
+      {
+        "disruption_id": "F015",
+        "title": "Earthquake halts fab output for inspection",
+        "type": "Natural disaster",
+        "split": "test",
+        "warned": false,
+        "start_date": "2028-09-27",
+        "relevant_signals": 7,
+        "signals_alerted_before_impact": 0,
+        "first_alert": null,
+        "lead_days": null
+      }
+    ],
+    "breakdowns": {
+      "overall": {
+        "by_style": {
+          "caps": {
+            "n": 100,
+            "relevant": 10,
+            "tp": 10,
+            "fp": 0,
+            "fn": 0,
+            "tn": 90,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "explainer": {
+            "n": 113,
+            "relevant": 7,
+            "tp": 5,
+            "fp": 3,
+            "fn": 2,
+            "tn": 103,
+            "precision": 0.625,
+            "recall": 0.714,
+            "f1": 0.667,
+            "accuracy": 0.956,
+            "false_positive_rate": 0.028
+          },
+          "hindi": {
+            "n": 212,
+            "relevant": 10,
+            "tp": 0,
+            "fp": 0,
+            "fn": 10,
+            "tn": 202,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "accuracy": 0.953,
+            "false_positive_rate": 0.0
+          },
+          "hinglish": {
+            "n": 171,
+            "relevant": 13,
+            "tp": 8,
+            "fp": 3,
+            "fn": 5,
+            "tn": 155,
+            "precision": 0.727,
+            "recall": 0.615,
+            "f1": 0.667,
+            "accuracy": 0.953,
+            "false_positive_rate": 0.019
+          },
+          "local": {
+            "n": 225,
+            "relevant": 9,
+            "tp": 8,
+            "fp": 4,
+            "fn": 1,
+            "tn": 212,
+            "precision": 0.667,
+            "recall": 0.889,
+            "f1": 0.762,
+            "accuracy": 0.978,
+            "false_positive_rate": 0.019
+          },
+          "rewrite": {
+            "n": 887,
+            "relevant": 47,
+            "tp": 37,
+            "fp": 13,
+            "fn": 10,
+            "tn": 827,
+            "precision": 0.74,
+            "recall": 0.787,
+            "f1": 0.763,
+            "accuracy": 0.974,
+            "false_positive_rate": 0.015
+          },
+          "ticker": {
+            "n": 215,
+            "relevant": 13,
+            "tp": 10,
+            "fp": 3,
+            "fn": 3,
+            "tn": 199,
+            "precision": 0.769,
+            "recall": 0.769,
+            "f1": 0.769,
+            "accuracy": 0.972,
+            "false_positive_rate": 0.015
+          },
+          "trade": {
+            "n": 372,
+            "relevant": 17,
+            "tp": 16,
+            "fp": 8,
+            "fn": 1,
+            "tn": 347,
+            "precision": 0.667,
+            "recall": 0.941,
+            "f1": 0.78,
+            "accuracy": 0.976,
+            "false_positive_rate": 0.023
+          },
+          "typos": {
+            "n": 288,
+            "relevant": 13,
+            "tp": 8,
+            "fp": 0,
+            "fn": 5,
+            "tn": 275,
+            "precision": 1.0,
+            "recall": 0.615,
+            "f1": 0.762,
+            "accuracy": 0.983,
+            "false_positive_rate": 0.0
+          },
+          "wire": {
+            "n": 343,
+            "relevant": 12,
+            "tp": 12,
+            "fp": 0,
+            "fn": 0,
+            "tn": 331,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          }
+        },
+        "recall_by_event_type": {
+          "Cyber": {
+            "relevant": 11,
+            "caught": 6,
+            "recall": 0.545
+          },
+          "Labour": {
+            "relevant": 34,
+            "caught": 23,
+            "recall": 0.676
+          },
+          "Logistics": {
+            "relevant": 13,
+            "caught": 8,
+            "recall": 0.615
+          },
+          "Natural disaster": {
+            "relevant": 15,
+            "caught": 14,
+            "recall": 0.933
+          },
+          "Supplier financial": {
+            "relevant": 11,
+            "caught": 7,
+            "recall": 0.636
+          },
+          "Supplier incident": {
+            "relevant": 8,
+            "caught": 5,
+            "recall": 0.625
+          },
+          "Trade policy": {
+            "relevant": 7,
+            "caught": 6,
+            "recall": 0.857
+          },
+          "Weather": {
+            "relevant": 31,
+            "caught": 25,
+            "recall": 0.806
+          },
+          "Weather / power": {
+            "relevant": 21,
+            "caught": 20,
+            "recall": 0.952
+          }
+        },
+        "false_positives_by_news_category": {
+          "Corporate": {
+            "background_items": 317,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Cyber": {
+            "background_items": 118,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Geopolitical": {
+            "background_items": 20,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Labour": {
+            "background_items": 157,
+            "false_positives": 4,
+            "false_positive_rate": 0.025
+          },
+          "Logistics": {
+            "background_items": 468,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Markets": {
+            "background_items": 627,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Policy": {
+            "background_items": 313,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Technology": {
+            "background_items": 377,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Weather": {
+            "background_items": 378,
+            "false_positives": 30,
+            "false_positive_rate": 0.079
+          }
+        }
+      },
+      "test": {
+        "by_style": {
+          "caps": {
+            "n": 24,
+            "relevant": 5,
+            "tp": 5,
+            "fp": 0,
+            "fn": 0,
+            "tn": 19,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "explainer": {
+            "n": 31,
+            "relevant": 1,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0,
+            "tn": 29,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "accuracy": 0.968,
+            "false_positive_rate": 0.033
+          },
+          "hindi": {
+            "n": 53,
+            "relevant": 3,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "tn": 50,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "accuracy": 0.943,
+            "false_positive_rate": 0.0
+          },
+          "hinglish": {
+            "n": 42,
+            "relevant": 2,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0,
+            "tn": 40,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "local": {
+            "n": 64,
+            "relevant": 2,
+            "tp": 2,
+            "fp": 2,
+            "fn": 0,
+            "tn": 60,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "accuracy": 0.969,
+            "false_positive_rate": 0.032
+          },
+          "rewrite": {
+            "n": 229,
+            "relevant": 10,
+            "tp": 7,
+            "fp": 2,
+            "fn": 3,
+            "tn": 217,
+            "precision": 0.778,
+            "recall": 0.7,
+            "f1": 0.737,
+            "accuracy": 0.978,
+            "false_positive_rate": 0.009
+          },
+          "ticker": {
+            "n": 61,
+            "relevant": 3,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0,
+            "tn": 57,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.857,
+            "accuracy": 0.984,
+            "false_positive_rate": 0.017
+          },
+          "trade": {
+            "n": 95,
+            "relevant": 4,
+            "tp": 3,
+            "fp": 3,
+            "fn": 1,
+            "tn": 88,
+            "precision": 0.5,
+            "recall": 0.75,
+            "f1": 0.6,
+            "accuracy": 0.958,
+            "false_positive_rate": 0.033
+          },
+          "typos": {
+            "n": 69,
+            "relevant": 5,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1,
+            "tn": 64,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.889,
+            "accuracy": 0.986,
+            "false_positive_rate": 0.0
+          },
+          "wire": {
+            "n": 80,
+            "relevant": 4,
+            "tp": 4,
+            "fp": 0,
+            "fn": 0,
+            "tn": 76,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "accuracy": 1.0,
+            "false_positive_rate": 0.0
+          }
+        },
+        "recall_by_event_type": {
+          "Cyber": {
+            "relevant": 11,
+            "caught": 6,
+            "recall": 0.545
+          },
+          "Labour": {
+            "relevant": 3,
+            "caught": 2,
+            "recall": 0.667
+          },
+          "Natural disaster": {
+            "relevant": 7,
+            "caught": 7,
+            "recall": 1.0
+          },
+          "Trade policy": {
+            "relevant": 3,
+            "caught": 3,
+            "recall": 1.0
+          },
+          "Weather": {
+            "relevant": 5,
+            "caught": 4,
+            "recall": 0.8
+          },
+          "Weather / power": {
+            "relevant": 10,
+            "caught": 9,
+            "recall": 0.9
+          }
+        },
+        "false_positives_by_news_category": {
+          "Corporate": {
+            "background_items": 85,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Cyber": {
+            "background_items": 23,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Geopolitical": {
+            "background_items": 7,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Labour": {
+            "background_items": 40,
+            "false_positives": 1,
+            "false_positive_rate": 0.025
+          },
+          "Logistics": {
+            "background_items": 120,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Markets": {
+            "background_items": 162,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Policy": {
+            "background_items": 85,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Technology": {
+            "background_items": 95,
+            "false_positives": 0,
+            "false_positive_rate": 0.0
+          },
+          "Weather": {
+            "background_items": 92,
+            "false_positives": 8,
+            "false_positive_rate": 0.087
+          }
+        }
+      }
+    },
+    "worst": {
+      "false_negatives": [
+        {
+          "signal_id": "FNEWS-00855",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "Shenzhen PCB manufacturer slow to pay its suppliers",
+          "reason": "links Yantian (Shenzhen), PCBs; cues none",
+          "linked_disruption_id": "F010",
+          "days_before_impact": 46.0
+        },
+        {
+          "signal_id": "FNEWS-00922",
+          "split": "train",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "क्रेडिट बीमाकर्ता ने Guangdong की PCB निर्माता कंपनी का कवर घटाया — अपडेट",
+          "reason": "links Yantian (Shenzhen), PCBs; cues none",
+          "linked_disruption_id": "F010",
+          "days_before_impact": 29.0
+        },
+        {
+          "signal_id": "FNEWS-00572",
+          "split": "train",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "कोरियाई बैटरी निर्माता की यूनियन ने हड़ताल के पक्ष में वोट किया",
+          "reason": "links nothing in our network; cues none",
+          "linked_disruption_id": "F001",
+          "days_before_impact": 22.0
+        },
+        {
+          "signal_id": "FNEWS-02499",
+          "split": "test",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "कोरियाई बैटरी निर्माता की यूनियन ने हड़ताल के पक्ष में वोट दिया",
+          "reason": "links nothing in our network; cues none",
+          "linked_disruption_id": "F018",
+          "days_before_impact": 20.0
+        },
+        {
+          "signal_id": "FNEWS-00982",
+          "split": "train",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "शेन्ज़ेन की PCB निर्माता कंपनी सप्लायर भुगतान में देरी कर रही है: जो हम जानते हैं",
+          "reason": "links PCBs; cues none",
+          "linked_disruption_id": "F010",
+          "days_before_impact": 16.0
+        },
+        {
+          "signal_id": "FNEWS-00520",
+          "split": "train",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "डीजीटीआर ने चीन से आने वाले एल्युमीनियम कास्टिंग पर एंटी-डंपिंग शुल्क की सिफारिश की (रिपोर्ट)",
+          "reason": "links nothing in our network; cues none",
+          "linked_disruption_id": "F007",
+          "days_before_impact": 8.0
+        },
+        {
+          "signal_id": "FNEWS-00990",
+          "split": "train",
+          "style": "typos",
+          "score": 0.0,
+          "headline": "Shenzehn container moevment slows as rains flood access roads",
+          "reason": "links nothing in our network; cues flood(+3), slows(+1)",
+          "linked_disruption_id": "F009",
+          "days_before_impact": 4.0
+        },
+        {
+          "signal_id": "FNEWS-01021",
+          "split": "train",
+          "style": "hinglish",
+          "score": 0.0,
+          "headline": "Shenzhen PCB maker ne supplier payments rok diye, situation abhi developing hai",
+          "reason": "links Yantian (Shenzhen), PCBs; cues none",
+          "linked_disruption_id": "F010",
+          "days_before_impact": 4.0
+        },
+        {
+          "signal_id": "FNEWS-01789",
+          "split": "train",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "ट्रक चालकों और सरकार के बीच बातचीत विफल; हड़ताल जारी रहेगी",
+          "reason": "links nothing in our network; cues none",
+          "linked_disruption_id": "F023",
+          "days_before_impact": 3.0
+        },
+        {
+          "signal_id": "FNEWS-02297",
+          "split": "test",
+          "style": "typos",
+          "score": 0.0,
+          "headline": "Severe heatwve warning for Pune and cetnral Maharashtra as situation develops",
+          "reason": "links Domestic — Pune; cues none",
+          "linked_disruption_id": "F014",
+          "days_before_impact": 3.0
+        },
+        {
+          "signal_id": "FNEWS-02619",
+          "split": "test",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "उष्णकटिबंधीय तूफान से उत्तरी ताइवान में बाढ़",
+          "reason": "links nothing in our network; cues none",
+          "linked_disruption_id": "F022",
+          "days_before_impact": 3.0
+        },
+        {
+          "signal_id": "FNEWS-01485",
+          "split": "train",
+          "style": "ticker",
+          "score": 0.0,
+          "headline": "Trucker-govt talks fail; strike on",
+          "reason": "links nothing in our network; cues disruption(+2), strike(+2)",
+          "linked_disruption_id": "F020",
+          "days_before_impact": 2.0
+        },
+        {
+          "signal_id": "FNEWS-01794",
+          "split": "train",
+          "style": "ticker",
+          "score": 0.0,
+          "headline": "Trucker-govt talks fail; strike on: what we know",
+          "reason": "links nothing in our network; cues disruption(+2), strike(+2)",
+          "linked_disruption_id": "F023",
+          "days_before_impact": 2.0
+        },
+        {
+          "signal_id": "FNEWS-01493",
+          "split": "train",
+          "style": "ticker",
+          "score": 0.0,
+          "headline": "Trucker-govt talks fail; strike to go ahead",
+          "reason": "links nothing in our network; cues disruption(+2), strike(+2), strike to go ahead(+2)",
+          "linked_disruption_id": "F020",
+          "days_before_impact": 1.0
+        },
+        {
+          "signal_id": "FNEWS-01494",
+          "split": "train",
+          "style": "typos",
+          "score": 0.0,
+          "headline": "Talks between truckres and goverment fail; strike to go ahead — update",
+          "reason": "links nothing in our network; cues disruption(+2), strike(+2), strike to go ahead(+2)",
+          "linked_disruption_id": "F020",
+          "days_before_impact": 1.0
+        },
+        {
+          "signal_id": "FNEWS-00657",
+          "split": "train",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "कोरियाई सेल संयंत्र में हड़ताल शुरू; उत्पादन में कटौती — अपडेट",
+          "reason": "links nothing in our network; cues none",
+          "linked_disruption_id": "F001",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-00936",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "Supply of low-voltage MOSFETs getting tighter, say distributors",
+          "reason": "links Semiconductors; cues none",
+          "linked_disruption_id": "F003",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-00939",
+          "split": "train",
+          "style": "hinglish",
+          "score": 0.0,
+          "headline": "Low-voltage MOSFETs ki supply tight ho rahi hai, distributors ne bataya (report)",
+          "reason": "links Semiconductors; cues none",
+          "linked_disruption_id": "F003",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-00941",
+          "split": "train",
+          "style": "rewrite",
+          "score": 0.0,
+          "headline": "Distributors say low-voltage MOSFET supply is tightening",
+          "reason": "links Semiconductors; cues none",
+          "linked_disruption_id": "F003",
+          "days_before_impact": 0.0
+        },
+        {
+          "signal_id": "FNEWS-01148",
+          "split": "train",
+          "style": "hindi",
+          "score": 0.0,
+          "headline": "योकोहामा पर जहाज़ों के लिए कैरियरों ने कंजेशन सरचार्ज जोड़ा",
+          "reason": "links nothing in our network; cues none",
+          "linked_disruption_id": "F005",
+          "days_before_impact": 0.0
+        }
+      ],
+      "false_positives": [
+        {
+          "signal_id": "FNEWS-00783",
+          "split": "train",
+          "style": "trade",
+          "score": 5.5,
+          "headline": "Malaysia shipyard wage talks close with no strike action",
+          "reason": "links Malaysia; cues close(+3), strike(+2)",
+          "category": "Labour"
+        },
+        {
+          "signal_id": "FNEWS-00304",
+          "split": "train",
+          "style": "trade",
+          "score": 5.5,
+          "headline": "Taiwan shipyard wage talks close with no strike action",
+          "reason": "links Taiwan; cues close(+3), strike(+2)",
+          "category": "Labour"
+        },
+        {
+          "signal_id": "FNEWS-02852",
+          "split": "test",
+          "style": "trade",
+          "score": 4.5,
+          "headline": "China shipyard wage talks wrap up, no strike action",
+          "reason": "links China; cues disruption(+2), strike(+2)",
+          "category": "Labour"
+        },
+        {
+          "signal_id": "FNEWS-00108",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Tamil Nadu districts may see heavy rainfall, forecast says",
+          "reason": "links Domestic — Chennai; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-01040",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Northern Taiwan areas face heavy rain forecast",
+          "reason": "links Keelung; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00261",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Coastal Karnataka set for heavy rain in places, says forecast",
+          "reason": "links Domestic — Bengaluru/Hosur; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00422",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Guangdong braces for heavy rain in some areas",
+          "reason": "links Yantian (Shenzhen); cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00613",
+          "split": "train",
+          "style": "explainer",
+          "score": 4.0,
+          "headline": "What does the heavy rain forecast for coastal Karnataka mean this weekend?",
+          "reason": "links Domestic — Bengaluru/Hosur; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00652",
+          "split": "train",
+          "style": "hinglish",
+          "score": 4.0,
+          "headline": "Maharashtra ke kuch parts mein heavy rain ki forecast",
+          "reason": "links Domestic — Pune; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00114",
+          "split": "train",
+          "style": "local",
+          "score": 4.0,
+          "headline": "Residents of coastal Karnataka told to expect heavy rain in some parts",
+          "reason": "links Domestic — Bengaluru/Hosur; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00732",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Parts of Maharashtra expected to get heavy rain",
+          "reason": "links Domestic — Pune; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00771",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Northern Taiwan told to brace for heavy rainfall",
+          "reason": "links Keelung; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00791",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Parts of Tamil Nadu warned of heavy rain",
+          "reason": "links Domestic — Chennai; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00819",
+          "split": "train",
+          "style": "ticker",
+          "score": 4.0,
+          "headline": "Heavy rain forecast: parts of Guangdong",
+          "reason": "links Yantian (Shenzhen); cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00883",
+          "split": "train",
+          "style": "explainer",
+          "score": 4.0,
+          "headline": "What does the heavy rain forecast for coastal Karnataka mean for the weekend?",
+          "reason": "links Domestic — Bengaluru/Hosur; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00888",
+          "split": "train",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Guangdong set for heavy rain in some areas",
+          "reason": "links Yantian (Shenzhen); cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00962",
+          "split": "train",
+          "style": "trade",
+          "score": 4.0,
+          "headline": "IMD forecasts heavy rain for parts of Tamil Nadu",
+          "reason": "links Domestic — Chennai; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-00402",
+          "split": "train",
+          "style": "hinglish",
+          "score": 4.0,
+          "headline": "Coastal Karnataka ke kuch hisson mein heavy rain ka forecast",
+          "reason": "links Domestic — Bengaluru/Hosur; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-02741",
+          "split": "test",
+          "style": "rewrite",
+          "score": 4.0,
+          "headline": "Parts of Maharashtra expected to get heavy rain",
+          "reason": "links Domestic — Pune; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        },
+        {
+          "signal_id": "FNEWS-01073",
+          "split": "train",
+          "style": "trade",
+          "score": 4.0,
+          "headline": "Tamil Nadu: moderate to heavy rain forecast over weekend, no major disruption expected for freight",
+          "reason": "links Domestic — Chennai; cues heavy rain(+1), disruption(+2)",
+          "category": "Weather"
+        }
+      ]
+    }
+  },
+  "data_pack_baseline": {
+    "overall": {
+      "triage": {
+        "n": 3609,
+        "relevant": 179,
+        "tp": 172,
+        "fp": 0,
+        "fn": 7,
+        "tn": 3430,
+        "precision": 1.0,
+        "recall": 0.961,
+        "f1": 0.98,
+        "accuracy": 0.998,
+        "false_positive_rate": 0.0,
+        "precision_95ci": [
+          1.0,
+          1.0
+        ],
+        "recall_95ci": [
+          0.93,
+          0.988
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 3609,
+        "relevant": 179,
+        "tp": 177,
+        "fp": 0,
+        "fn": 2,
+        "tn": 3430,
+        "precision": 1.0,
+        "recall": 0.989,
+        "f1": 0.994,
+        "accuracy": 0.999,
+        "false_positive_rate": 0.0
+      },
+      "detection": {
+        "disruptions": 18,
+        "warned": 15,
+        "caught_before_impact": 15,
+        "share_caught": 0.833,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 17.7,
+        "p10_lead_days": 11.4,
+        "p90_lead_days": 31.9,
+        "alerts": 19,
+        "alerts_per_week": 0.18,
+        "alert_precision": 1.0
+      }
+    },
+    "test": {
+      "triage": {
+        "n": 1218,
+        "relevant": 43,
+        "tp": 36,
+        "fp": 0,
+        "fn": 7,
+        "tn": 1175,
+        "precision": 1.0,
+        "recall": 0.837,
+        "f1": 0.911,
+        "accuracy": 0.994,
+        "false_positive_rate": 0.0,
+        "precision_95ci": [
+          1.0,
+          1.0
+        ],
+        "recall_95ci": [
+          0.72,
+          0.938
+        ],
+        "resamples": 2000
+      },
+      "alerted": {
+        "n": 1218,
+        "relevant": 43,
+        "tp": 41,
+        "fp": 0,
+        "fn": 2,
+        "tn": 1175,
+        "precision": 1.0,
+        "recall": 0.953,
+        "f1": 0.976,
+        "accuracy": 0.998,
+        "false_positive_rate": 0.0
+      },
+      "detection": {
+        "disruptions": 5,
+        "warned": 4,
+        "caught_before_impact": 4,
+        "share_caught": 0.8,
+        "share_of_warned_caught": 1.0,
+        "median_lead_days": 13.8,
+        "p10_lead_days": 10.9,
+        "p90_lead_days": 32.6,
+        "alerts": 5,
+        "alerts_per_week": 0.15,
+        "alert_precision": 1.0
+      }
+    }
+  }
+}
