@@ -1,0 +1,1753 @@
+{
+  "what": "Deployed site (https://veltrix-risk-copilot.vercel.app) on real 2024 headlines, one /api/simulate call each",
+  "headlines": 160,
+  "errors": 0,
+  "relevant": 28,
+  "decisions": {
+    "ignored": 139,
+    "inbox": 10,
+    "watch": 9,
+    "needs_review": 2
+  },
+  "metrics": {
+    "n": 160,
+    "relevant": 28,
+    "tp": 14,
+    "fp": 5,
+    "fn": 14,
+    "tn": 127,
+    "precision": 0.737,
+    "recall": 0.5,
+    "f1": 0.596,
+    "accuracy": 0.881,
+    "false_positive_rate": 0.038,
+    "precision_95ci": [
+      0.522,
+      0.938
+    ],
+    "recall_95ci": [
+      0.318,
+      0.688
+    ],
+    "resamples": 2000
+  },
+  "inbox_only": {
+    "n": 160,
+    "relevant": 28,
+    "tp": 6,
+    "fp": 4,
+    "fn": 22,
+    "tn": 128,
+    "precision": 0.6,
+    "recall": 0.214,
+    "f1": 0.316,
+    "accuracy": 0.838,
+    "false_positive_rate": 0.03
+  },
+  "misses": [
+    {
+      "published": "2024-03-20",
+      "score": 3.0,
+      "title": "Shipping disruptions in the Red Sea: Local shock, global impact"
+    },
+    {
+      "published": "2024-03-21",
+      "score": 0.0,
+      "title": "Yemen’s Houthis Tell China, Russia Their Ships Won’t Be Targeted"
+    },
+    {
+      "published": "2024-03-21",
+      "score": 0.0,
+      "title": "The Red Sea Has Become a War Zone Full of Vulnerable Ships"
+    },
+    {
+      "published": "2024-03-24",
+      "score": 0.0,
+      "title": "Chinese Tanker Hit with Houthi Missile in the Red Sea"
+    },
+    {
+      "published": "2024-03-24",
+      "score": 0.0,
+      "title": "China-run tanker shipping Russian oil hit by Houthis, US says"
+    },
+    {
+      "published": "2024-03-28",
+      "score": 0.0,
+      "title": "Navy downs 4 drones targeting ship in Red Sea"
+    },
+    {
+      "published": "2024-04-07",
+      "score": 0.0,
+      "title": "Shipping: No quick fix to Red Sea situation"
+    },
+    {
+      "published": "2024-04-09",
+      "score": 0.0,
+      "title": "Dire Straits – Houthi aggression in the Bab al-Mandab Strait: Joshua Krasna"
+    },
+    {
+      "published": "2024-04-10",
+      "score": 0.0,
+      "title": "Protection of Shipping in the Red Sea and the Gulf of Aden"
+    },
+    {
+      "published": "2024-06-04",
+      "score": 3.0,
+      "title": "Maersk Sees Deeper Impact to World Trade From Red Sea Disruption"
+    },
+    {
+      "published": "2024-06-05",
+      "score": 3.0,
+      "title": "Navigating global supply chain disruption: How the construction industry can cope with the Bab al-Mandab instability"
+    },
+    {
+      "published": "2024-06-12",
+      "score": 3.0,
+      "title": "DFS warning as Red Sea disruption hits deliveries"
+    },
+    {
+      "published": "2024-06-13",
+      "score": 0.0,
+      "title": "Suez squeeze continues"
+    },
+    {
+      "published": "2024-06-14",
+      "score": 0.0,
+      "title": "Houthi attack forces crew to abandon coal carrier in Red Sea"
+    }
+  ],
+  "false_alarms": [
+    {
+      "published": "2024-03-26",
+      "decision": "inbox",
+      "score": 4.0,
+      "title": "Fire breaks out at Wistron plant in north Taiwan"
+    },
+    {
+      "published": "2024-04-01",
+      "decision": "inbox",
+      "score": 4.0,
+      "title": "Karnataka gets insulated aerial work platform vehicles, no power cut during maintenance"
+    },
+    {
+      "published": "2024-04-03",
+      "decision": "inbox",
+      "score": 3.5,
+      "title": "TSMC resumes chip production following biggest earthquake in 25 years — incurred no damage to its critical tools"
+    },
+    {
+      "published": "2024-04-04",
+      "decision": "watch",
+      "score": 4.0,
+      "title": "US says it foiled Houthi drone, missile attack at US Navy ship in Red Sea"
+    },
+    {
+      "published": "2024-04-04",
+      "decision": "inbox",
+      "score": 5.5,
+      "title": "TSMC restarts operations after earthquake, reassuring no chip supply disruption"
+    }
+  ],
+  "rows": [
+    {
+      "hid": "H0257",
+      "published": "2024-03-19",
+      "title": "Shipping giants and customers like big-box retail are far apart on price in peak ocean freight contract season",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0258",
+      "published": "2024-03-20",
+      "title": "Johnson Controls to expands third manufacturing facility in Pune",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Domestic — Pune; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0259",
+      "published": "2024-03-20",
+      "title": "Common Shipping Challenges",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0260",
+      "published": "2024-03-20",
+      "title": "Identec Solutions‘ terminal tracker goes live at Contecon Guayaquil S.A.",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0261",
+      "published": "2024-03-20",
+      "title": "TIPC launches container terminal upgrades at Port of Kaohsiung",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Kaohsiung; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0262",
+      "published": "2024-03-20",
+      "title": "Shipping disruptions in the Red Sea: Local shock, global impact",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 3.0,
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0263",
+      "published": "2024-03-21",
+      "title": "South Korean rail workers start a strike in Ulsan",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 2.5,
+      "reason": "links South Korea; cues strike(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0264",
+      "published": "2024-03-21",
+      "title": "Yemen’s Houthis Tell China, Russia Their Ships Won’t Be Targeted",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal, China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0265",
+      "published": "2024-03-21",
+      "title": "The U.S. May Have Just Scored A Win Against China In The Battle Over A Key Mineral",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0266",
+      "published": "2024-03-21",
+      "title": "The Red Sea Has Become a War Zone Full of Vulnerable Ships",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0268",
+      "published": "2024-03-22",
+      "title": "South Korea targets multi-country talks for chip export controls",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 2.75,
+      "reason": "links South Korea, Semiconductors; cues export controls(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0269",
+      "published": "2024-03-22",
+      "title": "The causal effects and policy implications of global supply chain disruptions",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0267",
+      "published": "2024-03-22",
+      "title": "Canada says no security concerns reported at Port of Vancouver about Chinese-made cranes",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0270",
+      "published": "2024-03-24",
+      "title": "Chinese Tanker Hit with Houthi Missile in the Red Sea",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China, Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0271",
+      "published": "2024-03-24",
+      "title": "China-run tanker shipping Russian oil hit by Houthis, US says",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal, China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0272",
+      "published": "2024-03-24",
+      "title": "Chinese-owned oil tanker hit by Houthi missiles in Red Sea",
+      "relevant": true,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links China, Red Sea / Suez Canal; cues hit by houthi missiles(+3)",
+      "priority": 4
+    },
+    {
+      "hid": "H0273",
+      "published": "2024-03-25",
+      "title": "What impact will autonomous ships have on ports?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0274",
+      "published": "2024-03-25",
+      "title": "News Indian Customs to auction uncleared export boxes at Nhava Sheva",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Indian ports, Nhava Sheva (JNPT); cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0284",
+      "published": "2024-03-26",
+      "title": "‘Mayday’ call from ship stopped Baltimore bridge traffic, saved lives",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0289",
+      "published": "2024-03-26",
+      "title": "Logistics companies scramble after bridge collapse closes Port of Baltimore until further notice",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues closes(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0288",
+      "published": "2024-03-26",
+      "title": "Baltimore bridge collapse prompts questions to port experts and engineers, who say cargo ships can't hit Houston bridges",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0287",
+      "published": "2024-03-26",
+      "title": "Supply chains already feel the pinch as collapsed bridge blocks Baltimore’s port",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0286",
+      "published": "2024-03-26",
+      "title": "Baltimore's bridge collapse could hamper the busy port. Where do Ohio's busiest ports rank?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -1.5,
+      "reason": "links nothing in our network; cues could(-1.5)",
+      "priority": null
+    },
+    {
+      "hid": "H0285",
+      "published": "2024-03-26",
+      "title": "Port of Philadelphia may see influx of imports after Baltimore bridge collapse",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0283",
+      "published": "2024-03-26",
+      "title": "Fire breaks out at Wistron plant in north Taiwan",
+      "relevant": false,
+      "decision": "inbox",
+      "score": 4.0,
+      "reason": "links Keelung; cues fire(+3)",
+      "priority": 20
+    },
+    {
+      "hid": "H0275",
+      "published": "2024-03-26",
+      "title": "How shipping containers can make or break the global economy",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0281",
+      "published": "2024-03-26",
+      "title": "‘A Lot of Chaos’: Bridge Collapse Creates Upheaval at Largest U.S. Port for Car Trade (Published 2024)",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0280",
+      "published": "2024-03-26",
+      "title": "Nearly 140,000 jobs could be impacted by Francis Scott Key Bridge collapse",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -1.5,
+      "reason": "links nothing in our network; cues could(-1.5)",
+      "priority": null
+    },
+    {
+      "hid": "H0279",
+      "published": "2024-03-26",
+      "title": "Port of Baltimore Shut Down After Key Bridge Collapse, Coast Guard Conducting Recovery Operations",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues shut(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0278",
+      "published": "2024-03-26",
+      "title": "Baltimore bridge collapse may cost billions, dramatically disrupt supply chains",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0277",
+      "published": "2024-03-26",
+      "title": "Bridge collapse disrupts key trade lane, prompting new supply chain woes",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0276",
+      "published": "2024-03-26",
+      "title": "Baltimore Port: What impact will bridge collapse have on shipping?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0282",
+      "published": "2024-03-26",
+      "title": "Bridge collapse outside Port of Baltimore likely to disrupt supply chain, analysts say",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0297",
+      "published": "2024-03-27",
+      "title": "Baltimore bridge collapse investigators gather black box from Dali ship",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0299",
+      "published": "2024-03-27",
+      "title": "Baltimore bridge collapse could cause significant supply chain disruption",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues disruption(+2), could(-1.5)",
+      "priority": null
+    },
+    {
+      "hid": "H0298",
+      "published": "2024-03-27",
+      "title": "Climate activist Sonam Wangchuk ends fast after 21 days, Ladakh statehood stir to continue",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0295",
+      "published": "2024-03-27",
+      "title": "The impact of the Baltimore bridge collapse on shipping and supply chains",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0296",
+      "published": "2024-03-27",
+      "title": "Railroads scramble to keep freight moving after Baltimore port disruption",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0293",
+      "published": "2024-03-27",
+      "title": "Ship in Baltimore’s Key Bridge collapse passed inspections: port authority",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0294",
+      "published": "2024-03-27",
+      "title": "Opinion | I Work in Supply Chain Logistics. Here’s What I Advise After the Tragedy in Baltimore. (Published 2024)",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0292",
+      "published": "2024-03-27",
+      "title": "How shipping companies will navigate around the Port of Baltimore after bridge collapse",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0291",
+      "published": "2024-03-27",
+      "title": "Baltimore bridge collapse: US braces for supply chain disruption",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0290",
+      "published": "2024-03-27",
+      "title": "Baltimore bridge collapse raises port safety issues",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0300",
+      "published": "2024-03-28",
+      "title": "Africa looks to muscle in on the semiconductor value chain",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0305",
+      "published": "2024-03-28",
+      "title": "How Baltimore's Key Bridge collapse will affect supply chains and the economy",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0303",
+      "published": "2024-03-28",
+      "title": "Battle-proven HMS Richmond returns home to Plymouth from Red Sea mission",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0304",
+      "published": "2024-03-28",
+      "title": "Navy downs 4 drones targeting ship in Red Sea",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0301",
+      "published": "2024-03-28",
+      "title": "Cargo ship that collided with Baltimore Bridge had 'routine engine maintenance' in port, officials say",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0302",
+      "published": "2024-03-28",
+      "title": "India's new copper entrant, Adani Enterprises, starts operations at Kutch",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links India; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0306",
+      "published": "2024-03-29",
+      "title": "Baltimore’s port closure could upend jobs and supply chains for months",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues closure(+3), could(-1.5)",
+      "priority": null
+    },
+    {
+      "hid": "H0307",
+      "published": "2024-03-29",
+      "title": "How auto supply chain managers can navigate the Baltimore port stoppages",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0308",
+      "published": "2024-03-29",
+      "title": "Vehicle cargo could be heading to Georgia ports following the collapse of Baltimore’s bridge",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -1.5,
+      "reason": "links nothing in our network; cues could(-1.5)",
+      "priority": null
+    },
+    {
+      "hid": "H0309",
+      "published": "2024-03-29",
+      "title": "Gujarat: Adani Group marks debut into metal sector by activating its first copper plant in Mundra",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0310",
+      "published": "2024-03-30",
+      "title": "From longshoremen to charter boats, Baltimore's port closure means lost work",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues closure(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0312",
+      "published": "2024-04-01",
+      "title": "Karnataka gets insulated aerial work platform vehicles, no power cut during maintenance",
+      "relevant": false,
+      "decision": "inbox",
+      "score": 4.0,
+      "reason": "links Domestic — Bengaluru/Hosur; cues power cut(+3)",
+      "priority": 15
+    },
+    {
+      "hid": "H0311",
+      "published": "2024-04-01",
+      "title": "China strongly opposes revised US chip export restrictions",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China, Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0314",
+      "published": "2024-04-02",
+      "title": "Updated US chip controls raise demand in China for Nvidia’s graphics card",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China, Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0315",
+      "published": "2024-04-02",
+      "title": "South Korea sends chipmaking equipment to China — and the U.S. wants it to stop",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links South Korea, China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0313",
+      "published": "2024-04-02",
+      "title": "U.S. pushes South Korea to follow its lead and tighten export controls on chips for China",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 2.5,
+      "reason": "links South Korea, China; cues export controls(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0324",
+      "published": "2024-04-03",
+      "title": "TSMC evacuates fabs and suspends construction in earthquake aftermath; confirms all personnel are safe",
+      "relevant": true,
+      "decision": "inbox",
+      "score": 6.5,
+      "reason": "links Semiconductors; cues earthquake(+3), suspends(+3)",
+      "priority": 10
+    },
+    {
+      "hid": "H0316",
+      "published": "2024-04-03",
+      "title": "Crystal Cruises Risked Crew Member Lives By Sailing Crystal Symphony Through Strait of Bab el-Mandeb into the Red Sea",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0317",
+      "published": "2024-04-03",
+      "title": "Gallium price has more than doubled since China export curbs",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -1.0,
+      "reason": "links China; cues more than double(+2), gallium(-3)",
+      "priority": null
+    },
+    {
+      "hid": "H0318",
+      "published": "2024-04-03",
+      "title": "Addressing continued turbulence: The commercial-aerospace supply chain",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0319",
+      "published": "2024-04-03",
+      "title": "TSMC resumes chip production following biggest earthquake in 25 years — incurred no damage to its critical tools",
+      "relevant": false,
+      "decision": "inbox",
+      "score": 3.5,
+      "reason": "links Semiconductors; cues earthquake(+3)",
+      "priority": 10
+    },
+    {
+      "hid": "H0320",
+      "published": "2024-04-03",
+      "title": "Taiwan quake to hit some chip output, disrupt supply chain, analysts say",
+      "relevant": true,
+      "decision": "inbox",
+      "score": 3.75,
+      "reason": "links Taiwan, Semiconductors; cues quake(+3)",
+      "priority": 10
+    },
+    {
+      "hid": "H0321",
+      "published": "2024-04-03",
+      "title": "[News] Taiwan Hit by 7.2 Magnitude Earthquake: TSMC and Other Semiconductor, Panel Supply Chain Updates",
+      "relevant": true,
+      "decision": "inbox",
+      "score": 3.75,
+      "reason": "links Semiconductors, Taiwan; cues earthquake(+3)",
+      "priority": 10
+    },
+    {
+      "hid": "H0322",
+      "published": "2024-04-03",
+      "title": "News Hong Kong port's star status in the alliance universe is on the wane",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0323",
+      "published": "2024-04-03",
+      "title": "Renault Korea overhauls brand strategy to overcome sluggish performance",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links South Korea; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0331",
+      "published": "2024-04-04",
+      "title": "US says it foiled Houthi drone, missile attack at US Navy ship in Red Sea",
+      "relevant": false,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links Red Sea / Suez Canal; cues houthi drone, missile attack at us navy ship(+3)",
+      "priority": 3
+    },
+    {
+      "hid": "H0330",
+      "published": "2024-04-04",
+      "title": "Navigating uncertainty: The impact of Baltimore's bridge collapse on supply chains and coal trading",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0329",
+      "published": "2024-04-04",
+      "title": "TSMC restarts operations after earthquake, reassuring no chip supply disruption",
+      "relevant": false,
+      "decision": "inbox",
+      "score": 5.5,
+      "reason": "links Semiconductors; cues earthquake(+3), disruption(+2)",
+      "priority": 10
+    },
+    {
+      "hid": "H0325",
+      "published": "2024-04-04",
+      "title": "UK expands export controls to semiconductor, quantum and cryogenic technologies",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 2.5,
+      "reason": "links Semiconductors; cues export controls(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0327",
+      "published": "2024-04-04",
+      "title": "New Red Sea Pirates required a unified international response",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0326",
+      "published": "2024-04-04",
+      "title": "Maersk names 2nd large methanol-powered containership in Yokohama",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Yokohama; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0328",
+      "published": "2024-04-04",
+      "title": "CSX completes first diverted cargo shipments on new rail line for Port of Baltimore",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues diverted(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0333",
+      "published": "2024-04-05",
+      "title": "Houthi Red Sea Attacks Have Global Economic Repercussions",
+      "relevant": true,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links Red Sea / Suez Canal; cues red sea attacks(+3)",
+      "priority": 3
+    },
+    {
+      "hid": "H0332",
+      "published": "2024-04-05",
+      "title": "AI Chips for China Face Additional US Restrictions",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0334",
+      "published": "2024-04-05",
+      "title": "Aboard stranded cargo ships in Baltimore’s port, a fight against “tedium”",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0335",
+      "published": "2024-04-07",
+      "title": "Shipping: No quick fix to Red Sea situation",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0337",
+      "published": "2024-04-08",
+      "title": "Tyre godown fire spreads to two units; no casualties",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues fire(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0336",
+      "published": "2024-04-08",
+      "title": "IP24043 | Taiwan’s Reliance on the Semiconductor Industry: A Geopolitical Achilles’ Heel?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Semiconductors, Taiwan; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0338",
+      "published": "2024-04-09",
+      "title": "U.S. tightened chip export rules to China",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China, Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0339",
+      "published": "2024-04-09",
+      "title": "Dire Straits – Houthi aggression in the Bab al-Mandab Strait: Joshua Krasna",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0340",
+      "published": "2024-04-09",
+      "title": "Red Sea and Western Indian Ocean Attacks Expose Africa’s Maritime Vulnerability",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal, India; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0341",
+      "published": "2024-04-10",
+      "title": "Kaohsiung City Government's cross-bureau cooperation on \"Duck Economy\" brings in over 14 billion NTD in output value for Kaohsiung",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Kaohsiung; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0342",
+      "published": "2024-04-10",
+      "title": "Protection of Shipping in the Red Sea and the Gulf of Aden",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0343",
+      "published": "2024-04-11",
+      "title": "Commerce Issues Corrections to Advanced Semiconductor and Semiconductor Manufacturing Equipment Rules",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0344",
+      "published": "2024-04-11",
+      "title": "Industry minister notes cooperation with 'allies' over export controls",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues export controls(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0345",
+      "published": "2024-04-11",
+      "title": "Japan’s export controls require reassessment",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 2.5,
+      "reason": "links Japan; cues export controls(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0346",
+      "published": "2024-04-11",
+      "title": "Saudi Arabia bolsters first-ever Global Supply Chain Forum",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0350",
+      "published": "2024-04-12",
+      "title": "Malaysia's largest port to double capacity",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Malaysia; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0349",
+      "published": "2024-04-12",
+      "title": "Full automation for Dongwon",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0348",
+      "published": "2024-04-12",
+      "title": "NIA arrests Bengaluru cafe blast mastermind, bomber from Kolkata",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Domestic — Bengaluru/Hosur; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0347",
+      "published": "2024-04-12",
+      "title": "China remains crucial for U.S. chipmakers amid rising tensions between the world's top two economies",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Semiconductors, China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0351",
+      "published": "2024-06-03",
+      "title": "The Floating Traffic Jam That Freaked Us All Out (Published 2024)",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0352",
+      "published": "2024-06-03",
+      "title": "Bengaluru rain breaks 133-year-old record for the wettest day in June",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Domestic — Bengaluru/Hosur; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0353",
+      "published": "2024-06-03",
+      "title": "News Tanzania port deal latest step as Adani increases its global footprint",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0354",
+      "published": "2024-06-03",
+      "title": "Exclusive | The Goal for China’s Chip Giant: Cut Out the U.S.",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China, Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0362",
+      "published": "2024-06-04",
+      "title": "Exclusive: Chinese AI chip firms downgrading designs to secure TSMC production",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China, Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0361",
+      "published": "2024-06-04",
+      "title": "News Port congestion disrupts almost half Asia-Europe sailings",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0360",
+      "published": "2024-06-04",
+      "title": "Maersk Sees Deeper Impact to World Trade From Red Sea Disruption",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 3.0,
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0359",
+      "published": "2024-06-04",
+      "title": "How resilient ports can mitigate global supply chain disruptions",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0357",
+      "published": "2024-06-04",
+      "title": "Canada border disruption? What shippers should know about a possible strike",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues disruption(+2), strike(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0356",
+      "published": "2024-06-04",
+      "title": "Global ports grapple with congestion: A wake-up call for supply chains?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0355",
+      "published": "2024-06-04",
+      "title": "Northport sets new record in container handling Port Klang",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Port Klang; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0358",
+      "published": "2024-06-04",
+      "title": "5 reasons to implement supply chain diversification",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0363",
+      "published": "2024-06-04",
+      "title": "Chips on the Table: The High Stakes Industry of Semiconductor Design and Manufacturing",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0364",
+      "published": "2024-06-05",
+      "title": "Yangshan remains world’s most efficient container port",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Shanghai; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0365",
+      "published": "2024-06-05",
+      "title": "Navigating global supply chain disruption: How the construction industry can cope with the Bab al-Mandab instability",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 3.0,
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0366",
+      "published": "2024-06-05",
+      "title": "Main shipping channel at Key Bridge collapse site to open this weekend. Here's the progress made.",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0368",
+      "published": "2024-06-06",
+      "title": "China Is Losing the Chip War",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China, Semiconductors; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0367",
+      "published": "2024-06-06",
+      "title": "Technological de-risking in Netherlands-China Relations",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0369",
+      "published": "2024-06-06",
+      "title": "Should the world fear China’s chipmaking binge?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0370",
+      "published": "2024-06-06",
+      "title": "East and Southeast Asian Ports Dominate 2023 Global Container Port Performance Index",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0371",
+      "published": "2024-06-06",
+      "title": "Francis Scott Key Bridge collapse: Port of Baltimore shipping channel could fully reopen this weekend after removal of debris",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -1.5,
+      "reason": "links nothing in our network; cues could(-1.5)",
+      "priority": null
+    },
+    {
+      "hid": "H0372",
+      "published": "2024-06-06",
+      "title": "Charleston bridge closed as out-of-control ship powers through harbor",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues closed(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0374",
+      "published": "2024-06-07",
+      "title": "MMC’s PTP and Northport on a record-breaking roll",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Port Klang; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0375",
+      "published": "2024-06-07",
+      "title": "US chip export control rules circumvented by AI cloud services, says report",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 2.5,
+      "reason": "links Semiconductors; cues export controls(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0373",
+      "published": "2024-06-07",
+      "title": "7 remanded in Port Klang smuggling ring bust; S’porean said to be mastermind",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Port Klang; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0376",
+      "published": "2024-06-07",
+      "title": "South African ports ranked among worst in the world",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0377",
+      "published": "2024-06-08",
+      "title": "Maintenance, repair works to cause power cuts across Bengaluru till June 12: Report | Bengaluru",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -1.0,
+      "reason": "links Domestic — Bengaluru/Hosur; cues power cuts(+3), maintenance, repair works to cause power cuts(-4)",
+      "priority": null
+    },
+    {
+      "hid": "H0378",
+      "published": "2024-06-09",
+      "title": "Source, cause of Westports container yard fire yet to be determined",
+      "relevant": true,
+      "decision": "inbox",
+      "score": 4.0,
+      "reason": "links Port Klang; cues fire(+3)",
+      "priority": 20
+    },
+    {
+      "hid": "H0385",
+      "published": "2024-06-10",
+      "title": "Malaysia’s graft buster seeks alleged S’pore mastermind of $1 billion Port Klang smuggling ring",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Port Klang, Malaysia; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0384",
+      "published": "2024-06-10",
+      "title": "How forecasts of bad weather can drive up your grocery bill",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0383",
+      "published": "2024-06-10",
+      "title": "News MSC ULCV call adds to congestion at 'unprepared' port of Karachi",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0386",
+      "published": "2024-06-10",
+      "title": "Houthi Attacks on Merchant Vessels in the Red Sea",
+      "relevant": true,
+      "decision": "watch",
+      "score": 6.0,
+      "reason": "links Red Sea / Suez Canal; cues attacks on(+2), houthi attacks on merchant vessels(+3)",
+      "priority": 3
+    },
+    {
+      "hid": "H0381",
+      "published": "2024-06-10",
+      "title": "Baltimore shipping channel fully reopens after bridge collapse",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0380",
+      "published": "2024-06-10",
+      "title": "Critical Baltimore Shipping Channel Reopens 11 Weeks After Bridge Collapse (Published 2024)",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0379",
+      "published": "2024-06-10",
+      "title": "Is America becoming protectionist?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0382",
+      "published": "2024-06-10",
+      "title": "Monsoon arrives in Pune: Power outages spanning over 20 hours after heavy rain make citizens angry",
+      "relevant": true,
+      "decision": "inbox",
+      "score": 8.0,
+      "reason": "links Domestic — Pune; cues heavy rain(+1), outages(+3), power outage(+3)",
+      "priority": 20
+    },
+    {
+      "hid": "H0387",
+      "published": "2024-06-11",
+      "title": "Port of Baltimore fully reopens since Francis Scott Key Bridge collapse",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0388",
+      "published": "2024-06-11",
+      "title": "Baltimore shipping lane fully reopens after bridge collapse",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0389",
+      "published": "2024-06-11",
+      "title": "Baltimore shipping channel reopens after bridge collapse",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0390",
+      "published": "2024-06-11",
+      "title": "MKS Instruments to build factory in Penang",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Penang; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0391",
+      "published": "2024-06-11",
+      "title": "Humanitarian organizations showed flexibility and grit during COVID supply chain disruptions, study finds",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0398",
+      "published": "2024-06-12",
+      "title": "DFS warning as Red Sea disruption hits deliveries",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 3.0,
+      "reason": "links Red Sea / Suez Canal; cues disruption(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0400",
+      "published": "2024-06-12",
+      "title": "16 hour power cut in SoBo; outage in parts of suburbs too",
+      "relevant": false,
+      "decision": "needs_review",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues outage(+3), power cut(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0399",
+      "published": "2024-06-12",
+      "title": "News Carriers launch new transpac shuttle services as Chinese exports surge",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -3.0,
+      "reason": "links China; cues new transpac shuttle service(-3)",
+      "priority": null
+    },
+    {
+      "hid": "H0396",
+      "published": "2024-06-12",
+      "title": "Yemen's Houthi rebels launch boat-borne bomb attack against Greek-owned ship in Red Sea",
+      "relevant": true,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links Red Sea / Suez Canal; cues rebels launch boat-borne bomb attack against greek-owned ship(+3)",
+      "priority": 3
+    },
+    {
+      "hid": "H0397",
+      "published": "2024-06-12",
+      "title": "Hinjewadi hub to get waste mgmt depot",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0394",
+      "published": "2024-06-12",
+      "title": "Everport tests Yokohama RR42",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Yokohama; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0393",
+      "published": "2024-06-12",
+      "title": "(Yonhap Feature) S. Korean SLBM-capable sub on covert underwater duty against N. Korean threats",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links South Korea; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0392",
+      "published": "2024-06-12",
+      "title": "Ship severely flooded after Houthi attack in Red Sea",
+      "relevant": true,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links Red Sea / Suez Canal; cues flooded(+3)",
+      "priority": 4
+    },
+    {
+      "hid": "H0395",
+      "published": "2024-06-12",
+      "title": "Port operational updates from around the world (6 -12 June)",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0406",
+      "published": "2024-06-13",
+      "title": "World Container Shipping Rates Keep Rising Amid Port Congestion",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0407",
+      "published": "2024-06-13",
+      "title": "China’s Stockpiling and Mobilization Measures for Competition and Conflict",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links China; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0404",
+      "published": "2024-06-13",
+      "title": "Fears are rising ocean freight rates may surpass $20,000 with no relief for global trade into 2025",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0405",
+      "published": "2024-06-13",
+      "title": "‘We’re asking a lot of these people’: how fragile is the global supply chain?",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0402",
+      "published": "2024-06-13",
+      "title": "Yemen’s Houthis say they targeted Greek-owned ship in Red Sea",
+      "relevant": true,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links Red Sea / Suez Canal; cues houthis say they targeted greek-owned ship(+3)",
+      "priority": 3
+    },
+    {
+      "hid": "H0401",
+      "published": "2024-06-13",
+      "title": "Port congestion and vessel backlogs trigger multiple blank sailings",
+      "relevant": false,
+      "decision": "needs_review",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues backlog(+2), blank sailings(+2)",
+      "priority": null
+    },
+    {
+      "hid": "H0403",
+      "published": "2024-06-13",
+      "title": "Suez squeeze continues",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0408",
+      "published": "2024-06-14",
+      "title": "Yale economists take aim at improving supply chains",
+      "relevant": false,
+      "decision": "ignored",
+      "score": -4.0,
+      "reason": "links nothing in our network; cues improving(-4)",
+      "priority": null
+    },
+    {
+      "hid": "H0409",
+      "published": "2024-06-14",
+      "title": "Shanghai Port extends unbeaten run in CSL",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Shanghai; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0410",
+      "published": "2024-06-14",
+      "title": "Sailor injured, cargo ship ablaze after missile attack by Yemen’s Houthis",
+      "relevant": true,
+      "decision": "inbox",
+      "score": 4.0,
+      "reason": "links Red Sea / Suez Canal; cues blaze(+3)",
+      "priority": 15
+    },
+    {
+      "hid": "H0411",
+      "published": "2024-06-14",
+      "title": "Houthi attack forces crew to abandon coal carrier in Red Sea",
+      "relevant": true,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Red Sea / Suez Canal; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0413",
+      "published": "2024-06-15",
+      "title": "New book explores how the pandemic has revealed issues with the supply chain",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0412",
+      "published": "2024-06-15",
+      "title": "U.S. strikes Houthi radar sites after merchant sailor goes missing in Red Sea attack",
+      "relevant": true,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links Red Sea / Suez Canal; cues red sea attack(+3)",
+      "priority": 4
+    },
+    {
+      "hid": "H0414",
+      "published": "2024-06-15",
+      "title": "Kuwaiti authorities launch crackdown on illegal property extensions after Mangaf fire",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links nothing in our network; cues fire(+3)",
+      "priority": null
+    },
+    {
+      "hid": "H0415",
+      "published": "2024-06-16",
+      "title": "Taiwan in Time: When US bombs rained down on Keelung",
+      "relevant": false,
+      "decision": "ignored",
+      "score": 0.0,
+      "reason": "links Keelung, Taiwan; cues none",
+      "priority": null
+    },
+    {
+      "hid": "H0416",
+      "published": "2024-06-16",
+      "title": "Congestion at ports of Singapore, Shanghai/Ningbo escalates disruption in global shipping",
+      "relevant": true,
+      "decision": "watch",
+      "score": 4.0,
+      "reason": "links Shanghai, Ningbo; cues escalat(+1), disruption(+2)",
+      "priority": 3
+    }
+  ]
+}
