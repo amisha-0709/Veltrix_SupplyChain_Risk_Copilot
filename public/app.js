@@ -448,14 +448,22 @@ async function viewLive(refresh) {
       ${i.claude ? `<p class="muted" style="margin:4px 0">Claude: ${i.claude.relevant ? "supply risk to our network" : "not a live risk to our network"} (${esc(i.claude.status.replace(/_/g, " "))}) · ${esc(i.claude.reason)}${i.claude_promoted ? " · flagged what the word list missed" : ""}</p>` : ""}
       ${i.links.length ? `<div>${i.links.map(node).join("")}</div>` : ""}
       ${i.alert ? `<div class="btns" style="margin-top:6px"><a class="btn small" href="#/alert/${encodeURIComponent(i.alert.alert_id)}">Open alert · P${i.alert.priority} · ${esc(i.alert.revenue_at_risk_fmt)} at risk · ${esc(i.alert.owner)}</a></div>` : ""}</div>`;
-  const hot = r.items.filter((i) => i.decision !== "ignored"), cold = r.items.filter((i) => i.decision === "ignored");
+  const hot = r.items.filter((i) => i.decision !== "ignored");
+  /* Claude thinks it touches our network, but the decision rule chosen on train data is the word list: shown for a person, not alerted */
+  const flagged = r.items.filter((i) => i.decision === "ignored" && i.claude?.relevant);
+  const cold = r.items.filter((i) => i.decision === "ignored" && !i.claude?.relevant);
+  const fcard = (i) => card({ ...i, decision: "needs_review", message: null }).replace(">Needs review<", ">Claude flagged · not alerted<");
   $("#lout").innerHTML = `<div class="tiles">
       <div class="tile"><b>${r.items.length}</b><span>headlines read (duplicates merged)</span></div>
       <div class="tile"><b>${c.inbox}</b><span>alerts for the inbox</span></div>
       <div class="tile"><b>${c.watch + c.needs_review}</b><span>watch or needs review</span></div>
-      <div class="tile"><b>${c.ignored}</b><span>ignored: not a supply event for our network</span></div></div>
+      <div class="tile"><b>${flagged.length}</b><span>flagged by Claude for a person to check</span></div>
+      <div class="tile"><b>${cold.length}</b><span>ignored: not a supply event for our network</span></div></div>
     ${r.errors.length ? `<p class="muted">Source problems: ${esc(r.errors.join("; "))}</p>` : ""}
-    ${hot.length ? hot.map(card).join("") : `<div class="result"><b>Nothing touches Veltrix's network right now.</b><p>Every headline was read and none is a supply event on our ports, lanes, fab clusters or commodities. That is the normal day: the co-pilot stays quiet rather than spamming the team.</p></div>`}
+    ${hot.length ? hot.map(card).join("") : `<div class="result"><b>No alerts right now.</b><p>Every headline was read and none passed the alert rule for our ports, lanes, fab clusters or commodities. That is the normal day: the co-pilot stays quiet rather than spamming the team.</p></div>`}
+    ${flagged.length ? `<h3>Claude flagged for a person to check (${flagged.length})</h3>
+      <p class="muted" style="margin-top:0">Claude reads these as a possible risk to our network. They are not alerted: the decision rule chosen on the training months uses the word list,
+      and Claude advises but does not decide yet. The Head of Supply Chain can open the story and judge.</p>${flagged.map(fcard).join("")}` : ""}
     ${cold.length ? `<details class="card"><summary><b>${cold.length} ignored headlines</b> and why</summary>${cold.map(card).join("")}</details>` : ""}`;
 }
 

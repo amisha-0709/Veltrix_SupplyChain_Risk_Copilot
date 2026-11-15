@@ -47,4 +47,5 @@ def test_refresh_runs_pipeline(monkeypatch):
 def test_ui_has_live_tab():
     html = c.get("/").text
     assert 'href="#/live"' in html
-    assert "viewLive" in c.get("/app.js").text
+    js = c.get("/app.js").text
+    assert "viewLive" in js and "Claude flagged for a person to check" in js
