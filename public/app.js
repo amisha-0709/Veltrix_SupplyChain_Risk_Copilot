@@ -518,13 +518,40 @@ async function viewBusiness() {
     <p class="muted">Built the way the brief asks: replay all 18 disruptions with the co-pilot's alert date and top-ranked option, value the result with the playbook's
       ROI method, and include the co-pilot's own running costs. Labels like <span class="aref">A4</span> point to the assumptions listed at the end.</p>
 
-    <h2>What disruptions <em>cost</em> Veltrix today</h2>
-    <div class="tiles">
-      <div class="tile"><b>₹${h.revenue_lost_inr_cr.toFixed(1)} cr</b><span>revenue lost to ${h.disruptions} disruptions in 24 months; ${h.disruptions_with_stoppage} stopped production</span></div>
-      <div class="tile"><b>₹${h.mitigation_spend_inr_cr.toFixed(1)} cr</b><span>spent on mitigations, of which ₹${h.mitigation_spend_no_shortage_inr_cr.toFixed(1)} cr on parts that had enough stock</span></div>
-      <div class="tile"><b>${ts.median_warning_lead_days ?? 18} d</b><span>median public warning before impact (${ts.disruptions_with_warning ?? 15} of 18 had one)</span></div>
-      <div class="tile"><b>+${ts.median_team_alert_offset_days ?? 1} d / ${h.median_days_impact_to_decision} d</b><span>team's first alert after impact / days to first decision</span></div></div>
-    <p class="muted">All from the data pack (disruptions, mitigation_actions, signals).</p>
+    <p class="sub">Today: ₹${h.revenue_lost_inr_cr.toFixed(1)} cr of revenue lost to ${h.disruptions} disruptions in two years, and ₹${h.mitigation_spend_no_shortage_inr_cr.toFixed(1)} cr of ₹${h.mitigation_spend_inr_cr.toFixed(1)} cr
+      mitigation spend wasted on parts that had enough stock; public warnings came a median ${ts.median_warning_lead_days ?? 18} days ahead, the team noticed ${ts.median_team_alert_offset_days ?? 1} day after impact.</p>
+
+    <h2>Loss avoided, by the <em>playbook's formula</em></h2>
+    <p class="sub">Playbook §6: <b>ROI = (loss avoided − cost) ÷ cost</b>, where loss avoided = margin protected + penalties avoided + expedite costs avoided.
+      Revenue protected is sales kept; only the profit on those sales counts, because the cost of making them is spent either way. ${aref("A6", "A7")}</p>
+    <div class="card"><table><thead><tr><th>Line</th><th class="num">Two years</th><th class="num">Per year</th></tr></thead><tbody>
+      <tr><td class="muted">Revenue protected (sales kept, for reference)</td><td class="num muted">₹${rs.revenue_protected_expected_cr} cr</td><td class="num muted">₹${(rs.revenue_protected_expected_cr / 2).toFixed(2)} cr</td></tr>
+      <tr><td>Margin protected</td><td class="num">₹${rs.margin_protected_cr} cr</td><td class="num">${inr(b.margin_protected)}</td></tr>
+      <tr><td>+ Penalties avoided</td><td class="num">₹${rs.penalties_avoided_cr} cr</td><td class="num">${inr(b.penalties_avoided)}</td></tr>
+      <tr><td>+ Expedite and buffer spend avoided (detail under wasted spend, below)</td><td class="num">₹${rs.avoided_waste_cr} cr</td><td class="num">${inr(b.waste_avoided)}</td></tr>
+      <tr><td><b>= Loss avoided</b></td><td class="num"><b>₹${lossAvoided2.toFixed(2)} cr</b></td><td class="num"><b>${inr(b.margin_protected + b.penalties_avoided + b.waste_avoided)}</b></td></tr>
+      <tr><td>− Cost of the actions it recommends</td><td class="num">−₹${rs.plan_cost_cr} cr</td><td class="num">−${inr(b.mitigation_cost)}</td></tr>
+      <tr><td><b>= Net benefit</b></td><td class="num"><b>₹${net2.toFixed(2)} cr</b></td><td class="num"><b>${inr(b.net)}</b></td></tr></tbody></table>
+      <p class="muted">ROI on the recommended actions alone (margin + penalties they protect, before any wasted spend skipped) =
+        (₹${(rs.margin_protected_cr + rs.penalties_avoided_cr).toFixed(2)} cr − ₹${rs.plan_cost_cr} cr) ÷ ₹${rs.plan_cost_cr} cr ≈ <b>${rs.roi_on_plans}×</b>
+        (the playbook's worked example is about 3.1× for a single pre-buy).</p></div>
+
+    <h2>ROI on the co-pilot itself, <em>including running costs</em></h2>
+    <p class="sub">The brief asks for this explicitly (Stage 3). The brief and playbook give no running costs, so these are our estimates, labelled as such. ${aref("A9")}</p>
+    <div class="card"><table><thead><tr><th>Running cost</th><th class="num">Per year</th><th>Basis (our estimate unless stated)</th></tr></thead><tbody>
+      ${m.cost_rows.map((r) => `<tr><td>${esc(COST_LABEL[r.item] || r.item)}</td><td class="num">${inr(r.annual_inr)}</td><td class="muted">${esc(COST_BASIS[r.item] || r.note)}</td></tr>`).join("")}
+      <tr><td><b>Total</b></td><td class="num"><b>${inr(m.annual_cost_inr)}</b></td><td></td></tr></tbody></table>
+      <table style="margin-top:16px"><tbody>
+        <tr><td>Net benefit per year (from the loss-avoided table)</td><td class="num">${inr(b.net)}</td></tr>
+        <tr><td>Running cost per year</td><td class="num">${inr(m.annual_cost_inr)}</td></tr>
+        <tr><td><b>ROI = (net benefit − running cost) ÷ running cost</b></td><td class="num"><b>${x(base.roi)}</b></td></tr>
+        <tr><td>Payback: running cost ÷ net benefit per month</td><td class="num">${base.payback_months.toFixed(1)} months</td></tr></tbody></table></div>
+
+    <h2>How <em>robust</em> is it?</h2>
+    <p class="sub">The same calculation with harsher assumptions. It still pays back in every case. ${aref("A10")}</p>
+    <div class="card"><table><thead><tr><th>Scenario</th><th class="num">Net benefit / yr</th><th class="num">Running cost / yr</th><th class="num">ROI</th><th class="num">Payback (months)</th></tr></thead>
+      <tbody>${m.scenarios.map((r) => `<tr><td>${esc(SCEN[r.scenario] || r.scenario)}</td><td class="num">${inr(r.net_benefit_inr)}</td><td class="num">${inr(r.copilot_cost_inr)}</td>
+        <td class="num"><b>${x(r.roi)}</b></td><td class="num">${r.payback_months ? r.payback_months.toFixed(1) : "—"}</td></tr>`).join("")}</tbody></table></div>
 
     <h2>Replay: all <em>18 disruptions</em></h2>
     <p class="sub">Each disruption replayed with the co-pilot's own alert day and its top-ranked option on that day, applied to what really happened. ${aref("A2", "A3", "A4", "A5", "A7")}</p>
@@ -547,38 +574,6 @@ async function viewBusiness() {
           : "It skipped the parts it saw as covered; for the rest its own estimate showed a shortage, so it would also have acted."}</td></tr>`).join("")}
       <tr><td><b>Total</b></td><td></td><td class="num"><b>₹${rs.team_wasted_cr} cr</b></td><td class="num"><b>₹${rs.avoided_waste_cr} cr</b></td><td></td></tr></tbody></table></div>
       <p class="muted">Most of this was “pre-buy buffer stock (late)”: ordered after the event began and arriving after the peak (data pack outcome notes).</p></div>
-
-    <h2>Loss avoided, by the <em>playbook's formula</em></h2>
-    <p class="sub">Playbook §6: <b>ROI = (loss avoided − cost) ÷ cost</b>, where loss avoided = margin protected + penalties avoided + expedite costs avoided.
-      Revenue protected is sales kept; only the profit on those sales counts, because the cost of making them is spent either way. ${aref("A6", "A7")}</p>
-    <div class="card"><table><thead><tr><th>Line</th><th class="num">Two years</th><th class="num">Per year</th></tr></thead><tbody>
-      <tr><td class="muted">Revenue protected (sales kept, for reference)</td><td class="num muted">₹${rs.revenue_protected_expected_cr} cr</td><td class="num muted">₹${(rs.revenue_protected_expected_cr / 2).toFixed(2)} cr</td></tr>
-      <tr><td>Margin protected</td><td class="num">₹${rs.margin_protected_cr} cr</td><td class="num">${inr(b.margin_protected)}</td></tr>
-      <tr><td>+ Penalties avoided</td><td class="num">₹${rs.penalties_avoided_cr} cr</td><td class="num">${inr(b.penalties_avoided)}</td></tr>
-      <tr><td>+ Expedite and buffer spend avoided (the wasted spend above)</td><td class="num">₹${rs.avoided_waste_cr} cr</td><td class="num">${inr(b.waste_avoided)}</td></tr>
-      <tr><td><b>= Loss avoided</b></td><td class="num"><b>₹${lossAvoided2.toFixed(2)} cr</b></td><td class="num"><b>${inr(b.margin_protected + b.penalties_avoided + b.waste_avoided)}</b></td></tr>
-      <tr><td>− Cost of the actions it recommends</td><td class="num">−₹${rs.plan_cost_cr} cr</td><td class="num">−${inr(b.mitigation_cost)}</td></tr>
-      <tr><td><b>= Net benefit</b></td><td class="num"><b>₹${net2.toFixed(2)} cr</b></td><td class="num"><b>${inr(b.net)}</b></td></tr></tbody></table>
-      <p class="muted">ROI on the recommended actions alone (margin + penalties they protect, before any wasted spend skipped) =
-        (₹${(rs.margin_protected_cr + rs.penalties_avoided_cr).toFixed(2)} cr − ₹${rs.plan_cost_cr} cr) ÷ ₹${rs.plan_cost_cr} cr ≈ <b>${rs.roi_on_plans}×</b>
-        (the playbook's worked example is about 3.1× for a single pre-buy).</p></div>
-
-    <h2>ROI on the co-pilot itself, <em>including running costs</em></h2>
-    <p class="sub">The brief asks for this explicitly (Stage 3). The brief and playbook give no running costs, so these are our estimates, labelled as such. ${aref("A9")}</p>
-    <div class="card"><table><thead><tr><th>Running cost</th><th class="num">Per year</th><th>Basis (our estimate unless stated)</th></tr></thead><tbody>
-      ${m.cost_rows.map((r) => `<tr><td>${esc(COST_LABEL[r.item] || r.item)}</td><td class="num">${inr(r.annual_inr)}</td><td class="muted">${esc(COST_BASIS[r.item] || r.note)}</td></tr>`).join("")}
-      <tr><td><b>Total</b></td><td class="num"><b>${inr(m.annual_cost_inr)}</b></td><td></td></tr></tbody></table>
-      <table style="margin-top:16px"><tbody>
-        <tr><td>Net benefit per year (above)</td><td class="num">${inr(b.net)}</td></tr>
-        <tr><td>Running cost per year</td><td class="num">${inr(m.annual_cost_inr)}</td></tr>
-        <tr><td><b>ROI = (net benefit − running cost) ÷ running cost</b></td><td class="num"><b>${x(base.roi)}</b></td></tr>
-        <tr><td>Payback: running cost ÷ net benefit per month</td><td class="num">${base.payback_months.toFixed(1)} months</td></tr></tbody></table></div>
-
-    <h2>How <em>robust</em> is it?</h2>
-    <p class="sub">The same calculation with harsher assumptions. It still pays back in every case. ${aref("A10")}</p>
-    <div class="card"><table><thead><tr><th>Scenario</th><th class="num">Net benefit / yr</th><th class="num">Running cost / yr</th><th class="num">ROI</th><th class="num">Payback (months)</th></tr></thead>
-      <tbody>${m.scenarios.map((r) => `<tr><td>${esc(SCEN[r.scenario] || r.scenario)}</td><td class="num">${inr(r.net_benefit_inr)}</td><td class="num">${inr(r.copilot_cost_inr)}</td>
-        <td class="num"><b>${x(r.roi)}</b></td><td class="num">${r.payback_months ? r.payback_months.toFixed(1) : "—"}</td></tr>`).join("")}</tbody></table></div>
 
     <h2>Structural moves: <em>fix it before</em> it happens</h2>
     <p class="sub">The brief's stretch goal: dual sourcing and buffer levels from the back-test, with cost and avoided loss. Kept out of the ROI above;
@@ -605,7 +600,8 @@ async function viewBusiness() {
     <h2 id="assumptions">Assumptions, <em>in one place</em></h2>
     <div class="card"><table><tbody>${Object.entries(ASSUME).map(([k, v]) => `<tr><td class="num"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</tbody></table>
       <p class="muted">From the data pack: revenue, losses, mitigation actions and their costs, stock cover, lead times, margins, penalties, the 55% lost-sale share.
-      From the playbook: the impact method, the ranking rule, the ROI formula, holding cost and qualification cost ranges. Everything else above is labelled as ours.</p></div>`;
+      From the playbook: the impact method, the ranking rule, the ROI formula, holding cost and qualification cost ranges. Everything else above is labelled as ours.</p></div>
+`;
   document.querySelectorAll("[data-rep]").forEach((r) => (r.onclick = () => (location.hash = `#/replay/${r.dataset.rep}`)));
   $("#printpilot").onclick = () => print();
   document.querySelectorAll("[data-aref]").forEach((b) => (b.onclick = () => $("#assumptions").scrollIntoView({ behavior: "smooth" })));
