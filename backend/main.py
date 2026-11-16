@@ -229,8 +229,23 @@ def replays():
     s = snap()
     keep = ("disruption_id", "title", "type", "start_date", "detected", "copilot_alert_date", "copilot_lead_days",
             "team_alert_date", "team_decision_day", "actual_revenue_lost_inr", "with_plan_lost_inr", "plan_cost_inr",
-            "vs_actual_protected_expected_inr", "avoided_waste_inr", "team_wasted_inr", "structural")
-    return {"summary": s["replay_summary"], "rows": [{k: r.get(k) for k in keep} for r in s["replays"]]}
+            "vs_actual_protected_expected_inr", "avoided_waste_inr", "team_wasted_inr", "structural",
+            "margin_protected_inr", "penalties_avoided_inr", "recommended", "plan_p_works", "actual_delay_days")
+    return {"summary": s["replay_summary"], "rows": [{k: r.get(k) for k in keep} | {"waste_actions": _waste_actions().get(r["disruption_id"], []),
+                                                        "delay_estimate_days": (r.get("seen") or {}).get("delay_estimate_days")}
+                                                     for r in s["replays"]]}
+
+
+@lru_cache(maxsize=1)
+def _waste_actions() -> dict:
+    """Team mitigation actions on parts that turned out to have enough cover (mitigation_actions.had_shortage = False)."""
+    from core.etl import load
+    m = load()["mitigation_actions"]
+    out: dict = {}
+    for r in m[~m["had_shortage"].astype(bool)].itertuples():
+        out.setdefault(r.disruption_id, []).append({"part_id": r.part_id, "action": r.action, "cost_inr": float(r.cost_inr),
+                                                     "note": str(r.outcome_note)})
+    return out
 
 
 @app.get("/api/replays/{did}")

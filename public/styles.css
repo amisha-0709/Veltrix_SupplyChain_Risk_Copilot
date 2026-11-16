@@ -232,3 +232,7 @@ border-bottom:1px solid var(--rule);text-decoration:none;color:var(--ink);transi
 .tlm.impact{top:69px}.tlm.impact i{background:var(--ink)}.tlm.impact span{visibility:hidden}
 .tlm.impact::before{content:"Impact";position:absolute;top:-22px;font:700 11px var(--sans);letter-spacing:.18em;text-transform:uppercase}
 .tlm.cop i{background:var(--blue)}.tlm.cop b{color:var(--blue)}.tlm.team i{background:var(--muted)}
+
+.aref{display:inline-block;background:none;cursor:pointer;font:700 10px/1 var(--sans);letter-spacing:.08em;color:var(--blue);border:1px solid var(--blue);padding:2px 4px;margin:0 2px;text-decoration:none;vertical-align:1px}
+.aref:hover{background:var(--blue);color:var(--cream)}
+@media print{.mast,.foot,.btns{display:none}main{display:block;padding:0}}

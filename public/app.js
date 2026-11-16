@@ -291,7 +291,7 @@ async function viewSimulate() {
 }
 
 async function viewBacktest() {
-  const b = await get("/api/backtest");
+  const [b, bc] = await Promise.all([get("/api/backtest"), get("/api/business-case").catch(() => null)]);
   const s = b.signals.test, a = b.alerts.test, l = b.lead.test;
   const m2 = b.m2?.summary;
   $("#app").innerHTML = `${hed("Evidence · shared", "Tested on months it <em>never saw</em>.")}
@@ -320,7 +320,12 @@ async function viewBacktest() {
       <tr><td>False alerts per week</td><td class="num">—</td><td class="num">—</td><td class="num">0.12</td></tr>
       <tr><td>Median warning before impact</td><td class="num">≥ 7 d</td><td class="num">13.3 d</td><td class="num">—</td></tr></tbody></table>
       <p class="muted">Most real-news misses are follow-up stories about a crisis that already has an open alert. Method and caveats:
-      <a href="https://github.com/amisha-0709/Veltrix_SupplyChain_Risk_Copilot/blob/main/docs/EVALUATION.md" target="_blank" rel="noopener">EVALUATION.md</a>.</p></div>`;
+      <a href="https://github.com/amisha-0709/Veltrix_SupplyChain_Risk_Copilot/blob/main/docs/EVALUATION.md" target="_blank" rel="noopener">EVALUATION.md</a>.</p></div>
+    ${bc ? `<h2>False alarms: <em>what each safeguard prevents</em></h2>
+    <p class="sub">The brief asks for a false-alarm analysis and the changes made to reduce it. Each safeguard is switched off in turn and the test months re-scored.</p>
+    <div class="card"><table><thead><tr><th>Safeguard switched off</th><th class="num">False-alarm signals (test)</th><th class="num">False alerts (test)</th><th class="num">Alert precision (test)</th></tr></thead>
+      <tbody>${bc.ablations.map((r) => `<tr><td>${esc(r["guard removed"])}</td><td class="num">${r.false_alarm_signals_test}</td><td class="num">${r.false_alerts_test}</td><td class="num">${r.precision_test == null ? "—" : Math.round(r.precision_test * 100) + "%"}</td></tr>`).join("")}</tbody></table>
+      <p class="muted">Alert load as built: ${bc.load.alerts_per_week} alerts a week and ${bc.load.inbox_per_month} inbox alerts a month, from ${bc.load.signals_per_week} signals a week read.</p></div>` : ""}`;
 }
 
 /* ---------------- ask (chat) ---------------- */
@@ -460,47 +465,150 @@ async function viewReplay(did = "D04") {
   document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => (location.hash = `#/replay/${b.dataset.d}`)));
 }
 
-/* ---------------- business case (M6) ---------------- */
+/* ---------------- business case (brief §1, §3, §7, Stage 1 + 3; playbook §5–§6) ---------------- */
+/* Every figure is from the data pack and the replay; every assumption is labelled where it is used and listed at the end. */
+const ASSUME = {
+  A1: "Two years of history (Oct 2024 – Sep 2026, 18 disruptions); yearly figures are the two-year totals ÷ 2.",
+  A2: "Alert day = the co-pilot's own first alert in the signal back-test, not hindsight.",
+  A3: "On alert day the co-pilot uses its own estimate of how long supply is cut (event-type default × recovery ratio fitted on D01–D13), not the actual duration.",
+  A4: "Chance an action works in time (our assumption): pre-buy and re-route 90%, air freight 85%, switching or qualifying a known alternate 70%, broker buy 70%, a new supplier or demand shaping 50%, re-allocation 100%.",
+  A5: "Switching to a qualified alternate takes hold in 19 days, as observed in the history, not the playbook's 5–10.",
+  A6: "55% of a shortage becomes lost sales and 45% ships late with contract penalties (matches the data pack's disruption_impacts).",
+  A7: "Only what the co-pilot adds over what the team actually did is credited; the team's own actions still count in every case.",
+  A8: "Wasted spend = the team's actions on parts the data pack marks as having enough cover (had_shortage = False) that the co-pilot's own estimate would also have judged safe.",
+  A9: "Running costs are our estimates (the brief gives none), set on the generous side; model calls at list price with $1 = ₹88.",
+  A10: "Outlier test drops events that lost more than $1M (about ₹8.8 cr), the problem owner's rule.",
+  A11: "Structural moves: supplier outage rate 2.9% per supplier per year (5 outages across 87 suppliers in 2 years), qualification ₹15 lakh per part (playbook range ₹8–25 lakh), holding cost 22% a year (playbook).",
+};
+const aref = (...k) => k.map((x) => `<button type="button" class="aref" data-aref title="${esc(ASSUME[x])}">${x}</button>`).join(" ");
+
 async function viewBusiness() {
-  const [m, rp] = await Promise.all([get("/api/business-case"), get("/api/replays")]);
-  const rs = rp.summary;
-  const b = m.base, ss = m.structural_summary, base = m.scenarios[0];
+  const [m, rp, meta] = await Promise.all([get("/api/business-case"), get("/api/replays"), get("/api/meta")]);
+  const rs = rp.summary, b = m.base, base = m.scenarios[0], h = meta.headline, ts = meta.timeline_summary || {};
   const x = (v) => v == null ? "—" : `${v.toFixed(1)}×`;
-  const pc = (v) => v == null ? "—" : `${Math.round(v * 100)}%`;
-  const moves = m.structural.filter((r) => r.net_annual_value_inr > 0);
+  const cr = (v) => `₹${(v / 1e7).toFixed(2)} cr`;
+  const rows = rp.rows;
+  const net2 = rs.margin_protected_cr + rs.penalties_avoided_cr + rs.avoided_waste_cr - rs.plan_cost_cr;
+  const lossAvoided2 = rs.margin_protected_cr + rs.penalties_avoided_cr + rs.avoided_waste_cr;
+  const ss = m.structural_summary, moves = m.structural.filter((r) => r.net_annual_value_inr > 0);
+  const COST_LABEL = { "build and pilot one off": "Build and 3-month pilot", "news and data feeds": "News and data feeds", hosting: "Hosting",
+    "model calls": "AI model calls", "risk owner": "Risk owner (half a risk analyst)", maintenance: "Maintenance (a quarter of an engineer)" };
+  const COST_BASIS = {
+    "build and pilot one off": "₹35 lakh one-off: connect the ERP stock and in-transit feed, set up, run a 3-month pilot; spread over 3 years.",
+    "news and data feeds": "Allowance for one licensed news feed. The public sources the brief lists (GDELT, PortWatch, Global Trade Alert) are free.",
+    hosting: "Allowance for the web app, a managed database and monitoring.",
+    "model calls": "Calculated: 5,000 signals a day read by a small model, plus briefings and questions on a large model, at list price.",
+    "risk owner": "0.5 of a ~₹24 lakh a year analyst to own the inbox and weekly review; the brief notes nobody owns monitoring today.",
+    maintenance: "0.25 of a ~₹32 lakh a year engineer for rules, data feeds and model updates.",
+  };
+  const SCEN = { "Base: all 18 disruptions": "Base case: all 18 disruptions",
+    "Test period only (Feb–Sep 2026, annualised)": "Only the held-out test months (Feb–Sep 2026), annualised",
+    "Outliers removed (events losing > $1M)": "Big events removed: any disruption that lost more than about ₹8.8 cr",
+    "Half the probability of success": "Every action half as likely to work",
+    "Costs doubled": "Running costs doubled" };
+  const tl = (r) => r.detected ? (r.copilot_lead_days > 0 ? `${r.copilot_lead_days} d before` : "on the day") : "not detected";
+  const teamDay = (r) => { const d = Math.round((new Date(r.team_alert_date) - new Date(r.start_date)) / 864e5); return d === 0 ? "on the day" : d > 0 ? `${d} d after` : `${-d} d before`; };
+  const act = (r) => r.recommended?.length ? r.recommended.slice(0, 2).map((o) => esc(optText(o))).join("; ") + (r.recommended.length > 2 ? ` +${r.recommended.length - 2}` : "") : '<span class="muted">No action (stock judged enough)</span>';
+  const wasteRows = rows.filter((r) => r.team_wasted_inr > 0);
+  const sumBy = (xs) => { const c = {}; xs.forEach((a) => (c[a.action] = (c[a.action] || 0) + 1)); return Object.entries(c).map(([k, n]) => `${esc(k)}${n > 1 ? ` ×${n}` : ""}`).join(", "); };
+
   $("#app").innerHTML = `${hed("Business case · shared", "What resilience is <em>worth</em> to Veltrix.")}
-    <p class="sub">All 18 disruptions replayed as if the co-pilot had been live. Only what it adds over the team's own actions is credited, in margin,
-    weighted by the chance each action works, net of what the actions cost; annualised over 2 years.</p>
-    <div class="tiles"><div class="tile"><b>${inr(b.net)}</b><span>net benefit per year</span></div>
-      <div class="tile"><b>${inr(m.annual_cost_inr)}</b><span>co-pilot running cost per year, including people</span></div>
-      <div class="tile"><b>${x(base.roi)}</b><span>ROI; ${x(Math.min(...m.scenarios.map((r) => r.roi)))} in the harshest sensitivity</span></div>
-      <div class="tile"><b>₹${ss.net_annual_value_cr.toFixed(1)} cr/yr</b><span>extra from ${ss.parts_with_positive_move} structural moves (not in the ROI)</span></div></div>
-    <div class="card"><h3>From revenue protected to net benefit (two years, all 18 disruptions)</h3><table><tbody>
-      <tr><td>Revenue lost to the 18 disruptions</td><td class="num">₹${rs.actual_revenue_lost_cr} cr</td></tr>
-      <tr><td>Revenue the co-pilot's plans would have protected (expected, × chance each plan works)</td><td class="num">₹${rs.revenue_protected_expected_cr} cr</td></tr>
-      <tr><td>…of which is profit: the margin on those sales</td><td class="num">₹${rs.margin_protected_cr} cr</td></tr>
-      <tr><td>+ late-delivery penalties avoided</td><td class="num">₹${rs.penalties_avoided_cr} cr</td></tr>
-      <tr><td>+ wasted spend skipped (stock was enough)</td><td class="num">₹${rs.avoided_waste_cr} cr</td></tr>
-      <tr><td>− cost of the actions it recommends</td><td class="num">−₹${rs.plan_cost_cr} cr</td></tr>
-      <tr><td><b>Net benefit over two years</b> (÷ 2 = ${inr(b.net)} a year)</td><td class="num"><b>₹${(rs.margin_protected_cr + rs.penalties_avoided_cr + rs.avoided_waste_cr - rs.plan_cost_cr).toFixed(2)} cr</b></td></tr></tbody></table>
-      <p class="muted">Revenue protected is sales kept; a business case credits only the profit on those sales, because the cost of making them is spent either way.</p></div>
-    <div class="row"><div class="card"><h3>Benefit per year</h3><table><tbody>
-      <tr><td>Margin protected</td><td class="num">${inr(b.margin_protected)}</td></tr>
-      <tr><td>Penalties avoided</td><td class="num">${inr(b.penalties_avoided)}</td></tr>
-      <tr><td>Spend avoided where cover was enough</td><td class="num">${inr(b.waste_avoided)}</td></tr>
-      <tr><td>Less: cost of recommended actions</td><td class="num">−${inr(b.mitigation_cost)}</td></tr>
-      <tr><td><b>Net</b></td><td class="num"><b>${inr(b.net)}</b></td></tr></tbody></table></div>
-    <div class="card"><h3>Cost per year</h3><table><tbody>${m.cost_rows.map((r) => `<tr><td>${esc(r.item[0].toUpperCase() + r.item.slice(1))}</td><td class="num">${inr(r.annual_inr)}</td></tr>`).join("")}
-      <tr><td><b>Total</b></td><td class="num"><b>${inr(m.annual_cost_inr)}</b></td></tr></tbody></table></div></div>
-    <div class="card"><h3>Sensitivity</h3><table><thead><tr><th>Scenario</th><th class="num">Net benefit / yr</th><th class="num">Cost / yr</th><th class="num">ROI</th><th class="num">Payback (months)</th></tr></thead>
-      <tbody>${m.scenarios.map((r) => `<tr><td>${esc(r.scenario)}</td><td class="num">${inr(r.net_benefit_inr)}</td><td class="num">${inr(r.copilot_cost_inr)}</td><td class="num">${x(r.roi)}</td><td class="num">${r.payback_months ? r.payback_months.toFixed(1) : "—"}</td></tr>`).join("")}</tbody></table></div>
-    <div class="card"><h3>Structural moves for single-source parts (${moves.length} pay back)</h3><table><thead><tr><th>Part</th><th>Description</th><th class="num">Cover (d)</th><th>Move</th><th class="num">Net value / yr</th></tr></thead>
-      <tbody>${moves.map((r) => `<tr><td>${esc(r.part_id)}</td><td>${esc(r.description)}</td><td class="num">${r.cover_days}</td><td>${esc(r.recommendation)}</td><td class="num">${inr(r.net_annual_value_inr)}</td></tr>`).join("")}</tbody></table>
-      <p class="muted">One-off qualification ₹${ss.one_off_qualification_cost_cr.toFixed(1)} cr; extra buffer ${inr(ss.annual_buffer_cost_cr * 1e7)}/yr. An input to next year's sourcing budget, approved by Head of Supply Chain + Quality.</p></div>
-    <div class="card"><h3>False alarms: each guard switched off</h3><table><thead><tr><th>Guard removed</th><th class="num">False signals (test)</th><th class="num">False alerts (test)</th><th class="num">Precision (test)</th></tr></thead>
-      <tbody>${m.ablations.map((r) => `<tr><td>${esc(r["guard removed"])}</td><td class="num">${r.false_alarm_signals_test}</td><td class="num">${r.false_alerts_test}</td><td class="num">${pc(r.precision_test)}</td></tr>`).join("")}</tbody></table>
-      <p class="muted">Load as built: ${m.load.alerts_per_week} alerts a week and ${m.load.inbox_per_month} inbox alerts a month, from ${m.load.signals_per_week} signals a week read.</p></div>
-`;
+    <p class="sub" style="font-size:20px">Replayed over the last two years, the co-pilot nets <b>${inr(b.net)} a year</b> against <b>${inr(m.annual_cost_inr)}</b>
+      a year to run: a <b>${x(base.roi)}</b> return that pays back in about <b>${(base.payback_months * 30).toFixed(0)} days</b>. ${aref("A1", "A9")}</p>
+    <p class="muted">Built the way the brief asks: replay all 18 disruptions with the co-pilot's alert date and top-ranked option, value the result with the playbook's
+      ROI method, and include the co-pilot's own running costs. Labels like <span class="aref">A4</span> point to the assumptions listed at the end.</p>
+
+    <h2>What disruptions <em>cost</em> Veltrix today</h2>
+    <div class="tiles">
+      <div class="tile"><b>₹${h.revenue_lost_inr_cr.toFixed(1)} cr</b><span>revenue lost to ${h.disruptions} disruptions in 24 months; ${h.disruptions_with_stoppage} stopped production</span></div>
+      <div class="tile"><b>₹${h.mitigation_spend_inr_cr.toFixed(1)} cr</b><span>spent on mitigations, of which ₹${h.mitigation_spend_no_shortage_inr_cr.toFixed(1)} cr on parts that had enough stock</span></div>
+      <div class="tile"><b>${ts.median_warning_lead_days ?? 18} d</b><span>median public warning before impact (${ts.disruptions_with_warning ?? 15} of 18 had one)</span></div>
+      <div class="tile"><b>+${ts.median_team_alert_offset_days ?? 1} d / ${h.median_days_impact_to_decision} d</b><span>team's first alert after impact / days to first decision</span></div></div>
+    <p class="muted">All from the data pack (disruptions, mitigation_actions, signals).</p>
+
+    <h2>Replay: all <em>18 disruptions</em></h2>
+    <p class="sub">Each disruption replayed with the co-pilot's own alert day and its top-ranked option on that day, applied to what really happened. ${aref("A2", "A3", "A4", "A5", "A7")}</p>
+    <div class="card"><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Disruption</th><th>Co-pilot alert</th><th>Team alert</th><th>Its top action</th>
+      <th class="num">Action cost</th><th class="num">Revenue lost</th><th class="num">Revenue protected</th><th class="num">Margin protected</th><th class="num">Waste skipped</th></tr></thead><tbody>
+      ${rows.map((r) => `<tr class="click" data-rep="${esc(r.disruption_id)}"><td>${esc(r.disruption_id)}</td><td><b>${esc(r.title)}</b></td><td>${tl(r)}</td><td>${teamDay(r)}</td>
+        <td>${act(r)}</td><td class="num">${inr(r.plan_cost_inr)}</td><td class="num">${inr(r.actual_revenue_lost_inr)}</td>
+        <td class="num">${inr(Math.max(0, r.vs_actual_protected_expected_inr))}</td><td class="num">${inr(r.margin_protected_inr)}</td><td class="num">${inr(r.avoided_waste_inr)}</td></tr>`).join("")}
+      <tr><td></td><td><b>Total, two years</b></td><td></td><td></td><td></td><td class="num"><b>₹${rs.plan_cost_cr} cr</b></td><td class="num"><b>₹${rs.actual_revenue_lost_cr} cr</b></td>
+        <td class="num"><b>₹${rs.revenue_protected_expected_cr} cr</b></td><td class="num"><b>₹${rs.margin_protected_cr} cr</b></td><td class="num"><b>₹${rs.avoided_waste_cr} cr</b></td></tr>
+      </tbody></table></div>
+      <p class="muted">Revenue protected is expected value: what the plan saves × the chance it works. Open a row for its full replay.</p></div>
+
+    <h2>Wasted mitigation spend, <em>with the logic</em></h2>
+    <p class="sub">The brief's metric: ₹${h.mitigation_spend_no_shortage_inr_cr.toFixed(1)} cr of ₹${h.mitigation_spend_inr_cr.toFixed(1)} cr went on parts that turned out to have enough stock.
+      The co-pilot compares each part's days of cover with its own delay estimate; where cover is longer, it says “no action”. ${aref("A3", "A8")}</p>
+    <div class="card"><div style="overflow-x:auto"><table><thead><tr><th>Disruption</th><th>What the team bought</th><th class="num">Team spent</th><th class="num">Co-pilot would have skipped</th><th>Why</th></tr></thead><tbody>
+      ${wasteRows.map((r) => `<tr><td><b>${esc(r.disruption_id)}</b> ${esc(r.title)}</td><td>${sumBy(r.waste_actions)}</td><td class="num">${inr(r.team_wasted_inr)}</td>
+        <td class="num">${inr(r.avoided_waste_inr)}</td><td>${r.avoided_waste_inr >= r.team_wasted_inr - 1 ? "Its estimate showed cover outlasting the delay for every one of these parts."
+          : "It skipped the parts it saw as covered; for the rest its own estimate showed a shortage, so it would also have acted."}</td></tr>`).join("")}
+      <tr><td><b>Total</b></td><td></td><td class="num"><b>₹${rs.team_wasted_cr} cr</b></td><td class="num"><b>₹${rs.avoided_waste_cr} cr</b></td><td></td></tr></tbody></table></div>
+      <p class="muted">Most of this was “pre-buy buffer stock (late)”: ordered after the event began and arriving after the peak (data pack outcome notes).</p></div>
+
+    <h2>Loss avoided, by the <em>playbook's formula</em></h2>
+    <p class="sub">Playbook §6: <b>ROI = (loss avoided − cost) ÷ cost</b>, where loss avoided = margin protected + penalties avoided + expedite costs avoided.
+      Revenue protected is sales kept; only the profit on those sales counts, because the cost of making them is spent either way. ${aref("A6", "A7")}</p>
+    <div class="card"><table><thead><tr><th>Line</th><th class="num">Two years</th><th class="num">Per year</th></tr></thead><tbody>
+      <tr><td class="muted">Revenue protected (sales kept, for reference)</td><td class="num muted">₹${rs.revenue_protected_expected_cr} cr</td><td class="num muted">₹${(rs.revenue_protected_expected_cr / 2).toFixed(2)} cr</td></tr>
+      <tr><td>Margin protected</td><td class="num">₹${rs.margin_protected_cr} cr</td><td class="num">${inr(b.margin_protected)}</td></tr>
+      <tr><td>+ Penalties avoided</td><td class="num">₹${rs.penalties_avoided_cr} cr</td><td class="num">${inr(b.penalties_avoided)}</td></tr>
+      <tr><td>+ Expedite and buffer spend avoided (the wasted spend above)</td><td class="num">₹${rs.avoided_waste_cr} cr</td><td class="num">${inr(b.waste_avoided)}</td></tr>
+      <tr><td><b>= Loss avoided</b></td><td class="num"><b>₹${lossAvoided2.toFixed(2)} cr</b></td><td class="num"><b>${inr(b.margin_protected + b.penalties_avoided + b.waste_avoided)}</b></td></tr>
+      <tr><td>− Cost of the actions it recommends</td><td class="num">−₹${rs.plan_cost_cr} cr</td><td class="num">−${inr(b.mitigation_cost)}</td></tr>
+      <tr><td><b>= Net benefit</b></td><td class="num"><b>₹${net2.toFixed(2)} cr</b></td><td class="num"><b>${inr(b.net)}</b></td></tr></tbody></table>
+      <p class="muted">ROI on the recommended actions alone (margin + penalties they protect, before any wasted spend skipped) =
+        (₹${(rs.margin_protected_cr + rs.penalties_avoided_cr).toFixed(2)} cr − ₹${rs.plan_cost_cr} cr) ÷ ₹${rs.plan_cost_cr} cr ≈ <b>${rs.roi_on_plans}×</b>
+        (the playbook's worked example is about 3.1× for a single pre-buy).</p></div>
+
+    <h2>ROI on the co-pilot itself, <em>including running costs</em></h2>
+    <p class="sub">The brief asks for this explicitly (Stage 3). The brief and playbook give no running costs, so these are our estimates, labelled as such. ${aref("A9")}</p>
+    <div class="card"><table><thead><tr><th>Running cost</th><th class="num">Per year</th><th>Basis (our estimate unless stated)</th></tr></thead><tbody>
+      ${m.cost_rows.map((r) => `<tr><td>${esc(COST_LABEL[r.item] || r.item)}</td><td class="num">${inr(r.annual_inr)}</td><td class="muted">${esc(COST_BASIS[r.item] || r.note)}</td></tr>`).join("")}
+      <tr><td><b>Total</b></td><td class="num"><b>${inr(m.annual_cost_inr)}</b></td><td></td></tr></tbody></table>
+      <table style="margin-top:16px"><tbody>
+        <tr><td>Net benefit per year (above)</td><td class="num">${inr(b.net)}</td></tr>
+        <tr><td>Running cost per year</td><td class="num">${inr(m.annual_cost_inr)}</td></tr>
+        <tr><td><b>ROI = (net benefit − running cost) ÷ running cost</b></td><td class="num"><b>${x(base.roi)}</b></td></tr>
+        <tr><td>Payback: running cost ÷ net benefit per month</td><td class="num">${base.payback_months.toFixed(1)} months</td></tr></tbody></table></div>
+
+    <h2>How <em>robust</em> is it?</h2>
+    <p class="sub">The same calculation with harsher assumptions. It still pays back in every case. ${aref("A10")}</p>
+    <div class="card"><table><thead><tr><th>Scenario</th><th class="num">Net benefit / yr</th><th class="num">Running cost / yr</th><th class="num">ROI</th><th class="num">Payback (months)</th></tr></thead>
+      <tbody>${m.scenarios.map((r) => `<tr><td>${esc(SCEN[r.scenario] || r.scenario)}</td><td class="num">${inr(r.net_benefit_inr)}</td><td class="num">${inr(r.copilot_cost_inr)}</td>
+        <td class="num"><b>${x(r.roi)}</b></td><td class="num">${r.payback_months ? r.payback_months.toFixed(1) : "—"}</td></tr>`).join("")}</tbody></table></div>
+
+    <h2>Structural moves: <em>fix it before</em> it happens</h2>
+    <p class="sub">The brief's stretch goal: dual sourcing and buffer levels from the back-test, with cost and avoided loss. Kept out of the ROI above;
+      it is an input to next year's sourcing budget, approved by Head of Supply Chain + Quality. ${aref("A11")}</p>
+    <div class="card"><div style="overflow-x:auto"><table><thead><tr><th>Part</th><th class="num">Cover / lead time (d)</th><th>Move</th><th class="num">One-off cost</th><th class="num">Expected loss avoided / yr, net</th></tr></thead><tbody>
+      ${moves.map((r) => `<tr><td><b>${esc(r.description)}</b> <span class="pid">${esc(r.part_id)}</span></td><td class="num">${r.cover_days} / ${r.lead_time_days}</td>
+        <td>${esc(nameIds(r.recommendation))}</td><td class="num">${/Qualify/.test(r.recommendation) ? inr(r.qualify_cost_once_inr) : "—"}</td><td class="num">${inr(r.net_annual_value_inr)}</td></tr>`).join("")}
+      <tr><td><b>Total (${moves.length} moves)</b></td><td></td><td></td><td class="num"><b>₹${ss.one_off_qualification_cost_cr.toFixed(1)} cr</b></td><td class="num"><b>₹${ss.net_annual_value_cr.toFixed(1)} cr</b></td></tr></tbody></table></div>
+      <p class="muted">Example: D05, the Penang fire, cost ₹61.4 cr. Qualifying the alternate MOSFET supplier in advance (about ₹15 lakh) would have protected about ₹49.8 cr of it.</p></div>
+
+    <h2>A <em>3-month pilot</em> the COO can approve</h2>
+    <div class="card" id="pilot"><table><tbody>
+      <tr><td><b>What</b></td><td>The co-pilot on Veltrix's live stock feed and the free public feeds (news, port activity, trade measures), for the two categories with the
+        most revenue behind single-source parts: PCBs and semiconductors. Alerts go to the category managers and the Head of Supply Chain.</td></tr>
+      <tr><td><b>Cost</b></td><td>The build-and-pilot line above (₹35 lakh one-off, our estimate), plus the risk owner's time for three months.</td></tr>
+      <tr><td><b>What we measure</b></td><td>The brief's own metrics on live signals: recall ≥ 80%, alert precision ≥ 60%, warning ≥ 7 days before impact,
+        signal to quantified impact &lt; 5 minutes, and mitigation spend on parts that had enough stock (today ₹4.6 cr in two years).</td></tr>
+      <tr><td><b>Go / no-go</b></td><td>Go to full roll-out if alert precision ≥ 60% with no more than about 2 inbox alerts a week, and the team says the briefings are
+        forwardable without edits. Stop if the team ignores the inbox.</td></tr>
+      <tr><td><b>Guardrails</b></td><td>The co-pilot recommends; people decide. It never orders, books freight or contacts suppliers. Supplier data stays out of model training.</td></tr>
+      <tr><td><b>Approval</b></td><td>COO, with the CFO for the budget.</td></tr></tbody></table>
+      <div class="btns" style="margin-top:12px"><button class="btn secondary" id="printpilot">Print this page</button></div></div>
+
+    <h2 id="assumptions">Assumptions, <em>in one place</em></h2>
+    <div class="card"><table><tbody>${Object.entries(ASSUME).map(([k, v]) => `<tr><td class="num"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</tbody></table>
+      <p class="muted">From the data pack: revenue, losses, mitigation actions and their costs, stock cover, lead times, margins, penalties, the 55% lost-sale share.
+      From the playbook: the impact method, the ranking rule, the ROI formula, holding cost and qualification cost ranges. Everything else above is labelled as ours.</p></div>`;
+  document.querySelectorAll("[data-rep]").forEach((r) => (r.onclick = () => (location.hash = `#/replay/${r.dataset.rep}`)));
+  $("#printpilot").onclick = () => print();
+  document.querySelectorAll("[data-aref]").forEach((b) => (b.onclick = () => $("#assumptions").scrollIntoView({ behavior: "smooth" })));
 }
 
 /* ---------------- live news feed ---------------- */
