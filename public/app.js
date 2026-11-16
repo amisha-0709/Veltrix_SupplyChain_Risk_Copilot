@@ -393,6 +393,20 @@ async function viewAsk() {
 /* ---------------- replay (T10) ---------------- */
 function replayVerdict(r) {
   const est = r.seen.delay_estimate_days, act = r.actual_delay_days, lost = r.actual_revenue_lost_inr;
+  if (r.had_warning === false) {          /* sudden event: the brief expects day-one value, not early warning */
+    const teamDay = r.team_alert_date ? Math.round((new Date(r.team_alert_date) - new Date(r.start_date)) / 864e5) : null;
+    const when = r.detected ? `it alerted on impact day${teamDay > 0 ? `, ${teamDay} day${teamDay === 1 ? "" : "s"} before the team noticed` : ""} and ${r.team_decision_day} days before the team's first decision`
+      : "it would have quantified the impact on day one";
+    const lc = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+    const list = (xs) => xs.length > 1 ? xs.slice(0, -1).join(", ") + " and " + xs[xs.length - 1] : xs[0];
+    const fast = (r.top_options || []).find((o) => o.fixes_shortage && (o.net_value_inr ?? 0) < 0 && o.on_time !== false);
+    const recs = r.recommended || [];
+    const did = recs.length ? `Its recommendation: ${list(recs.map((x) => lc(optText(x))))}${r.margin_protected_inr > 0 ? `, keeping ${inr(r.margin_protected_inr)} more profit` : ""}${r.plan_cost_inr > 0 ? ` for ${inr(r.plan_cost_inr)}` : ""}.`
+      : lost > 0 ? "No option paid back on what it knew that day, so the loss stands." : "Stock covered the outage: no action, no spend.";
+    const st = r.structural && r.structural.revenue_protected_inr > 0
+      ? ` The real lesson is structural: ${list(r.structural.parts.map((p) => { const m = p.match(/^(PRT-\d+) → qualify (SUP-\d+) \((\d+) wk\)/); return m ? `qualifying ${supName(m[2])} for the ${partName(m[1])} (${m[3]} weeks)` : nameIds(p.replace(/ in advance$/, "")); }))} in advance, for about ${inr(r.structural.cost_inr)}, would have protected about ${inr(r.structural.revenue_protected_inr)}.` : "";
+    return `No public warning was possible, so ${when}. ${fast ? `The only fast fix, ${lc(optText(fast))} (${inr(fast.cost_inr)}), costs more than it saves. ` : ""}${did}${st}`;
+  }
   if (!r.detected) return `No public warning, so no early alert; on day one it would have quantified the impact and ranked options.`;
   if (!r.recommended.length && lost > 0 && est != null && est < act)
     return `It alerted ${r.copilot_lead_days} days early, but expected supply to be cut for ${est} days; it was actually ${act}. Stock looked enough, so it advised monitoring, and the ${inr(lost)} loss would still have happened. A miss on duration, not on detection.`;
