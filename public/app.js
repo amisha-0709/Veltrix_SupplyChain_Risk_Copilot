@@ -24,6 +24,13 @@ const node = (n) => { const [t, name] = n.split(":"); return `<span class="tag" 
 
 /* page heading: a mono kicker over a serif headline (one italic phrase in the pigment; static text only) */
 const hed = (k, h) => `<p class="kicker">${esc(k)}</p><h1>${h}</h1>`;
+/* Glance first, detail on demand. glance(): one sentence + up to 4 key numbers. fold(): a tile showing a title, one key
+   figure and one line; the full table or chart opens beneath it. Callers pass already-escaped HTML. */
+const glance = (sentence, tiles = []) => `<div class="glance">${sentence ? `<p class="gs">${sentence}</p>` : ""}
+  ${tiles.length ? `<div class="tiles">${tiles.map(([b, s]) => `<div class="tile"><b>${b}</b><span>${s}</span></div>`).join("")}</div>` : ""}</div>`;
+const fold = (title, body, { fig = "", line = "", open = false, id = "" } = {}) =>
+  `<details class="fold"${open ? " open" : ""}${id ? ` id="${id}"` : ""}><summary><span class="ft">${title}</span><b class="ff">${fig}</b>
+    <span class="fl">${line}</span><span class="fx" aria-hidden="true"></span></summary><div class="fb">${body}</div></details>`;
 /* role ("View as"): remembered in this browser; no sign-in */
 const ROLE_NAMES = { category: "Category manager", hosc: "Head of Supply Chain", coo: "COO", sales: "Sales / key-account manager" };
 const role = () => { let r = ""; try { r = localStorage.getItem("persona") || ""; } catch (e) {} return ROLE_NAMES[r] ? r : ""; };
@@ -58,8 +65,7 @@ async function viewInbox(tab = "inbox") {
     ${hed("Alerts · shared", "Every signal, <em>one alert</em> per event.")}${roleNote()}
     ${myCat ? `<p class="sub"><b>${nMine}</b> of ${inbox.length} inbox alerts are yours (${esc(myCat)}): listed first and marked.</p>` : ""}
     ${r0 === "coo" ? `<p class="sub">Sorted by revenue at risk, largest first.</p>` : ""}
-    <p class="sub">Every external signal that touches Veltrix's suppliers, ports, lanes or commodities becomes one alert per event, quantified with
-    the playbook method. Priority ≥ 6 goes to the inbox; the rest is the watch log. Stock position: ${esc(meta.snapshot_date)}.</p>
+    <p class="muted">One alert per event, priced on stock as of ${esc(meta.snapshot_date)}. Priority 6+ goes to the inbox; the rest is the watch log.</p>
     <div class="tiles">
       <div class="tile"><b>${inbox.length}</b><span>alerts needing an owner (priority ≥ 6)</span></div>
       <div class="tile"><b>${(bt.signals.test.recall * 100).toFixed(1)}%</b><span>recall on the test period (target ≥ 80%)</span></div>
@@ -110,6 +116,8 @@ async function viewAlert(id, tab = "options") {
   const skus = (a.skus || []).filter((s) => s.units_short > 0).map((s) => `<tr><td>${esc(s.sku_id)}</td><td>${esc(s.customer)}</td><td>${esc(s.binding_part)}</td>
     <td class="num">${s.shortage_days}</td><td class="num">${(s.units_short || 0).toLocaleString("en-IN")}</td><td class="num">${inr(s.revenue_at_risk_inr)}</td>
     <td class="num">${inr(s.margin_at_risk_inr)}</td><td class="num">${inr(s.penalty_inr)}</td></tr>`).join("");
+  const maxShort = Math.max(0, ...(a.parts || []).map((p) => p.shortage_days || 0));
+  const hitCusts = uniq((a.skus || []).filter((s) => s.units_short > 0).map((s) => s.customer));
   const r0 = role();
   const canDecide = r0 === "sales" ? [] : r0 === "category" ? ["proposed", "watching"] : ["proposed", "approved", "escalated", "rejected", "watching", "dismissed"];
   const myBy = r0 ? ROLE_NAMES[r0] : a.owner;
@@ -159,15 +167,18 @@ async function viewAlert(id, tab = "options") {
       <button class="btn secondary" id="copy">Copy as email</button></div></div>
     <p class="muted">${esc(a.kind)} · first seen ${date(a.first_seen)} · ${a.n_signals} signals from ${a.n_sources} sources
       · impact on stock as of 30 Sep 2026 · quantified in ${a.seconds_to_quantify}s${a.actual_disruptions?.length ? ` · history: ${esc(a.actual_disruptions.join(", "))}` : ""}</p>
-    ${alertVisual(a)}
-    <div class="row">
-      <div class="card" style="padding:0;border:0"><iframe class="brief" id="brief" title="One-page briefing"></iframe></div>
-      <div><div class="tabs">${["options", "working", "sources", "decide"].map((t) =>
+    ${flowStrip(a)}
+    ${fold("What to do", `<div class="tabs">${["options", "working", "sources", "decide"].map((t) =>
         `<button data-t="${t}" class="${t === tab ? "on" : ""}">${{ options: "Options", working: "Working", sources: "Sources", decide: "Decide" }[t]}</button>`).join("")}</div>
-      <div class="card" id="tab">${T[tab]}</div></div>
-    </div>`;
+      <div class="card" id="tab">${T[tab]}</div>`,
+      { fig: rec.length ? `${rec.length} option${rec.length === 1 ? "" : "s"}` : "No action", line: rec[0] ? `Best: ${esc(optText(rec[0]))} · ${esc(rec[0].approver)}` : "Stock outlasts the expected delay", open: true })}
+    ${fold("Stock runs out vs supply comes back", coverChart(a) || '<p class="muted">No part is short.</p>',
+      { fig: maxShort > 0 ? `short ${maxShort.toFixed(0)} d` : "Cover holds", line: maxShort > 0 ? "Where each part's stock ends and when supply returns" : "Every part's stock outlasts the expected delay" })}
+    ${fold("Where it hits", traceCols(a), { fig: `${hitCusts.length} customer${hitCusts.length === 1 ? "" : "s"}`, line: "News → suppliers → parts → products → customers" })}
+    ${fold("One-page briefing", `<iframe class="brief" id="brief" title="One-page briefing"></iframe>`, { fig: "1 page", line: "Ready to forward, with every source cited", id: "fbrief" })}`;
   const f = $("#brief"); f.srcdoc = await briefFrame(a);
-  f.onload = () => { try { f.style.height = f.contentDocument.body.scrollHeight + 20 + "px"; } catch (e) {} };
+  const fit = () => { try { if (f.contentDocument?.body?.scrollHeight) f.style.height = f.contentDocument.body.scrollHeight + 20 + "px"; } catch (e) {} };
+  f.onload = fit; $("#fbrief").addEventListener("toggle", fit);
   $("#copy").onclick = async () => { try { await navigator.clipboard.writeText(a.brief_text); toast("Briefing copied"); } catch (e) { toast("Copy blocked by the browser"); } };
   document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => viewAlert(id, b.dataset.t)));
   const form = $("#dec");
@@ -188,13 +199,21 @@ async function viewRegister() {
       m += `<div class="${pcls(p)}" style="opacity:${n ? 1 : 0.25}" title="L${L} × I${I} = ${p}">${n || ""}</div>`; }
   }
   m += "</div>";
-  $("#app").innerHTML = `${hed("Risk register · shared", "Open risks, <em>owned</em> and scored.")}
-    <p class="sub">Open risks scored likelihood × impact (playbook §2), with owner, response time and status. Status shows the latest human decision.</p>
-    <div class="row"><div class="card"><table><thead><tr><th>Priority</th><th>Risk</th><th>Owner</th><th>Response</th><th class="num">At risk</th><th>Status</th></tr></thead><tbody>
-    ${rows.map((r) => `<tr class="click" data-id="${esc(r.alert_id)}"><td>${pill(r.priority, r.likelihood, r.impact)}</td><td><b>${esc(r.title)}</b>
+  const head = `<thead><tr><th>Priority</th><th>Risk</th><th>Owner</th><th>Response</th><th class="num">At risk</th><th>Status</th></tr></thead>`;
+  const tr = (r) => `<tr class="click" data-id="${esc(r.alert_id)}"><td>${pill(r.priority, r.likelihood, r.impact)}</td><td><b>${esc(r.title)}</b>
       <div class="muted">${esc(r.kind)} · ${date(r.first_seen)}</div></td><td>${esc(r.owner.replace("Category manager: ", "CM: "))}</td>
-      <td>${esc(r.response.split(";")[0])}</td><td class="num">${esc(r.revenue_at_risk_fmt)}</td><td>${esc(r.status)}</td></tr>`).join("")}
-    </tbody></table></div><div class="card"><h3>Likelihood × impact</h3>${m}<p class="muted">Count of risks per cell. 20–25 war-room · 12–19 decide in 48 h · 6–11 owner assigned · 1–5 watch.</p></div></div>`;
+      <td>${esc(r.response.split(";")[0])}</td><td class="num">${esc(r.revenue_at_risk_fmt)}</td><td>${esc(r.status)}</td></tr>`;
+  const sorted = rows.slice().sort((x, y) => y.priority - x.priority);
+  const top = sorted.slice(0, 5), more = sorted.slice(5);
+  const urgent = rows.filter((r) => r.priority >= 12).length, owned = rows.filter((r) => r.priority >= 6).length;
+  $("#app").innerHTML = `${hed("Risk register · shared", "Open risks, <em>owned</em> and scored.")}
+    ${glance(`<b>${rows.length}</b> open risks, scored likelihood × impact. <b>${urgent}</b> need a decision within 48 hours.`,
+      [[rows.length, "open risks"], [urgent, "priority 12+: decide within 48 h"], [owned, "priority 6+: owner assigned"], [rows.length - owned, "on watch"]])}
+    ${fold("Top risks", `<div style="overflow-x:auto"><table>${head}<tbody>${top.map(tr).join("")}</tbody></table></div>
+      ${more.length ? `<details class="more"><summary>Show all ${rows.length} risks</summary><div style="overflow-x:auto"><table>${head}<tbody>${more.map(tr).join("")}</tbody></table></div></details>` : ""}`,
+      { fig: top[0] ? `P${top[0].priority}` : "—", line: top[0] ? `Highest: ${esc(top[0].title)}` : "No open risk", open: true })}
+    ${fold("Likelihood × impact matrix", `${m}<p class="muted">Count of risks per cell. 20–25 war-room · 12–19 decide in 48 h · 6–11 owner assigned · 1–5 watch.</p>`,
+      { fig: `${rows.length} risks`, line: "Where each risk sits on the playbook's 5 × 5 grid" })}`;
   document.querySelectorAll("tr[data-id]").forEach((r) => (r.onclick = () => (location.hash = `#/alert/${r.dataset.id}`)));
 }
 
@@ -209,16 +228,18 @@ async function viewExposure() {
   const [ex, meta] = await Promise.all([get("/api/exposure"), get("/api/meta")]);
   const h = meta.headline; const cr = (v) => `₹${Math.round(v).toLocaleString("en-IN")} cr`;
   const ss = ex.parts.filter((p) => p.single_source);
+  const val = "revenue_behind_single_source_inr_cr";
+  const topPort = ex.ports.slice().sort((a, b) => b[val] - a[val])[0], topCat = ex.categories.slice().sort((a, b) => b[val] - a[val])[0];
+  const fragile = ss.filter((p) => p.days_of_cover < p.lead_time_days).length;
+  const top5 = (rows, label) => `${bars(rows.slice(0, 5), "node", val, cr)}${rows.filter((r) => r[val] > 0).length > 5 ? `<details class="more"><summary>Show all</summary>${bars(rows.slice(5), "node", val, cr)}</details>` : ""}`;
   $("#app").innerHTML = `${hed("Exposure · shared", "Where one event <em>stops the line</em>.")}
-    <p class="sub">Where one event stops the line. Revenue behind a node = annual revenue of every product that needs a single-source part
-    shipped from or through it (a product stops when any one part runs out).</p>
-    <div class="tiles"><div class="tile"><b>${h.single_source_cover_below_lead} of ${h.single_source_parts}</b><span>single-source parts with cover below lead time</span></div>
-      <div class="tile"><b>${h.east_asia_spend_pct}%</b><span>of ₹${Math.round(h.material_spend_inr_cr)} cr material spend ships from East Asia</span></div>
-      <div class="tile"><b>${h.lost_revenue_via_single_source_pct}%</b><span>of past lost revenue came through single-source parts</span></div>
-      <div class="tile"><b>${h.single_source_median_cover} vs ${h.single_source_median_lead} d</b><span>median cover vs lead time, single-source parts</span></div></div>
-    <div class="row"><div class="card"><h3>By port of loading</h3>${bars(ex.ports, "node", "revenue_behind_single_source_inr_cr", cr)}</div>
-      <div class="card"><h3>By commodity</h3>${bars(ex.categories, "node", "revenue_behind_single_source_inr_cr", cr)}</div></div>
-    <div class="card"><h3>Single-source parts, most fragile first</h3>
+    ${glance(`<b>${h.lost_revenue_via_single_source_pct}%</b> of past lost revenue came through single-source parts. The biggest single point of failure is <b>${esc(topPort?.node || "")}</b>.`,
+      [[`${h.single_source_cover_below_lead} of ${h.single_source_parts}`, "single-source parts with cover below lead time"], [`${h.east_asia_spend_pct}%`, `of ₹${Math.round(h.material_spend_inr_cr)} cr material spend ships from East Asia`],
+       [`${h.lost_revenue_via_single_source_pct}%`, "of past lost revenue came through single-source parts"], [`${h.single_source_median_cover} vs ${h.single_source_median_lead} d`, "median cover vs lead time, single-source parts"]])}
+    ${fold("By port of loading", top5(ex.ports), { fig: topPort ? cr(topPort[val]) : "—", line: topPort ? `${esc(topPort.node)}: revenue behind single-source parts shipped from it` : "", open: true })}
+    ${fold("By commodity", top5(ex.categories), { fig: topCat ? cr(topCat[val]) : "—", line: topCat ? `${esc(topCat.node)}: revenue behind single-source parts in it` : "" })}
+    ${fold("Single-source parts, most fragile first", `<p class="muted" style="margin-top:0">Revenue behind a node = annual revenue of every product that needs a single-source part
+    shipped from or through it (a product stops when any one part runs out).</p><div class="card">
       <div class="legend"><span><span class="sw hatch"></span>days of cover</span><span><span class="sw rule"></span>supplier lead time</span></div>
       <table><thead><tr><th>Part</th><th>Supplier · port</th><th class="num">Cover</th><th class="num">Lead</th><th>Cover vs lead</th><th class="num">SKUs</th>
       <th class="num">Revenue dep. (₹ cr/yr)</th><th>Fallback</th></tr></thead><tbody>
@@ -227,7 +248,7 @@ async function viewExposure() {
         <td><div class="cov"><i style="width:${Math.min(100, (p.days_of_cover / 65) * 100)}%"></i><b style="left:${Math.min(100, (p.lead_time_days / 65) * 100)}%"></b></div></td>
         <td class="num">${p.n_skus}</td><td class="num">${Math.round(p.revenue_dependent_inr_cr)}</td>
         <td>${p.unqualified_alternate_supplier_id ? `unqualified ${esc(p.unqualified_alternate_supplier_id)} (${p.qualification_weeks_if_unqualified} wk)` : '<b style="color:var(--crit)">none</b>'}</td></tr>`).join("")}
-      </tbody></table></div>`;
+      </tbody></table></div>`, { fig: `${fragile} of ${ss.length}`, line: "single-source parts whose stock runs out before a new order could arrive" })}`;
 }
 
 const EXAMPLES = [
@@ -295,22 +316,21 @@ async function viewBacktest() {
   const s = b.signals.test, a = b.alerts.test, l = b.lead.test;
   const m2 = b.m2?.summary;
   $("#app").innerHTML = `${hed("Evidence · shared", "Tested on months it <em>never saw</em>.")}
-    <p class="sub">Every signal from Oct 2024 to Sep 2026 was replayed through the co-pilot. Rules were tuned on the train period; results below are the test period
-    (from 1 Feb 2026, disruptions D14–D18), scored against the ground-truth labels.</p>
-    <div class="tiles"><div class="tile"><b>${(s.recall * 100).toFixed(1)}%</b><span>recall: ${s.tp}/${s.relevant} relevant signals caught (target ≥ 80%)</span></div>
-      <div class="tile"><b>${Math.round(a.precision * 100)}%</b><span>alert precision: ${a.relevant_alerts}/${a.alerts} alerts relevant; ${s.fp} false-alarm signals (target ≥ 60%)</span></div>
-      <div class="tile"><b>${l.median_lead_days.toFixed(1)} d</b><span>median warning before impact; ${l.detected}/${l.disruptions_with_warning} warned disruptions caught (target ≥ 7 d)</span></div>
-      ${m2 ? `<div class="tile"><b>${m2.A.median_abs_err_pct.toFixed(1)}%</b><span>impact engine median error replaying D01–D18 (${esc(m2.A.within_25pct)} within ±25%)</span></div>` : ""}</div>
-    <div class="card"><h3>Lead time per disruption</h3><table><thead><tr><th>ID</th><th>Disruption</th><th>Split</th><th>Warning?</th><th>Co-pilot alert</th>
+    ${glance(`Tuned on the training months, then scored once on months it never saw (Feb–Sep 2026): it beats every target the brief sets. All 10 of the brief's test scenarios pass.`,
+      [[`${(s.recall * 100).toFixed(1)}%`, `recall: ${s.tp}/${s.relevant} relevant signals caught (target ≥ 80%)`], [`${Math.round(a.precision * 100)}%`, `alert precision: ${a.relevant_alerts}/${a.alerts} alerts relevant (target ≥ 60%)`],
+       [`${l.median_lead_days.toFixed(1)} d`, `median warning before impact (target ≥ 7 d)`], m2 ? [`${m2.A.median_abs_err_pct.toFixed(1)}%`, `impact engine median error, D01–D18 (${esc(m2.A.within_25pct)} within ±25%)`] : ["86%", "alert precision on real 2024 news"]])}
+    ${fold("Lead time per disruption", `<div class="card"><table><thead><tr><th>ID</th><th>Disruption</th><th>Split</th><th>Warning?</th><th>Co-pilot alert</th>
       <th class="num">Lead (d)</th><th class="num">Team (d)</th><th class="num">Days gained</th></tr></thead><tbody>
       ${b.lead_table.map((r) => `<tr><td>${esc(r.disruption_id)}</td><td>${esc(r.title)}</td><td>${esc(r.split)}</td><td>${r.had_warning ? "yes" : "sudden"}</td>
         <td>${date(r.first_alert)}</td><td class="num">${r.lead_days ?? "—"}</td><td class="num">${r.team_lead_days}</td><td class="num">${r.days_gained_vs_team ?? "—"}</td></tr>`).join("")}
-      </tbody></table><p class="muted">Lead = disruption start − co-pilot's first alert. Team = start − team's first internal alert (negative = noticed after impact).</p></div>
-    <div class="card"><h3>Test-period misses (${b.misses.length}) and false alarms (${b.false_alarms.length})</h3>
+      </tbody></table><p class="muted">Lead = disruption start − co-pilot's first alert. Team = start − team's first internal alert (negative = noticed after impact).</p></div>`,
+      { fig: `${l.detected}/${l.disruptions_with_warning}`, line: "warned disruptions caught early; days gained over the team for each" })}
+    ${fold("Misses and false alarms", `<div class="card">
       <table><tbody>${b.misses.map((m) => `<tr><td>miss</td><td>${esc(m.linked_disruption_id)}</td><td>${esc(m.text)}</td><td class="num">score ${m.score}</td></tr>`).join("")}
       ${b.false_alarms.map((m) => `<tr><td>false alarm</td><td></td><td>${esc(m.text)}</td><td class="num">score ${m.score}</td></tr>`).join("")}</tbody></table>
-      <p class="muted">The acceptance tests T1–T10 can be run live from <a href="#/simulate">Check a headline</a>, <a href="#/ask">Ask</a> and <a href="#/replay/D05">Replay D05</a>.</p></div>
-    <h2>Beyond the data pack: <em>harder</em> news</h2>
+      <p class="muted">The acceptance tests T1–T10 can be run live from <a href="#/simulate">Check a headline</a>, <a href="#/ask">Ask</a> and <a href="#/replay/D05">Replay D05</a>.</p></div>`,
+      { fig: `${b.misses.length} · ${b.false_alarms.length}`, line: "test-period misses · false alarms, each listed with its score" })}
+    ${fold("Beyond the data pack: harder news", `
     <p class="sub">Rules were changed on train data only, then each test set was scored once. Real news: 416 archived headlines from 2023–24
       (Red Sea, Taiwan quake, Baltimore bridge, gallium controls and three quiet periods), tuned on 2023 and scored on 2024.</p>
     <div class="card"><table><thead><tr><th>Measure</th><th class="num">Brief's target</th><th class="num">Two-year forecast test</th><th class="num">Real news, 2024</th></tr></thead><tbody>
@@ -320,12 +340,14 @@ async function viewBacktest() {
       <tr><td>False alerts per week</td><td class="num">—</td><td class="num">—</td><td class="num">0.12</td></tr>
       <tr><td>Median warning before impact</td><td class="num">≥ 7 d</td><td class="num">13.3 d</td><td class="num">—</td></tr></tbody></table>
       <p class="muted">Most real-news misses are follow-up stories about a crisis that already has an open alert. Method and caveats:
-      <a href="https://github.com/amisha-0709/Veltrix_SupplyChain_Risk_Copilot/blob/main/docs/EVALUATION.md" target="_blank" rel="noopener">EVALUATION.md</a>.</p></div>
-    ${bc ? `<h2>False alarms: <em>what each safeguard prevents</em></h2>
+      <a href="https://github.com/amisha-0709/Veltrix_SupplyChain_Risk_Copilot/blob/main/docs/EVALUATION.md" target="_blank" rel="noopener">EVALUATION.md</a>.</p></div>`,
+      { fig: "86% · 68%", line: "precision and recall on real 2024 news it was not tuned on; 6 of 6 real events alerted" })}
+    ${bc ? fold("False alarms: what each safeguard prevents", `
     <p class="sub">The brief asks for a false-alarm analysis and the changes made to reduce it. Each safeguard is switched off in turn and the test months re-scored.</p>
     <div class="card"><table><thead><tr><th>Safeguard switched off</th><th class="num">False-alarm signals (test)</th><th class="num">False alerts (test)</th><th class="num">Alert precision (test)</th></tr></thead>
       <tbody>${bc.ablations.map((r) => `<tr><td>${esc(r["guard removed"])}</td><td class="num">${r.false_alarm_signals_test}</td><td class="num">${r.false_alerts_test}</td><td class="num">${r.precision_test == null ? "—" : Math.round(r.precision_test * 100) + "%"}</td></tr>`).join("")}</tbody></table>
-      <p class="muted">Alert load as built: ${bc.load.alerts_per_week} alerts a week and ${bc.load.inbox_per_month} inbox alerts a month, from ${bc.load.signals_per_week} signals a week read.</p></div>` : ""}`;
+      <p class="muted">Alert load as built: ${bc.load.alerts_per_week} alerts a week and ${bc.load.inbox_per_month} inbox alerts a month, from ${bc.load.signals_per_week} signals a week read.</p></div>`,
+      { fig: `${bc.load.inbox_per_month}/month`, line: "inbox alerts as built; each safeguard switched off in turn to show what it prevents" }) : ""}`;
 }
 
 /* ---------------- ask (chat) ---------------- */
@@ -372,10 +394,8 @@ function renderChat() {
 }
 async function viewAsk() {
   $("#app").innerHTML = `${hed("Ask · shared", "Ask the <em>co-pilot</em>.")}<nav class="seg" aria-label="Ask mode"><a href="#/ask" class="on">Ask a question</a><a href="#/simulate" class="">Check a headline</a></nav>
-    <p class="sub"><b>Ask</b> is for questions about scenarios and your own data: “What if Kaohsiung closes for ten days?”, “Which customers miss 95% OTIF if…?”.
-    You get a direct answer with the working. <b>Check a headline</b> is for a news item: it runs as if the news just arrived and gives a full alert
-    (triage, linked parts and customers, ₹ impact, ranked options, briefing). Typos, Hinglish and comparisons are fine; every number comes from the impact engine.
-    <span id="eng" class="muted"></span></p>
+    <p class="muted"><b>Ask</b> answers questions about scenarios and your data, with the working. For a news item, use <b>Check a headline</b>.
+    Typos and Hinglish are fine; every number comes from the impact engine. <span id="eng"></span></p>
     <div class="examples">${ASK_EXAMPLES.map((e, i) => `<button data-i="${i}">${esc(e)}</button>`).join("")}</div>
     <div id="log"></div>
     <form class="card stack" id="askf"><label>Your question<input name="q" required maxlength="400" placeholder="e.g. Which products stop first if Ningbo closes for three weeks?"></label>
@@ -428,27 +448,14 @@ async function viewReplay(did = "D04") {
     : "<li>No option clears the playbook's net-value bar (margin protected must exceed cost).</li>";
   const st = r.structural;
   $("#app").innerHTML = `${hed("Replay · shared", "What if it had been <em>live</em>?")}
-    <p class="sub">The co-pilot sees only what it would have known that day: its own alert date from the signal back-test, stock cover at the time, and its
-    <i>own</i> delay estimate. Its plan is then applied to what actually happened.</p>
-    <div class="tiles"><div class="tile"><b>₹${s.revenue_protected_expected_cr} cr</b><span>expected revenue protected across all 18 disruptions (of ₹${s.actual_revenue_lost_cr} cr lost)</span></div>
-      <div class="tile"><b>₹${s.plan_cost_cr} cr</b><span>cost of the recommended plans; ROI on plans ${s.roi_on_plans ?? "—"}×</span></div>
-      <div class="tile"><b>₹${s.avoided_waste_cr} cr</b><span>of ₹${s.team_wasted_cr} cr wasted spend avoided (cover was enough)</span></div>
-      <div class="tile"><b>₹${s.structural_protected_cr} cr</b><span>more if unqualified alternates had been qualified in advance (structural; overlaps with plans)</span></div></div>
+    ${glance(`Replaying all 18 disruptions with only what it knew on the day, the co-pilot would have protected <b>₹${s.revenue_protected_expected_cr} cr</b> of the ₹${s.actual_revenue_lost_cr} cr lost.`,
+      [[`₹${s.revenue_protected_expected_cr} cr`, `revenue protected (of ₹${s.actual_revenue_lost_cr} cr lost)`], [`₹${s.plan_cost_cr} cr`, `cost of its plans · ${s.roi_on_plans ?? "—"}× return on them`],
+       [`₹${s.avoided_waste_cr} cr`, `of ₹${s.team_wasted_cr} cr wasted spend avoided`], [`₹${s.structural_protected_cr} cr`, "more with alternates qualified in advance"]])}
     <div class="tabs">${list.rows.map((x) => `<button data-d="${esc(x.disruption_id)}" class="${x.disruption_id === r.disruption_id ? "on" : ""}">${esc(x.disruption_id)}</button>`).join("")}</div>
     <h2>${esc(r.disruption_id)} · ${esc(r.title)}</h2>
+    <div class="result ${r.vs_actual_protected_expected_inr > 0 ? "inbox" : ""}" style="margin-bottom:16px"><b>${esc(replayVerdict(r))}</b></div>
     ${replayTimeline(r)}
-    <div class="row"><div class="card">
-      <table><tbody>
-        <tr><td>Impact started</td><td>${date(r.start_date)}</td></tr>
-        <tr><td><b>Co-pilot first alert</b></td><td><b>${r.detected ? date(r.copilot_alert_date) + ` (${r.copilot_lead_days} d before impact)` : "not detected"}</b></td></tr>
-        <tr><td>Team first alert</td><td>${date(r.team_alert_date)}</td></tr>
-        <tr><td>Team first decision</td><td>day +${r.team_decision_day} after impact</td></tr>
-        <tr><td>How long supply would be cut off: co-pilot's estimate on the day / what actually happened</td><td>${r.seen.delay_estimate_days ?? "—"} days / ${r.actual_delay_days} days</td></tr>
-        <tr><td>Revenue at risk it would have shown on the day</td><td>${inr(r.seen.revenue_at_risk_inr)} (${r.seen.skus_stopped} products)</td></tr>
-      </tbody></table>
-      <h3 style="margin-top:14px">It would have recommended</h3><ul>${rec}</ul>
-      <div class="result ${r.vs_actual_protected_expected_inr > 0 ? "inbox" : ""}"><b>${esc(replayVerdict(r))}</b></div>
-      <h3>Outcome in rupees</h3><table><tbody>
+    ${fold("Outcome in rupees", `<table><tbody>
         <tr><td>Revenue Veltrix actually lost</td><td class="num">${inr(r.actual_revenue_lost_inr)}</td></tr>
         <tr><td>Revenue still lost if the co-pilot's plan had been followed${r.recommended.length ? "" : " (it advised no action, so the loss is unchanged)"}</td><td class="num">${inr(r.with_plan_lost_inr)}</td></tr>
         <tr><td><b>Revenue the co-pilot would have protected</b>${r.recommended.length ? ` (expected: × ${Math.round(r.plan_p_works * 100)}% chance the plan works)` : ""}</td><td class="num"><b>${inr(Math.max(0, r.vs_actual_protected_expected_inr))}</b></td></tr>
@@ -457,11 +464,23 @@ async function viewReplay(did = "D04") {
         <tr><td>Team's spend on parts that turned out to have enough stock / of it, what the co-pilot would have skipped</td><td class="num">${inr(r.team_wasted_inr)} / ${inr(r.avoided_waste_inr)}</td></tr>
       </tbody></table>
       ${st ? `<div class="result" style="margin-top:12px"><b>Structural fix the exposure map flags</b><p>${st.parts.map(esc).join("; ")}: about ${inr(st.cost_inr)}.
-        Had this been done before the event, a switch would land ~19 days after impact: <b>${inr(st.revenue_protected_inr)}</b> of revenue protected.</p></div>` : ""}
-    </div><div class="card"><h3>Options it ranked (on the day)</h3><table><thead><tr><th>Option</th><th class="num">Cost</th><th class="num">Net value</th><th>Timing</th><th>Approver</th></tr></thead>
+        Had this been done before the event, a switch would land ~19 days after impact: <b>${inr(st.revenue_protected_inr)}</b> of revenue protected.</p></div>` : ""}`,
+      { fig: inr(Math.max(0, r.vs_actual_protected_expected_inr)), line: `protected of ${inr(r.actual_revenue_lost_inr)} lost · plan cost ${inr(r.plan_cost_inr)}` })}
+    ${fold("What it would have recommended", `<ul>${rec}</ul>`, { fig: r.recommended.length ? `${r.recommended.length} action${r.recommended.length === 1 ? "" : "s"}` : "No action", line: r.recommended[0] ? esc(optText(r.recommended[0])) : "No option cleared the net-value bar" })}
+    ${fold("Dates and estimates", `<table><tbody>
+        <tr><td>Impact started</td><td>${date(r.start_date)}</td></tr>
+        <tr><td><b>Co-pilot first alert</b></td><td><b>${r.detected ? date(r.copilot_alert_date) + ` (${r.copilot_lead_days} d before impact)` : "not detected"}</b></td></tr>
+        <tr><td>Team first alert</td><td>${date(r.team_alert_date)}</td></tr>
+        <tr><td>Team first decision</td><td>day +${r.team_decision_day} after impact</td></tr>
+        <tr><td>How long supply would be cut off: co-pilot's estimate on the day / what actually happened</td><td>${r.seen.delay_estimate_days ?? "—"} days / ${r.actual_delay_days} days</td></tr>
+        <tr><td>Revenue at risk it would have shown on the day</td><td>${inr(r.seen.revenue_at_risk_inr)} (${r.seen.skus_stopped} products)</td></tr>
+      </tbody></table>`, { fig: r.detected && r.copilot_lead_days > 0 ? `${r.copilot_lead_days} d early` : r.detected ? "On the day" : "Not detected",
+        line: `Estimated ${r.seen.delay_estimate_days ?? "—"} days of disruption; actually ${r.actual_delay_days}` })}
+    ${fold("Options it ranked on the day", `<table><thead><tr><th>Option</th><th class="num">Cost</th><th class="num">Net value</th><th>Timing</th><th>Approver</th></tr></thead>
       <tbody>${opts || '<tr><td colspan="5" class="muted">Cover was enough: no options needed.</td></tr>'}</tbody></table>
-      <details><summary class="muted">Working on the day</summary><ol class="steps">${(r.seen.working || []).map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>
-      <p class="muted">Switches are assumed to take hold in 19 days (observed in history), not the playbook's 5–10. Team actions the co-pilot didn't cover still count.</p></div></div>`;
+      <details class="more"><summary>Working on the day</summary><ol class="steps">${(r.seen.working || []).map((w) => `<li>${esc(w.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol></details>
+      <p class="muted">Switches are assumed to take hold in 19 days (observed in history), not the playbook's 5–10. Team actions the co-pilot didn't cover still count.</p>`,
+      { fig: `${(r.top_options || []).length} options`, line: "Cost, net value, timing and approver, with the working" })}`;
   document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => (location.hash = `#/replay/${b.dataset.d}`)));
 }
 
@@ -512,16 +531,15 @@ async function viewBusiness() {
   const wasteRows = rows.filter((r) => r.team_wasted_inr > 0);
   const sumBy = (xs) => { const c = {}; xs.forEach((a) => (c[a.action] = (c[a.action] || 0) + 1)); return Object.entries(c).map(([k, n]) => `${esc(k)}${n > 1 ? ` ×${n}` : ""}`).join(", "); };
 
+  const worst = m.scenarios.reduce((lo, r) => (r.roi != null && (lo == null || r.roi < lo.roi) ? r : lo), null);
   $("#app").innerHTML = `${hed("Business case · shared", "What resilience is <em>worth</em> to Veltrix.")}
-    <p class="sub" style="font-size:20px">Replayed over the last two years, the co-pilot nets <b>${inr(b.net)} a year</b> against <b>${inr(m.annual_cost_inr)}</b>
-      a year to run: a <b>${x(base.roi)}</b> return that pays back in about <b>${(base.payback_months * 30).toFixed(0)} days</b>. ${aref("A1", "A9")}</p>
-    <p class="muted">Built the way the brief asks: replay all 18 disruptions with the co-pilot's alert date and top-ranked option, value the result with the playbook's
-      ROI method, and include the co-pilot's own running costs. Labels like <span class="aref">A4</span> point to the assumptions listed at the end.</p>
+    ${glance(`Replayed over the last two years, the co-pilot nets <b>${inr(b.net)} a year</b> against <b>${inr(m.annual_cost_inr)}</b> a year to run: a <b>${x(base.roi)}</b> return. ${aref("A1", "A9")}`,
+      [[`₹${rs.revenue_protected_expected_cr} cr`, `revenue protected of ₹${rs.actual_revenue_lost_cr} cr lost (2 years)`], [inr(b.net), "net benefit a year"],
+       [x(base.roi), "return on the co-pilot, including its running costs"], [worst ? x(worst.roi) : "—", "return in the harshest case"]])}
+    <p class="muted">Today: ₹${h.revenue_lost_inr_cr.toFixed(1)} cr of revenue lost to ${h.disruptions} disruptions in two years; public warnings came a median ${ts.median_warning_lead_days ?? 18} days ahead, the team noticed ${ts.median_team_alert_offset_days ?? 1} day after impact.
+      Open any tile for the table behind it. Labels like <span class="aref">A4</span> point to the assumptions at the end.</p>
 
-    <p class="sub">Today: ₹${h.revenue_lost_inr_cr.toFixed(1)} cr of revenue lost to ${h.disruptions} disruptions in two years, and ₹${h.mitigation_spend_no_shortage_inr_cr.toFixed(1)} cr of ₹${h.mitigation_spend_inr_cr.toFixed(1)} cr
-      mitigation spend wasted on parts that had enough stock; public warnings came a median ${ts.median_warning_lead_days ?? 18} days ahead, the team noticed ${ts.median_team_alert_offset_days ?? 1} day after impact.</p>
-
-    <h2>Loss avoided, by the <em>playbook's formula</em></h2>
+    ${fold("Loss avoided, by the playbook's formula", `
     <p class="sub">Playbook §6: <b>ROI = (loss avoided − cost) ÷ cost</b>, where loss avoided = margin protected + penalties avoided + expedite costs avoided.
       Revenue protected is sales kept; only the profit on those sales counts, because the cost of making them is spent either way. ${aref("A6", "A7")}</p>
     <div class="card"><table><thead><tr><th>Line</th><th class="num">Two years</th><th class="num">Per year</th></tr></thead><tbody>
@@ -534,9 +552,10 @@ async function viewBusiness() {
       <tr><td><b>= Net benefit</b></td><td class="num"><b>₹${net2.toFixed(2)} cr</b></td><td class="num"><b>${inr(b.net)}</b></td></tr></tbody></table>
       <p class="muted">ROI on the recommended actions alone (margin + penalties they protect, before any wasted spend skipped) =
         (₹${(rs.margin_protected_cr + rs.penalties_avoided_cr).toFixed(2)} cr − ₹${rs.plan_cost_cr} cr) ÷ ₹${rs.plan_cost_cr} cr ≈ <b>${rs.roi_on_plans}×</b>
-        (the playbook's worked example is about 3.1× for a single pre-buy).</p></div>
+        (the playbook's worked example is about 3.1× for a single pre-buy).</p></div>`,
+      { fig: `${inr(b.net)}/yr`, line: "Margin + penalties + wasted spend avoided, minus the cost of its actions" })}
 
-    <h2>ROI on the co-pilot itself, <em>including running costs</em></h2>
+    ${fold("ROI on the co-pilot, including running costs", `
     <p class="sub">The brief asks for this explicitly (Stage 3). The brief and playbook give no running costs, so these are our estimates, labelled as such. ${aref("A9")}</p>
     <div class="card"><table><thead><tr><th>Running cost</th><th class="num">Per year</th><th>Basis (our estimate unless stated)</th></tr></thead><tbody>
       ${m.cost_rows.map((r) => `<tr><td>${esc(COST_LABEL[r.item] || r.item)}</td><td class="num">${inr(r.annual_inr)}</td><td class="muted">${esc(COST_BASIS[r.item] || r.note)}</td></tr>`).join("")}
@@ -545,15 +564,17 @@ async function viewBusiness() {
         <tr><td>Net benefit per year (from the loss-avoided table)</td><td class="num">${inr(b.net)}</td></tr>
         <tr><td>Running cost per year</td><td class="num">${inr(m.annual_cost_inr)}</td></tr>
         <tr><td><b>ROI = (net benefit − running cost) ÷ running cost</b></td><td class="num"><b>${x(base.roi)}</b></td></tr>
-        <tr><td>Payback: running cost ÷ net benefit per month</td><td class="num">${base.payback_months.toFixed(1)} months</td></tr></tbody></table></div>
+        <tr><td>Payback: running cost ÷ net benefit per month</td><td class="num">${base.payback_months.toFixed(1)} months</td></tr></tbody></table></div>`,
+      { fig: x(base.roi), line: `Running cost ${inr(m.annual_cost_inr)} a year · pays back in about ${(base.payback_months * 30).toFixed(0)} days` })}
 
-    <h2>How <em>robust</em> is it?</h2>
+    ${fold("How robust is it?", `
     <p class="sub">The same calculation with harsher assumptions. It still pays back in every case. ${aref("A10")}</p>
     <div class="card"><table><thead><tr><th>Scenario</th><th class="num">Net benefit / yr</th><th class="num">Running cost / yr</th><th class="num">ROI</th><th class="num">Payback (months)</th></tr></thead>
       <tbody>${m.scenarios.map((r) => `<tr><td>${esc(SCEN[r.scenario] || r.scenario)}</td><td class="num">${inr(r.net_benefit_inr)}</td><td class="num">${inr(r.copilot_cost_inr)}</td>
-        <td class="num"><b>${x(r.roi)}</b></td><td class="num">${r.payback_months ? r.payback_months.toFixed(1) : "—"}</td></tr>`).join("")}</tbody></table></div>
+        <td class="num"><b>${x(r.roi)}</b></td><td class="num">${r.payback_months ? r.payback_months.toFixed(1) : "—"}</td></tr>`).join("")}</tbody></table></div>`,
+      { fig: worst ? `${x(worst.roi)} worst` : "—", line: worst ? `Still pays back in every case; lowest: ${esc(SCEN[worst.scenario] || worst.scenario)}` : "" })}
 
-    <h2>Replay: all <em>18 disruptions</em></h2>
+    ${fold("Replay: all 18 disruptions", `
     <p class="sub">Each disruption replayed with the co-pilot's own alert day and its top-ranked option on that day, applied to what really happened. ${aref("A2", "A3", "A4", "A5", "A7")}</p>
     <div class="card"><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Disruption</th><th>Co-pilot alert</th><th>Team alert</th><th>Its top action</th>
       <th class="num">Action cost</th><th class="num">Revenue lost</th><th class="num">Revenue protected</th><th class="num">Margin protected</th><th class="num">Waste skipped</th></tr></thead><tbody>
@@ -563,9 +584,10 @@ async function viewBusiness() {
       <tr><td></td><td><b>Total, two years</b></td><td></td><td></td><td></td><td class="num"><b>₹${rs.plan_cost_cr} cr</b></td><td class="num"><b>₹${rs.actual_revenue_lost_cr} cr</b></td>
         <td class="num"><b>₹${rs.revenue_protected_expected_cr} cr</b></td><td class="num"><b>₹${rs.margin_protected_cr} cr</b></td><td class="num"><b>₹${rs.avoided_waste_cr} cr</b></td></tr>
       </tbody></table></div>
-      <p class="muted">Revenue protected is expected value: what the plan saves × the chance it works. Open a row for its full replay.</p></div>
+      <p class="muted">Revenue protected is expected value: what the plan saves × the chance it works. Open a row for its full replay.</p></div>`,
+      { fig: `₹${rs.revenue_protected_expected_cr} cr`, line: `protected of ₹${rs.actual_revenue_lost_cr} cr lost, disruption by disruption` })}
 
-    <h2>Wasted mitigation spend, <em>with the logic</em></h2>
+    ${fold("Wasted mitigation spend, with the logic", `
     <p class="sub">The brief's metric: ₹${h.mitigation_spend_no_shortage_inr_cr.toFixed(1)} cr of ₹${h.mitigation_spend_inr_cr.toFixed(1)} cr went on parts that turned out to have enough stock.
       The co-pilot compares each part's days of cover with its own delay estimate; where cover is longer, it says “no action”. ${aref("A3", "A8")}</p>
     <div class="card"><div style="overflow-x:auto"><table><thead><tr><th>Disruption</th><th>What the team bought</th><th class="num">Team spent</th><th class="num">Co-pilot would have skipped</th><th>Why</th></tr></thead><tbody>
@@ -573,18 +595,20 @@ async function viewBusiness() {
         <td class="num">${inr(r.avoided_waste_inr)}</td><td>${r.avoided_waste_inr >= r.team_wasted_inr - 1 ? "Its estimate showed cover outlasting the delay for every one of these parts."
           : "It skipped the parts it saw as covered; for the rest its own estimate showed a shortage, so it would also have acted."}</td></tr>`).join("")}
       <tr><td><b>Total</b></td><td></td><td class="num"><b>₹${rs.team_wasted_cr} cr</b></td><td class="num"><b>₹${rs.avoided_waste_cr} cr</b></td><td></td></tr></tbody></table></div>
-      <p class="muted">Most of this was “pre-buy buffer stock (late)”: ordered after the event began and arriving after the peak (data pack outcome notes).</p></div>
+      <p class="muted">Most of this was “pre-buy buffer stock (late)”: ordered after the event began and arriving after the peak (data pack outcome notes).</p></div>`,
+      { fig: `₹${rs.avoided_waste_cr} cr`, line: `of ₹${rs.team_wasted_cr} cr spent on parts that had enough stock would have been skipped` })}
 
-    <h2>Structural moves: <em>fix it before</em> it happens</h2>
+    ${fold("Structural moves: fix it before it happens", `
     <p class="sub">The brief's stretch goal: dual sourcing and buffer levels from the back-test, with cost and avoided loss. Kept out of the ROI above;
       it is an input to next year's sourcing budget, approved by Head of Supply Chain + Quality. ${aref("A11")}</p>
     <div class="card"><div style="overflow-x:auto"><table><thead><tr><th>Part</th><th class="num">Cover / lead time (d)</th><th>Move</th><th class="num">One-off cost</th><th class="num">Expected loss avoided / yr, net</th></tr></thead><tbody>
       ${moves.map((r) => `<tr><td><b>${esc(r.description)}</b> <span class="pid">${esc(r.part_id)}</span></td><td class="num">${r.cover_days} / ${r.lead_time_days}</td>
         <td>${esc(nameIds(r.recommendation))}</td><td class="num">${/Qualify/.test(r.recommendation) ? inr(r.qualify_cost_once_inr) : "—"}</td><td class="num">${inr(r.net_annual_value_inr)}</td></tr>`).join("")}
       <tr><td><b>Total (${moves.length} moves)</b></td><td></td><td></td><td class="num"><b>₹${ss.one_off_qualification_cost_cr.toFixed(1)} cr</b></td><td class="num"><b>₹${ss.net_annual_value_cr.toFixed(1)} cr</b></td></tr></tbody></table></div>
-      <p class="muted">Example: D05, the Penang fire, cost ₹61.4 cr. Qualifying the alternate MOSFET supplier in advance (about ₹15 lakh) would have protected about ₹49.8 cr of it.</p></div>
+      <p class="muted">Example: D05, the Penang fire, cost ₹61.4 cr. Qualifying the alternate MOSFET supplier in advance (about ₹15 lakh) would have protected about ₹49.8 cr of it.</p></div>`,
+      { fig: `₹${ss.net_annual_value_cr.toFixed(1)} cr/yr`, line: `${moves.length} moves for ₹${ss.one_off_qualification_cost_cr.toFixed(1)} cr one-off · kept out of the ROI` })}
 
-    <h2>A <em>3-month pilot</em> the COO can approve</h2>
+    ${fold("A 3-month pilot the COO can approve", `
     <div class="card" id="pilot"><table><tbody>
       <tr><td><b>What</b></td><td>The co-pilot on Veltrix's live stock feed and the free public feeds (news, port activity, trade measures), for the two categories with the
         most revenue behind single-source parts: PCBs and semiconductors. Alerts go to the category managers and the Head of Supply Chain.</td></tr>
@@ -595,16 +619,18 @@ async function viewBusiness() {
         forwardable without edits. Stop if the team ignores the inbox.</td></tr>
       <tr><td><b>Guardrails</b></td><td>The co-pilot recommends; people decide. It never orders, books freight or contacts suppliers. Supplier data stays out of model training.</td></tr>
       <tr><td><b>Approval</b></td><td>COO, with the CFO for the budget.</td></tr></tbody></table>
-      <div class="btns" style="margin-top:12px"><button class="btn secondary" id="printpilot">Print this page</button></div></div>
+      <div class="btns" style="margin-top:12px"><button class="btn secondary" id="printpilot">Print this page</button></div></div>`,
+      { fig: "3 months", line: "PCBs and semiconductors · go/no-go on the brief's own metrics · COO with CFO" })}
 
-    <h2 id="assumptions">Assumptions, <em>in one place</em></h2>
+    ${fold("Assumptions, in one place", `
     <div class="card"><table><tbody>${Object.entries(ASSUME).map(([k, v]) => `<tr><td class="num"><b>${k}</b></td><td>${esc(v)}</td></tr>`).join("")}</tbody></table>
       <p class="muted">From the data pack: revenue, losses, mitigation actions and their costs, stock cover, lead times, margins, penalties, the 55% lost-sale share.
-      From the playbook: the impact method, the ranking rule, the ROI formula, holding cost and qualification cost ranges. Everything else above is labelled as ours.</p></div>
+      From the playbook: the impact method, the ranking rule, the ROI formula, holding cost and qualification cost ranges. Everything else above is labelled as ours.</p></div>`,
+      { fig: `${Object.keys(ASSUME).length} assumptions`, line: "Everything not taken from the data pack or the playbook", id: "assumptions" })}
 `;
   document.querySelectorAll("[data-rep]").forEach((r) => (r.onclick = () => (location.hash = `#/replay/${r.dataset.rep}`)));
-  $("#printpilot").onclick = () => print();
-  document.querySelectorAll("[data-aref]").forEach((b) => (b.onclick = () => $("#assumptions").scrollIntoView({ behavior: "smooth" })));
+  $("#printpilot").onclick = () => { document.querySelectorAll("details.fold").forEach((d) => (d.open = true)); print(); };
+  document.querySelectorAll("[data-aref]").forEach((b) => (b.onclick = (ev) => { ev.preventDefault(); const d = $("#assumptions"); d.open = true; d.scrollIntoView({ behavior: "smooth" }); }));
 }
 
 /* ---------------- live news feed ---------------- */
@@ -612,8 +638,7 @@ const ago = (s) => { if (!s) return ""; const m = Math.round((Date.now() - new D
   return m < 60 ? `${Math.max(m, 1)} min ago` : m < 2880 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; };
 async function viewLive(refresh) {
   $("#app").innerHTML = `${hed("Live news · shared", "Today's news, <em>read for Veltrix</em>.")}
-    <p class="sub">Real headlines from the last 3 days (Google News), searched for our ports, lanes, fab clusters and commodities, and run through
-    the same pipeline as <a href="#/simulate">Check a headline</a>: triage, Veltrix Co-Pilot extraction, linking to Veltrix's network, impact on today's stock and options.</p>
+    <p class="muted">Real headlines from the last 3 days about our ports, lanes and materials, run through the same pipeline as <a href="#/simulate">Check a headline</a>.</p>
     <div class="btns"><button class="btn" id="lrefresh">Fetch latest news</button> <span class="muted" id="lstamp"></span></div>
     <div id="lout"><p class="muted">${refresh ? "Fetching and reading the news… (up to 30 s)" : "Loading…"}</p></div>`;
   $("#lrefresh").onclick = () => viewLive(true);
@@ -687,6 +712,34 @@ $("#role").onchange = (ev) => {
   else route();
 };
 
+/* ---------------- role-based nav + "All tools" menu ---------------- */
+const PAGES = { home: ["#/home", "Home"], desk: ["#/desk", "My desk"], alerts: ["#/inbox", "Alerts"], live: ["#/live", "Live news"],
+  ask: ["#/ask", "Ask"], exposure: ["#/exposure", "Exposure"], register: ["#/register", "Risk register"], replay: ["#/replay", "Replay"],
+  business: ["#/business", "Business case"], evidence: ["#/evidence", "Evidence"] };
+const TOOL_ORDER = ["desk", "alerts", "live", "ask", "exposure", "register", "replay", "business", "evidence"];
+/* what each seat needs day to day; everything else sits under All tools */
+const ROLE_NAV = { "": ["home", "live"], category: ["desk", "alerts", "live"], hosc: ["desk", "alerts", "live", "register"],
+  coo: ["desk", "replay", "business"], sales: ["desk", "alerts", "live"] };
+function renderNav(sec) {
+  const k = role(), main = ROLE_NAV[k] || ROLE_NAV[""];
+  const link = (p) => `<a href="${PAGES[p][0]}" data-r="${p}"${p === sec ? ' class="on" aria-current="page"' : ""}>${PAGES[p][1]}</a>`;
+  $("#nav").innerHTML = main.map(link).join("");
+  const rest = TOOL_ORDER.filter((p) => !main.includes(p) && (k || p !== "desk"));
+  $("#toolsmenu").innerHTML = rest.map((p) => `<a role="menuitem" href="${PAGES[p][0]}"${p === sec ? ' class="on" aria-current="page"' : ""}>${PAGES[p][1]}</a>`).join("");
+  const here = rest.includes(sec);
+  const btn = $("#toolsbtn");
+  btn.innerHTML = `All tools${here ? `<span class="tsuf"> · ${PAGES[sec][1]}</span>` : ""}`;
+  btn.classList.toggle("on", here);
+  toolsMenu(false);
+}
+function toolsMenu(open) {
+  const m = $("#toolsmenu"), b = $("#toolsbtn"); if (!m) return;
+  m.hidden = !open; b.setAttribute("aria-expanded", String(!!open));
+}
+$("#toolsbtn").onclick = (ev) => { ev.stopPropagation(); toolsMenu($("#toolsmenu").hidden); };
+document.addEventListener("click", (ev) => { if (!ev.target.closest(".tools")) toolsMenu(false); });
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") toolsMenu(false); });
+
 /* ---------------- router ---------------- */
 const NAVMAP = { desk: "desk", p: "desk", inbox: "alerts", alert: "alerts", live: "live", ask: "ask", simulate: "ask", exposure: "exposure",
   register: "register", replay: "replay", business: "business", backtest: "evidence", evidence: "evidence" };
@@ -694,8 +747,8 @@ async function route() {
   const [, r, id] = (location.hash || "#/home").split("/");
   if (r === "p" && PERSONA_VIEWS[id]) setRole(id);
   const sec = !r || r === "home" ? "home" : NAVMAP[r] || "alerts";
-  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.r === sec));
   $("#role").value = role();
+  renderNav(sec === "desk" && !role() ? "home" : sec);
   try {
     await loadNames();
     if (sec === "home") await viewHome();

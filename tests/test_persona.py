@@ -32,6 +32,36 @@ def test_ui_ships_persona_pages():
         assert v in js
 
 
+def test_role_nav_and_all_tools():
+    """Each seat's nav shows only its pages; everything else is one click away under All tools."""
+    import re
+    from pathlib import Path
+    html = Path("public/index.html").read_text(encoding="utf-8")
+    app = Path("public/app.js").read_text(encoding="utf-8")
+    assert 'id="toolsbtn"' in html and 'id="toolsmenu"' in html
+    m = re.search(r"const ROLE_NAV = \{(.*?)\};", app, re.S)
+    nav = {k: re.findall(r'"(\w+)"', v) for k, v in re.findall(r'(\w+|"")\s*:\s*\[([^\]]*)\]', m.group(1))}
+    assert nav["category"] == ["desk", "alerts", "live"]
+    assert nav["hosc"] == ["desk", "alerts", "live", "register"]
+    assert nav["coo"] == ["desk", "replay", "business"]
+    assert nav["sales"] == ["desk", "alerts", "live"]
+    for p in ("ask", "exposure", "register", "replay", "business", "evidence"):   # every page still reachable
+        assert f"{p}: [\"#/" in app
+
+
+def test_pages_lead_with_a_glance():
+    """Every busy page opens with a glance strip; detail sits in tiles that expand on click."""
+    import re
+    from pathlib import Path
+    src = Path("public/app.js").read_text(encoding="utf-8") + Path("public/personas.js").read_text(encoding="utf-8")
+    assert "const glance =" in src and "const fold =" in src and ".fold" in Path("public/styles.css").read_text(encoding="utf-8")
+    for fn in ("viewCategory", "viewHosc", "viewCoo", "viewSales", "viewSalesAll", "viewRegister", "viewReplay",
+               "viewBusiness", "viewExposure", "viewBacktest"):
+        body = re.search(rf"function {fn}\(.*?\n}}\n", src, re.S).group(0)
+        assert "glance(" in body and "fold(" in body, fn
+    assert "askBlock(" not in src                     # the Ask bar at the top replaces the per-desk ask boxes
+
+
 def test_leading_indicators():
     j = c.get("/api/leading").json()
     assert j["ports"] and j["rule"]

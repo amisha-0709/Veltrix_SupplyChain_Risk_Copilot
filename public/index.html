@@ -7,7 +7,7 @@
 <meta name="description" content="Supply-chain resilience co-pilot prepared for Veltrix Components: signals to ₹ impact, ranked options and a named approver.">
 <link rel="preconnect" href="https://api.fontshare.com">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=32">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231351AA'/%3E%3Cpath d='M7 8l9 16 9-16' stroke='%23E3E2DE' stroke-width='4' fill='none'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -24,17 +24,16 @@
         <option value="sales">Sales / key-account manager</option>
       </select></label>
   </div>
-  <nav id="nav" aria-label="Pages">
-    <a href="#/desk" data-r="desk">My desk</a>
-    <a href="#/inbox" data-r="alerts">Alerts</a>
-    <a href="#/live" data-r="live">Live news</a>
-    <a href="#/ask" data-r="ask">Ask</a>
-    <a href="#/exposure" data-r="exposure">Exposure</a>
-    <a href="#/register" data-r="register">Risk register</a>
-    <a href="#/replay" data-r="replay">Replay</a>
-    <a href="#/business" data-r="business">Business case</a>
-    <a href="#/evidence" data-r="evidence">Evidence</a>
-  </nav>
+  <div class="navrow">
+    <nav id="nav" aria-label="Pages for this role">
+      <a href="#/home" data-r="home">Home</a>
+      <a href="#/live" data-r="live">Live news</a>
+    </nav>
+    <div class="tools">
+      <button type="button" id="toolsbtn" aria-expanded="false" aria-controls="toolsmenu">All tools</button>
+      <div id="toolsmenu" class="toolsmenu" role="menu" hidden></div>
+    </div>
+  </div>
   <form id="askbar" class="askbar" autocomplete="off">
     <span class="kicker">Ask</span>
     <input name="q" maxlength="400" required aria-label="Ask a question or paste a headline" placeholder="Ask a question or paste a headline…">
@@ -46,8 +45,8 @@
 <footer class="foot"><span>The co-pilot recommends; your team decides. It never orders, books freight or contacts suppliers.</span>
   <span>Veltrix Components · Supply-chain resilience programme</span></footer>
 <div id="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=30"></script>
-<script src="visuals.js?v=30"></script>
-<script src="personas.js?v=30"></script>
+<script src="app.js?v=32"></script>
+<script src="visuals.js?v=32"></script>
+<script src="personas.js?v=32"></script>
 </body>
 </html>
