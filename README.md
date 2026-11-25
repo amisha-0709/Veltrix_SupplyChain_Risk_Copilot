@@ -5,13 +5,39 @@ quantifies revenue / margin / OTIF impact with the playbook method, ranks mitiga
 required approver, and writes a one-page briefing per alert. **It recommends; people decide.** It never
 orders, books freight or contacts suppliers. All data is synthetic (Veltrix Components is fictional).
 
+## Project status: complete (final pitch delivered)
+
+**Live:** https://veltrix-risk-copilot.vercel.app — role-based desks for the Category manager, Head of Supply Chain,
+COO and Sales, plus Alerts, Live news, Risk register, Replay, Business case and the Ask bar.
+
+**What it showed, replayed on Veltrix's 18 disruptions (Oct 2024 – Sep 2026):**
+- ₹170.3 cr was lost; 15 of 18 disruptions were in the news first, a median 18 days before impact.
+- With only what was known on the day, the co-pilot would have protected ₹59.1 cr: ₹11.03 cr a year net, 22.5× return including running costs.
+- D04 (rare-earth magnets): alert on 28 Jan 2025, 19 days before impact; a ₹32.9 lakh plan protects about ₹13.5 cr (expected) of the ₹22.4 cr lost.
+
+**Final pitch materials (`docs/`):**
+
+| File | What |
+|---|---|
+| `Veltrix_CoPilot_Pitch.pdf` | the final pitch deck as presented |
+| `Veltrix_CoPilot_Pitch.pptx` | editable deck: 21 click-by-click slides with speaker notes |
+| `Veltrix_Pitch_and_Demo_Script.pdf` | pitch and 3-minute demo, line by line |
+| `PITCH_AND_DEMO_SCRIPT.md` | the same script with speakers, timings and demo click paths |
+| `DECK_PLAN_AND_PROMPT.md` | deck plan and slide-builder prompt |
+| `EVALUATION.md` | evaluation notes |
+
+**Next step for a real pilot:** 3 months on PCBs and semiconductors, with live feeds, a database for the decision
+log (today it lives in `/tmp` on Vercel) and the persona sessions in `docs/persona_feedback_kit.md`.
+
+**Team 6:** Amisha, Moksh Jain, Aryan Dewangan · Mentor: Abhishek Raj, EY.
+
 ## Run locally
 
 ```bash
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements-dev.txt
 .venv/Scripts/python -m uvicorn app:app --port 8000      # UI + API at http://localhost:8000
-.venv/Scripts/python -m pytest -q                         # 80 tests: M1–M6, acceptance T1–T10, persona fixes, Claude chat (mocked)
+.venv/Scripts/python -m pytest -q                         # 114 tests: M1–M6, acceptance T1–T10, persona fixes, role nav, Claude chat (mocked)
 ```
 
 ## Rebuild data and reports (after changing rules or the engine)
